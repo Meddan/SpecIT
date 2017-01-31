@@ -29,7 +29,7 @@ public class ListClasses {
     }
 
     public static void main(String[] args) {
-        File projectDir = new File("C:/Users/dover/IdeaProjects/testparser");
+        File projectDir = new File("src/main/java");
         listClasses(projectDir);
     }
 }

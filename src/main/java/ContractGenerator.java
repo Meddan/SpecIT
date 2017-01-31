@@ -17,7 +17,7 @@ import java.util.Optional;
 public class ContractGenerator {
     private ArrayList<Contract> contracts = new ArrayList<>();
     public void createContracts(){
-        File projectDir = new File("/Users/meddan/Documents/Skola/Exjobb/src/main/java");
+        File projectDir = new File("src/main/java");
         for (ReturnStmt rs : findReturn(projectDir)){
             contracts.add(new Contract(rs));
         }
