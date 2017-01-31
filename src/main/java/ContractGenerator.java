@@ -28,6 +28,7 @@ public class ContractGenerator {
     }
 
     private void buildContract(Contract c) {
+        c.getStartStmnt();
 
     }
 

@@ -8,4 +8,10 @@ public class Contract {
     public Contract(Statement start){
         startStmnt = start;
     }
+    public Statement getStartStmnt(){
+        return startStmnt;
+    }
+    public Contract clone(){
+
+    }
 }
