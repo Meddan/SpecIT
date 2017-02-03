@@ -68,6 +68,37 @@ public class ContractGenerator {
                 //Check distance from start / end to determine if assertion is pre/post condition
                 //Check if statements between allow for ignore
             }
+
+            if(s instanceof IfStmt){
+                String contract = ""; // New contract
+
+                //System.out.println((s));
+
+                // Begin building behavior for first case
+                String newBehavior = "requires " + ((IfStmt) s).getCondition().toString() + ";\n";
+
+                // Extract if-body
+                Statement ifBody = ((IfStmt) s).getThenStmt();
+                if(ifBody instanceof BlockStmt){
+                    // It's a block statement, likely to be many statements
+                    // But could still be only one
+
+                    // Check body for return
+                } else if (ifBody instanceof ReturnStmt){
+                    // Body is only a return, not enclosed by { }
+                    newBehavior = newBehavior.concat("ensures \\result == "
+                            + ((ReturnStmt) ifBody).getExpression().get()) + ";\n";
+                } else {
+                    // It's not a return but some other single line expression/statement
+                }
+
+                // Add behavior to contract
+                contract = contract.concat(newBehavior);
+
+                                
+
+                System.out.println(contract);
+            }
         }
 
         return sb.toString();
