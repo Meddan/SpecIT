@@ -12,6 +12,7 @@ import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.google.common.base.Strings;
 
+import javax.swing.plaf.nimbus.State;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -53,21 +54,31 @@ public class ContractGenerator {
         //Get row for md
         //Get top-level assertions
         NodeList<Statement> stmtList =  md.getBody().get().getStatements();
+        StringBuilder sb = new StringBuilder();
         for(Statement s : stmtList){
             if(s instanceof AssertStmt){
-                System.out.println("found assert");
                 //Check if first / statements can be ignored
 
-                if(stmtList.get(0) == s){
-                    return "requires " +  ((AssertStmt) s).getCheck().toString();
+                if(stmtList.indexOf(s) == 0 || allAssert(stmtList, s)){
+                    sb.append( "requires " +  ((AssertStmt) s).getCheck().toString() + "\n");
                 }
                 //Check distance from start / end to determine if assertion is pre/post condition
                 //Check if statements between allow for ignore
             }
         }
 
-        return null;
+        return sb.toString();
     }
+    private boolean allAssert(NodeList<Statement> stmtList, Statement s){
+        int index = stmtList.indexOf(s);
+        for(int i = 0 ; i < index ; i++){
+            if(!(stmtList.get(i) instanceof AssertStmt)){
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static void main(String args[]){
         File projectDir = new File("src/main/java/Examples");
         testClasses(projectDir);

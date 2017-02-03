@@ -23,6 +23,11 @@ public class Assertions {
         assert a != 5;
         return a;
     }
+    public int method3(){
+        assert a != 3;
+        assert a != 4;
+        return a;
+    }
 
     public static void main(String args[]){
         Assertions ass = new Assertions();
