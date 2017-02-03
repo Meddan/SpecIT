@@ -5,6 +5,8 @@ package Examples;
  */
 public class IfStatements {
 
+    private String x;
+
     public boolean method1(boolean a){
         if(a){
             return true;
@@ -22,6 +24,22 @@ public class IfStatements {
         return "Zero.";
     }
 
+    public void method3(int n){
+        if(n == 42){
+            x = "The answer";
+        } else {
+            x = "Not the answer";
+        }
+    }
+
+    public String method4(int n){
+        if(someHelperMethod(n)){
+            return "Got helped.";
+        }
+
+        return "No help.";
+    }
+
     // wow such strong method cool story
     public String methodXX(int n){
         if(n < 25){
@@ -33,5 +51,9 @@ public class IfStatements {
         }
     }
 
+
+    private boolean someHelperMethod(int n){
+        return n == 10;
+    }
 
 }
