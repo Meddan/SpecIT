@@ -59,8 +59,11 @@ public class ContractGenerator {
             if(s instanceof AssertStmt){
                 //Check if first / statements can be ignored
 
-                if(stmtList.indexOf(s) == 0 || allAssert(stmtList, s)){
-                    sb.append( "requires " +  ((AssertStmt) s).getCheck().toString() + "\n");
+                if(allAssert(stmtList, s)){
+                    sb.append( "requires " + ((AssertStmt) s).getCheck().toString() + "\n");
+                }
+                if(endAssrt(stmtList, s)){
+                    sb.append( "ensures " + ((AssertStmt) s).getCheck().toString() + "\n");
                 }
                 //Check distance from start / end to determine if assertion is pre/post condition
                 //Check if statements between allow for ignore
@@ -69,6 +72,19 @@ public class ContractGenerator {
 
         return sb.toString();
     }
+
+    private boolean endAssrt(NodeList<Statement> stmtList, Statement s) {
+        int index = stmtList.indexOf(s);
+        for(int i = index ; i < stmtList.size() ; i++){
+            if(stmtList.get(i) instanceof ReturnStmt){
+                return true;
+            } else if(!(stmtList.get(i) instanceof AssertStmt)){
+                return false;
+            }
+        }
+        return true;
+    }
+
     private boolean allAssert(NodeList<Statement> stmtList, Statement s){
         int index = stmtList.indexOf(s);
         for(int i = 0 ; i < index ; i++){

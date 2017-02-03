@@ -9,21 +9,21 @@ public class Assertions {
     /*
      * Assert as precondition
      */
-    public int method1(){
+    public int basicAssert(){
         assert a != 5;
         return a;
     }
     /*
     Assert as postcondition
      */
-    public int method2(){
+    public int assertWithCode(){
         a = 2;
         a = a * 2;
         a++;
         assert a != 5;
         return a;
     }
-    public int method3(){
+    public int doubleAssert(){
         assert a != 3;
         assert a != 4;
         return a;
@@ -31,6 +31,5 @@ public class Assertions {
 
     public static void main(String args[]){
         Assertions ass = new Assertions();
-        ass.method1();
     }
 }
