@@ -7,6 +7,13 @@ public class IfStatements {
 
     private String x;
 
+    public boolean simplestCase(int n){
+        if(n == 1)
+            return true;
+        else
+            return false;
+    }
+
     public boolean simpleCase(boolean a){
         if(a){
             return true;
