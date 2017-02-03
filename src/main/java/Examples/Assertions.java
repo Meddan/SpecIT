@@ -23,6 +23,7 @@ public class Assertions {
         assert a != 5;
         return a;
     }
+
     public static void main(String args[]){
         Assertions ass = new Assertions();
         ass.method1();

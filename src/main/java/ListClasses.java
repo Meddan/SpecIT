@@ -1,6 +1,8 @@
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseException;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.google.common.base.Strings;
 
@@ -19,6 +21,17 @@ public class ListClasses {
                     public void visit(ClassOrInterfaceDeclaration n, Object arg) {
                         super.visit(n, arg);
                         System.out.println(" * " + n.getName());
+                        System.out.println("members: ");
+                        for(BodyDeclaration<?> b: n.getMembers()){
+                            if(b instanceof FieldDeclaration){
+                                System.out.println(b.toString());
+                            }
+                            /*System.out.println(b.toString());
+                            System.out.println();
+                            System.out.println(b.getComment());
+                            System.out.println();
+                            */
+                        }
                     }
                 }.visit(JavaParser.parse(file), null);
                 System.out.println(); // empty line
