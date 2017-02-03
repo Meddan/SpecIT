@@ -7,7 +7,7 @@ public class IfStatements {
 
     private String x;
 
-    public boolean method1(boolean a){
+    public boolean simpleCase(boolean a){
         if(a){
             return true;
         } else {
@@ -15,7 +15,7 @@ public class IfStatements {
         }
     }
 
-    public String method2(int n){
+    public String severalCases(int n){
         if(n > 0){
             return "Positive!";
         } else if (n < 0) {
@@ -24,7 +24,7 @@ public class IfStatements {
         return "Zero.";
     }
 
-    public void method3(int n){
+    public void assigningToClassField(int n){
         if(n == 42){
             x = "The answer";
         } else {
@@ -32,7 +32,7 @@ public class IfStatements {
         }
     }
 
-    public String method4(int n){
+    public String usingHelperMethod(int n){
         if(someHelperMethod(n)){
             return "Got helped.";
         }
@@ -41,7 +41,7 @@ public class IfStatements {
     }
 
     // wow such strong method cool story
-    public String methodXX(int n){
+    public String severalCasesAndException(int n){
         if(n < 25){
             return "foo";
         } else if (n >= 25){
@@ -50,7 +50,6 @@ public class IfStatements {
             throw new IllegalArgumentException();
         }
     }
-
 
     private boolean someHelperMethod(int n){
         return n == 10;
