@@ -11,7 +11,4 @@ public class Contract {
     public Statement getStartStmnt(){
         return startStmnt;
     }
-    public Contract clone(){
-
-    }
 }

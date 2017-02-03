@@ -1,0 +1,64 @@
+Assert
+assert(x) == ensures x
+
+Block
+{}
+Ignore
+
+Break
+break;
+Ignore
+
+Catch
+catch(Exception e)
+handled as a part of try-catch block, means we do not treat throws statement as a end statement
+
+Continue
+dunno
+
+Do
+do{x}while()
+we know that x is at least run once.
+
+EmptyStatement
+Ignore
+
+ExpressionStatement
+x=5;
+Look at what the expression is, assignment etc.
+
+For
+
+Foreach
+
+If
+split the contract in two, requires the condition on one hand, requiring the negation on the other
+
+LabeledStatement
+Look at inner statement
+
+LocalClassDeclarationStmt
+generate contracts for the local class
+
+ReturnStatement
+return x;
+ensures \result == x
+
+SwitchEntry
+done as part of switch, label is used as condition for if statement, code as body of if
+
+Switch
+Seen as if-else, have to have break in mind.
+
+Synchronized
+ignore
+
+Throw
+throw new Exception()
+signals Exception
+
+Try
+evaluate as normal, ignoring throw/catch
+
+While
+this is hard
