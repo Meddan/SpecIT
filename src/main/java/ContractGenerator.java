@@ -182,6 +182,9 @@ probably not useful
                 // TODO : What if empty return? Should be handled.
                 sb.append("ensures \\result == "
                         + ((ReturnStmt) bodyStmts.get(0)).getExpression().get() + "\n");
+            } else if (bodyStmts.get(0) instanceof ThrowStmt) {
+                // Is the first statement a throw statement? Big dollahs.
+
             } else {
                 // The first statement was not a return statement. Time to think.
                 // TODO : Implement logic
