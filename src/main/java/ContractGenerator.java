@@ -148,6 +148,7 @@ probably not useful
     private String checkIfBody (Statement body){
         StringBuilder sb = new StringBuilder();
         if(body instanceof BlockStmt){
+            sb.append("Not yet implemented\n");
             // It's a block statement, likely to be many statements
             // But could still be only one
 
@@ -159,6 +160,7 @@ probably not useful
             sb.append("ensures \\result == "
                     + ((ReturnStmt) body).getExpression().get() + ";\n");
         } else {
+            sb.append("Not yet implemented\n");
             // It's not a return but some other single line expression/statement
             // TODO : Fill with logic
         }
