@@ -45,7 +45,7 @@ public class ContractGenerator {
         for(MethodDeclaration md : contracts.keySet()){
             System.out.println("-----------------");
             System.out.println();
-            System.out.println(md.getName() + " " + contracts.get(md));
+            System.out.println(md.getName() + "\n" + contracts.get(md));
             System.out.println();
             System.out.println("-----------------");
         }
@@ -84,7 +84,7 @@ public class ContractGenerator {
                 newBehavior = newBehavior.concat(checkIfBody(((IfStmt) temp).getThenStmt()));
 
                 // Add behavior to contract
-                contract = contract.concat(newBehavior);
+                sb.append(newBehavior);
 
                 // If the next statement is also an if-statement, redo the loop
                 if(((IfStmt) temp).getElseStmt().isPresent()){ // There is some statement
@@ -93,7 +93,8 @@ public class ContractGenerator {
                         // That statement is an if-statement
 
                         //Prepare new behavior
-                        contract = contract.concat("also\n");
+                        sb.append("also\n");
+
                         // Set temp to new if-statement, so next iteration of
                         // loop will handle contract generation
                         temp = ((IfStmt) temp).getElseStmt().get();
@@ -105,18 +106,16 @@ public class ContractGenerator {
                         // It is not an if-statement (but it is the body of an else)
                         // Therefore, it is a block-statement or some single-line statement
                         // Check body to extract contract
-                        contract = contract.concat(checkIfBody(((IfStmt) temp).getElseStmt().get()));
+                        sb.append(checkIfBody(((IfStmt) temp).getElseStmt().get()));
+
                         temp = new EmptyStmt(); // Temp fix to avoid inf-loop TODO Permanent fix
-                        contract = contract.concat("\n"); // Temp line-break for formatting TODO Permanent fix
                     }
 
                 } else { // There is no else-statement
                     // What do we do?! Panic.
-                    contract = contract.concat("\n"); // Temp line-break for formatting TODO Permanent fix
                     temp = new EmptyStmt(); // Temp fix to avoid inf-loop TODO Permanent fix
                 }
 
-                System.out.print(contract);
             }
         }
 
