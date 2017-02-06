@@ -77,39 +77,43 @@ public class ContractGenerator {
             while(temp instanceof IfStmt){
                 String contract = ""; // New contract
 
-                //System.out.println((s));
-
                 // Begin building behavior for first case
                 String newBehavior = "requires " + ((IfStmt) temp).getCondition().toString() + ";\n";
 
-                // Extract if-body
-                Statement ifBody = ((IfStmt) temp).getThenStmt();
-                newBehavior = newBehavior.concat(checkIfBody(ifBody));
-                /*if(ifBody instanceof BlockStmt){
-                    // It's a block statement, likely to be many statements
-                    // But could still be only one
-
-                    // Check body for return
-                } else if (ifBody instanceof ReturnStmt){
-                    // Body is only a return, not enclosed by { }
-                    newBehavior = newBehavior.concat("ensures \\result == "
-                            + ((ReturnStmt) ifBody).getExpression().get()) + ";\n";
-                } else {
-                    // It's not a return but some other single line expression/statement
-                }*/
+                // Check if-body for contract info
+                newBehavior = newBehavior.concat(checkIfBody(((IfStmt) temp).getThenStmt()));
 
                 // Add behavior to contract
                 contract = contract.concat(newBehavior);
 
-                //System.out.println(((IfStmt) temp).getElseStmt());
                 // If the next statement is also an if-statement, redo the loop
-                if(((IfStmt) temp).getElseStmt().isPresent() && ((IfStmt) temp).getElseStmt().get() instanceof IfStmt){
-                    contract = contract.concat("also\n");
-                    temp = ((IfStmt) temp).getElseStmt().get();
-                } else {
-                    // Otherwise, do something
-                    temp = new EmptyStmt();
-                    contract = contract.concat("\n");
+                if(((IfStmt) temp).getElseStmt().isPresent()){ // There is some statement
+
+                    if(((IfStmt) temp).getElseStmt().get() instanceof IfStmt){
+                        // That statement is an if-statement
+
+                        //Prepare new behavior
+                        contract = contract.concat("also\n");
+                        // Set temp to new if-statement, so next iteration of
+                        // loop will handle contract generation
+                        temp = ((IfStmt) temp).getElseStmt().get();
+
+                    } else {
+                        // This is the else-statement. It should be written as a new behavior
+                        // with a requirement that is the negation of all previous requirements.
+
+                        // It is not an if-statement (but it is the body of an else)
+                        // Therefore, it is a block-statement or some single-line statement
+                        // Check body to extract contract
+                        contract = contract.concat(checkIfBody(((IfStmt) temp).getElseStmt().get()));
+                        temp = new EmptyStmt(); // Temp fix to avoid inf-loop TODO Permanent fix
+                        contract = contract.concat("\n"); // Temp line-break for formatting TODO Permanent fix
+                    }
+
+                } else { // There is no else-statement
+                    // What do we do?! Panic.
+                    contract = contract.concat("\n"); // Temp line-break for formatting TODO Permanent fix
+                    temp = new EmptyStmt(); // Temp fix to avoid inf-loop TODO Permanent fix
                 }
 
                 System.out.print(contract);
@@ -144,12 +148,15 @@ probably not useful
             // But could still be only one
 
             // Check body for return
+
+            // TODO : Fill with logic
         } else if (body instanceof ReturnStmt){
             // Body is only a return, not enclosed by { }
             sb.append("ensures \\result == "
                     + ((ReturnStmt) body).getExpression().get() + ";\n");
         } else {
             // It's not a return but some other single line expression/statement
+            // TODO : Fill with logic
         }
 
         return sb.toString();
