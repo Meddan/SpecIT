@@ -215,8 +215,6 @@ probably not useful
 
     public static void main(String args[]){
         File projectDir = new File("src/main/java/Examples");
-        String s = "!Example";
-        System.out.println(s.substring(1,s.length()));
         testClasses(projectDir);
     }
     public static void testClasses(File projectDir) {
