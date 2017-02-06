@@ -74,7 +74,7 @@ public class ContractGenerator {
             }
 
             Statement temp = s;
-            ArrayList preCons = new ArrayList();
+            LinkedList preCons = new LinkedList<String>();
             while(temp instanceof IfStmt){
                 String contract = ""; // New contract
 
@@ -105,11 +105,12 @@ public class ContractGenerator {
 
                     } else {
                         // This is the else-statement. It should be written as a new behavior
-                        // with a requirement that is the negation of all previous requirements.
+                        // with a pre-condition that is the negation of all previous requirements.
+                        sb.append(genElsePreCondition(preCons));
 
                         // It is not an if-statement (but it is the body of an else)
                         // Therefore, it is a block-statement or some single-line statement
-                        // Check body to extract contract
+                        // Check body to extract contract (post-condition)
                         sb.append(checkIfBody(((IfStmt) temp).getElseStmt().get()));
 
                         break; // Break out of while-loop as there are no more if-cases
@@ -143,6 +144,27 @@ probably not useful
         return true;
     }
 */
+
+    /* Takes a list of Strings
+     * Generates the pre-condition that is the negation of those strings */
+    private String genElsePreCondition (LinkedList<String> array) {
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("requires ");
+
+        for(String s : array){
+            sb.append("!" + s);
+
+            if(array.getLast() != s){
+                sb.append(" && ");
+            }
+        }
+
+        sb.append("\n");
+
+        return sb.toString();
+    }
 
     /* Will most likely return some post-condition */
     private String checkIfBody (Statement body){
