@@ -108,12 +108,12 @@ public class ContractGenerator {
                         // Check body to extract contract
                         sb.append(checkIfBody(((IfStmt) temp).getElseStmt().get()));
 
-                        temp = new EmptyStmt(); // Temp fix to avoid inf-loop TODO Permanent fix
+                        break; // Break out of while-loop as there are no more if-cases
                     }
 
                 } else { // There is no else-statement
                     // What do we do?! Panic.
-                    temp = new EmptyStmt(); // Temp fix to avoid inf-loop TODO Permanent fix
+                    break; // No more if-cases and no else-statement, break out of loop
                 }
 
             }
