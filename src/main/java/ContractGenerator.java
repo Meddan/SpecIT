@@ -93,11 +93,11 @@ public class ContractGenerator {
                 // If the next statement is also an if-statement, redo the loop
                 if(((IfStmt) temp).getElseStmt().isPresent()){ // There is some statement
 
+                    //Prepare new behavior
+                    sb.append("also\n");
+
                     if(((IfStmt) temp).getElseStmt().get() instanceof IfStmt){
                         // That statement is an if-statement
-
-                        //Prepare new behavior
-                        sb.append("also\n");
 
                         // Set temp to new if-statement, so next iteration of
                         // loop will handle contract generation
