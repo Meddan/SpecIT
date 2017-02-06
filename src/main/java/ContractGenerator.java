@@ -74,11 +74,15 @@ public class ContractGenerator {
             }
 
             Statement temp = s;
+            ArrayList preCons = new ArrayList();
             while(temp instanceof IfStmt){
                 String contract = ""; // New contract
 
                 // Begin building behavior for first case
                 String newBehavior = "requires " + ((IfStmt) temp).getCondition().toString() + ";\n";
+
+                // Add expressions of pre-conditions for safekeeping
+                preCons.add(((IfStmt) temp).getCondition().toString());
 
                 // Check if-body for contract info
                 newBehavior = newBehavior.concat(checkIfBody(((IfStmt) temp).getThenStmt()));
@@ -140,6 +144,7 @@ probably not useful
     }
 */
 
+    /* Will most likely return some post-condition */
     private String checkIfBody (Statement body){
         StringBuilder sb = new StringBuilder();
         if(body instanceof BlockStmt){
