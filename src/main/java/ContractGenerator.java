@@ -157,7 +157,7 @@ probably not useful
 
             sb.append("!(" + s + ")");
 
-            if(array.getLast() != s){
+            if(array.getLast().equals(s)){
                 sb.append(" && ");
             }
         }
