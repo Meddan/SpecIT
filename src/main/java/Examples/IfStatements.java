@@ -51,7 +51,7 @@ public class IfStatements {
     public String severalCasesAndException(int n){
         if(n < 25){
             return "foo";
-        } else if (n >= 25){
+        } else if (n > 25){
             return "bar";
         } else {
             throw new IllegalArgumentException();
