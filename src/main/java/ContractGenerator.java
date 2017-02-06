@@ -171,15 +171,30 @@ probably not useful
     private String checkIfBody (Statement body){
         StringBuilder sb = new StringBuilder();
         if(body instanceof BlockStmt){
-            sb.append("NOT YET IMPLEMENTED\n");
             // It's a block statement, likely to be many statements
             // But could still be only one
+
+            // Get all highest level statements in block
+            List<Node> bodyStmts = body.getChildNodes();
+
+            if(bodyStmts.get(0) instanceof ReturnStmt){
+                // Is the first statement a return statement? Easy money.
+                // TODO : What if empty return? Should be handled.
+                sb.append("ensures \\result == "
+                        + ((ReturnStmt) bodyStmts.get(0)).getExpression().get() + "\n");
+            } else {
+                // The first statement was not a return statement. Time to think.
+                // TODO : Implement logic
+                sb.append("NOT YET IMPLEMENTED\n");
+            }
+
 
             // Check body for return
 
             // TODO : Fill with logic
         } else if (body instanceof ReturnStmt){
             // Body is only a return, not enclosed by { }
+            // TODO : What if empty return? Should be handled.
             sb.append("ensures \\result == "
                     + ((ReturnStmt) body).getExpression().get() + ";\n");
         } else {
