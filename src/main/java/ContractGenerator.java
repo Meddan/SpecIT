@@ -5,11 +5,13 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import com.github.javaparser.symbolsolver.resolution.SymbolSolver;
 import com.google.common.base.Strings;
 
 import javax.swing.plaf.nimbus.State;
@@ -57,16 +59,18 @@ public class ContractGenerator {
         StringBuilder sb = new StringBuilder();
         for(Statement s : stmtList){
             if(s instanceof AssertStmt){
-                //Check if first / statements can be ignored
 
-                if(allAssert(stmtList, s)){
+                //Checks if assertions are at the start of function and can be added as preconditions
+                if(startAssert(stmtList, s)){
                     sb.append( "requires " + ((AssertStmt) s).getCheck().toString() + "\n");
                 }
+                //Checks if assertions are at the end of function and can be added as postconditions
                 if(endAssrt(stmtList, s)){
                     sb.append( "ensures " + ((AssertStmt) s).getCheck().toString() + "\n");
                 }
-                //Check distance from start / end to determine if assertion is pre/post condition
-                //Check if statements between allow for ignore
+                //Checks if we can ignore/integrate statements before assertions.
+
+
             }
 
             if(s instanceof IfStmt){
@@ -103,7 +107,24 @@ public class ContractGenerator {
 
         return sb.toString();
     }
-
+/*
+probably not useful
+    private boolean ignoreableStmt(NodeList<Statement> stmtList, Statement s) {
+        int index = stmtList.indexOf(s);
+        for(int i = 0 ; i < index ; i++){
+            Statement stmt = stmtList.get(i);
+            if(stmt instanceof ExpressionStmt){
+                ExpressionStmt es = (ExpressionStmt) stmt;
+                if(!(((ExpressionStmt) stmt).getExpression() instanceof AssignExpr)){
+                    return false;
+                }
+            } else if(!(stmt instanceof AssertStmt)){
+                return false;
+            }
+        }
+        return true;
+    }
+*/
     private boolean endAssrt(NodeList<Statement> stmtList, Statement s) {
         int index = stmtList.indexOf(s);
         for(int i = index ; i < stmtList.size() ; i++){
@@ -116,7 +137,7 @@ public class ContractGenerator {
         return true;
     }
 
-    private boolean allAssert(NodeList<Statement> stmtList, Statement s){
+    private boolean startAssert(NodeList<Statement> stmtList, Statement s){
         int index = stmtList.indexOf(s);
         for(int i = 0 ; i < index ; i++){
             if(!(stmtList.get(i) instanceof AssertStmt)){
