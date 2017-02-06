@@ -154,7 +154,8 @@ probably not useful
         sb.append("requires ");
 
         for(String s : array){
-            sb.append("!" + s);
+
+            sb.append("!(" + s + ")");
 
             if(array.getLast() != s){
                 sb.append(" && ");
@@ -214,6 +215,8 @@ probably not useful
 
     public static void main(String args[]){
         File projectDir = new File("src/main/java/Examples");
+        String s = "!Example";
+        System.out.println(s.substring(1,s.length()));
         testClasses(projectDir);
     }
     public static void testClasses(File projectDir) {
