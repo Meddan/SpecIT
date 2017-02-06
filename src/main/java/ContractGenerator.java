@@ -73,17 +73,19 @@ public class ContractGenerator {
 
             }
 
-            if(s instanceof IfStmt){
+            Statement temp = s;
+            while(temp instanceof IfStmt){
                 String contract = ""; // New contract
 
                 //System.out.println((s));
 
                 // Begin building behavior for first case
-                String newBehavior = "requires " + ((IfStmt) s).getCondition().toString() + ";\n";
+                String newBehavior = "requires " + ((IfStmt) temp).getCondition().toString() + ";\n";
 
                 // Extract if-body
-                Statement ifBody = ((IfStmt) s).getThenStmt();
-                if(ifBody instanceof BlockStmt){
+                Statement ifBody = ((IfStmt) temp).getThenStmt();
+                newBehavior = newBehavior.concat(checkIfBody(ifBody));
+                /*if(ifBody instanceof BlockStmt){
                     // It's a block statement, likely to be many statements
                     // But could still be only one
 
@@ -94,14 +96,23 @@ public class ContractGenerator {
                             + ((ReturnStmt) ifBody).getExpression().get()) + ";\n";
                 } else {
                     // It's not a return but some other single line expression/statement
-                }
+                }*/
 
                 // Add behavior to contract
                 contract = contract.concat(newBehavior);
 
-                                
+                //System.out.println(((IfStmt) temp).getElseStmt());
+                // If the next statement is also an if-statement, redo the loop
+                if(((IfStmt) temp).getElseStmt().isPresent() && ((IfStmt) temp).getElseStmt().get() instanceof IfStmt){
+                    contract = contract.concat("also\n");
+                    temp = ((IfStmt) temp).getElseStmt().get();
+                } else {
+                    // Otherwise, do something
+                    temp = new EmptyStmt();
+                    contract = contract.concat("\n");
+                }
 
-                System.out.println(contract);
+                System.out.print(contract);
             }
         }
 
@@ -125,6 +136,25 @@ probably not useful
         return true;
     }
 */
+
+    private String checkIfBody (Statement body){
+        StringBuilder sb = new StringBuilder();
+        if(body instanceof BlockStmt){
+            // It's a block statement, likely to be many statements
+            // But could still be only one
+
+            // Check body for return
+        } else if (body instanceof ReturnStmt){
+            // Body is only a return, not enclosed by { }
+            sb.append("ensures \\result == "
+                    + ((ReturnStmt) body).getExpression().get() + ";\n");
+        } else {
+            // It's not a return but some other single line expression/statement
+        }
+
+        return sb.toString();
+    }
+
     private boolean endAssrt(NodeList<Statement> stmtList, Statement s) {
         int index = stmtList.indexOf(s);
         for(int i = index ; i < stmtList.size() ; i++){
