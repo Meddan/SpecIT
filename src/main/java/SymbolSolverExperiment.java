@@ -53,7 +53,7 @@ public class SymbolSolverExperiment {
         combinedTypeSolver.add(new ReflectionTypeSolver());
         combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java/Examples/SymbolSolver")));
         combinedTypeSolver.add(jpts2);
-        
+
 
     }
     public static void main(String[] args) {

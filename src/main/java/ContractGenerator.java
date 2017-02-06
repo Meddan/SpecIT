@@ -1,14 +1,9 @@
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.AssignExpr;
-import com.github.javaparser.ast.expr.ConditionalExpr;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.body.*;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.symbolsolver.resolution.SymbolSolver;
@@ -17,7 +12,6 @@ import com.google.common.base.Strings;
 import javax.swing.plaf.nimbus.State;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.*;
 
 public class ContractGenerator {
@@ -46,6 +40,8 @@ public class ContractGenerator {
             System.out.println("-----------------");
             System.out.println();
             System.out.println(md.getName() + "\n" + contracts.get(md));
+            System.out.println();
+            System.out.println("Purity status: " + syntacticlyPure(md));
             System.out.println();
             System.out.println("-----------------");
         }
@@ -226,6 +222,35 @@ probably not useful
         for(int i = 0 ; i < index ; i++){
             if(!(stmtList.get(i) instanceof AssertStmt)){
                 return false;
+            }
+        }
+        return true;
+    }
+    public boolean syntacticlyPure(MethodDeclaration md){
+        ArrayList<SimpleName> localVar = new ArrayList<SimpleName>();
+        NodeList<Statement> stmtList =  md.getBody().get().getStatements();
+        for(Statement s : stmtList){
+            if(s instanceof ExpressionStmt){
+                Expression exp =((ExpressionStmt) s).getExpression();
+                if(exp instanceof MethodCallExpr){
+                    /**
+                     * Until we get the SymbolSolver to work we cannot evaluate the purity of method calls
+                     * so we treat all method calls as unpure
+                     */
+                    return false;
+                } else if(exp instanceof VariableDeclarationExpr){
+                    //might have to check if assigning the value of a method call
+                    VariableDeclarationExpr vde = (VariableDeclarationExpr) exp;
+                    for(VariableDeclarator vd : vde.getVariables()){
+                       localVar.add(vd.getName());
+                    }
+                } else if (exp instanceof AssignExpr){
+                    //might have to check if assigning the value of a method call
+                    AssignExpr ae = (AssignExpr) exp;
+                    if(!localVar.contains(((NameExpr)ae.getTarget()).getName())){
+                        return false;
+                    }
+                }
             }
         }
         return true;
