@@ -207,7 +207,7 @@ probably not useful
                     sb.append("signals_only " + typeOfExpr + "\n");
 
                     // Extract the condition that should hold once that contract is thrown
-                    sb.append("signal " + typeOfExpr + " (POSTCON FOR THIS BEHAVIOR)");
+                    sb.append("signal " + typeOfExpr + " (" + concatPreCons(preCons) + ")\n");
                 } else {
                     // Thrown expression is some already defined variable
 
