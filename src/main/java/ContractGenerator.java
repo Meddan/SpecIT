@@ -196,7 +196,7 @@ probably not useful
                 // Is the first statement a throw statement? Big dollahs.
 
                 // Extract expression to be thrown
-                Expression toThrow = ((ThrowStmt) bodyStmts.get(0)).getExpression();
+                Expression toThrow = ((ThrowStmt) bodyStmts.get(0)).getExpr();
 
                 if(toThrow instanceof ObjectCreationExpr){
                     // A new expression is created and thrown on the spot
