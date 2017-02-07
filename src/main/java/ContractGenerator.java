@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.concurrent.locks.StampedLock;
 
 public class ContractGenerator {
+
     //Should be initialized with a class
     private ClassOrInterfaceDeclaration target;
     private ArrayList<FieldDeclaration> fields = new ArrayList<FieldDeclaration>();
@@ -56,7 +57,7 @@ public class ContractGenerator {
     public String createContract(MethodDeclaration md){
         //Get row for md
         //Get top-level assertions
-        NodeList<Statement> stmtList =  md.getBody().get().getStatements();
+        NodeList<Statement> stmtList =  md.getBody().get().getStmts();
         StringBuilder sb = new StringBuilder();
         for(Statement s : stmtList){
             if(s instanceof AssertStmt){
@@ -190,7 +191,7 @@ probably not useful
                 // Is the first statement a return statement? Easy money.
                 // TODO : What if empty return? Should be handled.
                 sb.append("ensures \\result == "
-                        + ((ReturnStmt) bodyStmts.get(0)).getExpression().get() + "\n");
+                        + ((ReturnStmt) bodyStmts.get(0)).getExpr().get() + "\n");
             } else if (bodyStmts.get(0) instanceof ThrowStmt) {
                 // Is the first statement a throw statement? Big dollahs.
 
@@ -230,7 +231,7 @@ probably not useful
             // Body is only a return, not enclosed by { }
             // TODO : What if empty return? Should be handled.
             sb.append("ensures \\result == "
-                    + ((ReturnStmt) body).getExpression().get() + ";\n");
+                    + ((ReturnStmt) body).getExpr().get() + ";\n");
         } else {
             sb.append("NOT YET IMPLEMENTED\n");
             // It's not a return but some other single line expression/statement
@@ -263,7 +264,7 @@ probably not useful
     }
     public boolean syntacticlyPure(MethodDeclaration md){
         ArrayList<SimpleName> localVar = new ArrayList<SimpleName>();
-        NodeList<Statement> stmtList =  md.getBody().get().getStatements();
+        NodeList<Statement> stmtList =  md.getBody().get().getStmts();
         for(Statement s : stmtList){
             if(s instanceof ExpressionStmt){
                 Expression exp =((ExpressionStmt) s).getExpression();
@@ -277,8 +278,8 @@ probably not useful
                     //might have to check if assigning the value of a method call
                     VariableDeclarationExpr vde = (VariableDeclarationExpr) exp;
                     for(VariableDeclarator vd : vde.getVariables()){
-                       localVar.add(vd.getName());
-                       if(vd.getInitializer().isPresent()){
+                       localVar.add(vd.getId().getName());
+                       if(vd.getInit().isPresent()){
                            //TODO: 1. check if initializer contians method call
                            //TODO: 2. check if method call is pure
                        }

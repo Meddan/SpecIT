@@ -2,12 +2,16 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.AssignExpr;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
+import com.github.javaparser.symbolsolver.model.methods.MethodUsage;
 import com.github.javaparser.symbolsolver.model.typesystem.Type;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
@@ -31,10 +35,31 @@ public class SymbolSolverExperiment {
                     @Override
                     public boolean handle(Node node) {
                         if (node instanceof ExpressionStmt) {
-                            System.out.println(node);
-                            dostuff(node);
+                            //System.out.println(node);
+                            System.out.println("expstmt");
+                            Expression e = ((ExpressionStmt) node).getExpression();
+                            //if(e instanceof ReturnStmt){
+                                //dostuff(e);
+                            //}
+
+                            if (e instanceof MethodCallExpr){
+                                System.out.println(((MethodCallExpr) e).getArgs());
+                                System.out.println("methodcall");
+                                JavaParserTypeSolver jpts2 = new JavaParserTypeSolver(new File("target/classes/Examples/SymbolSolver"));
+                                CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+                                combinedTypeSolver.add(new ReflectionTypeSolver());
+                                combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java/Examples/SymbolSolver")));
+                                //combinedTypeSolver.add(jpts2);
+                                MethodUsage mu = JavaParserFacade.get(combinedTypeSolver).solveMethodAsUsage((MethodCallExpr) e);
+                                System.out.println("MU");
+                                System.out.println(mu);
+                            }
+                            /*
+                            if(((ExpressionStmt)node).getExpression() instanceof AssignExpr){
+                                AssignExpr
+                            }*/
                             return false;
-                        } else {
+                        }  else {
                             return true;
                         }
                     }
@@ -46,13 +71,24 @@ public class SymbolSolverExperiment {
         }).explore(projectDir);
     }
     private static void dostuff(Node node){
-        System.out.println("stuff");
         JavaParserTypeSolver jpts = new JavaParserTypeSolver(new File("src/main/java/Examples/SymbolSolver"));
         JavaParserTypeSolver jpts2 = new JavaParserTypeSolver(new File("target/classes/Examples/SymbolSolver"));
         CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
         combinedTypeSolver.add(new ReflectionTypeSolver());
         combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java/Examples/SymbolSolver")));
         combinedTypeSolver.add(jpts2);
+
+        System.out.println("stuff");
+        System.out.println(node);
+        Type typeOfTheNode = JavaParserFacade.get(combinedTypeSolver).getType(node);
+
+        System.out.println(typeOfTheNode);
+        System.out.println("done");
+
+    }
+    private static void methodfind(Node node){
+        System.out.println("methodfind");
+        System.out.println(node);
 
 
     }
