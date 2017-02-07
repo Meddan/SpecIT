@@ -86,7 +86,7 @@ public class ContractGenerator {
                 preCons.add(((IfStmt) temp).getCondition().toString());
 
                 // Check if-body for contract info
-                newBehavior = newBehavior.concat(checkIfBody(((IfStmt) temp).getThenStmt()));
+                newBehavior = newBehavior.concat(checkIfBody(((IfStmt) temp).getThenStmt(), preCons));
 
                 // Add behavior to contract
                 sb.append(newBehavior);
@@ -112,7 +112,7 @@ public class ContractGenerator {
                         // It is not an if-statement (but it is the body of an else)
                         // Therefore, it is a block-statement or some single-line statement
                         // Check body to extract contract (post-condition)
-                        sb.append(checkIfBody(((IfStmt) temp).getElseStmt().get()));
+                        sb.append(checkIfBody(((IfStmt) temp).getElseStmt().get(), preCons));
 
                         break; // Break out of while-loop as there are no more if-cases
                     }
@@ -177,7 +177,7 @@ probably not useful
     }
 
     /* Will most likely return some post-condition */
-    private String checkIfBody (Statement body){
+    private String checkIfBody (Statement body, LinkedList<String> preCons){
         StringBuilder sb = new StringBuilder();
         if(body instanceof BlockStmt){
             // It's a block statement, likely to be many statements
