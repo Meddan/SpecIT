@@ -43,8 +43,10 @@ public class SymbolSolverExperiment {
                             //}
 
                             if (e instanceof MethodCallExpr){
-                                System.out.println(((MethodCallExpr) e).getArgs());
-                                System.out.println("methodcall");
+                                System.out.println();
+                                System.out.println("METHOD CALL:");
+                                System.out.println(((MethodCallExpr) e));
+
                                 JavaParserTypeSolver jpts2 = new JavaParserTypeSolver(new File("target/classes/Examples/SymbolSolver"));
                                 CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
                                 combinedTypeSolver.add(new ReflectionTypeSolver());
@@ -53,6 +55,9 @@ public class SymbolSolverExperiment {
                                 MethodUsage mu = JavaParserFacade.get(combinedTypeSolver).solveMethodAsUsage((MethodCallExpr) e);
                                 System.out.println("MU");
                                 System.out.println(mu);
+                                System.out.println("DECLARATION");
+                                System.out.println(mu.getDeclaration());
+                                System.out.println();
                             }
                             /*
                             if(((ExpressionStmt)node).getExpression() instanceof AssignExpr){
