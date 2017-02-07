@@ -3,6 +3,10 @@ import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
+import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
@@ -13,6 +17,7 @@ import javax.swing.plaf.nimbus.State;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.locks.StampedLock;
 
 public class ContractGenerator {
     //Should be initialized with a class
@@ -143,17 +148,17 @@ probably not useful
 
     /* Takes a list of Strings
      * Generates the pre-condition that is the negation of those strings */
-    private String genElsePreCondition (LinkedList<String> array) {
+    private String genElsePreCondition (LinkedList<String> preCons) {
 
         StringBuilder sb = new StringBuilder();
 
         sb.append("requires ");
 
-        for(String s : array){
+        for(String s : preCons){
 
             sb.append("!(" + s + ")");
 
-            if(!array.getLast().equals(s)){
+            if(!preCons.getLast().equals(s)){
                 sb.append(" && ");
             }
         }
@@ -180,6 +185,28 @@ probably not useful
                         + ((ReturnStmt) bodyStmts.get(0)).getExpression().get() + "\n");
             } else if (bodyStmts.get(0) instanceof ThrowStmt) {
                 // Is the first statement a throw statement? Big dollahs.
+
+                // Extract expression to be thrown
+                Expression toThrow = ((ThrowStmt) bodyStmts.get(0)).getExpression();
+
+                if(toThrow instanceof ObjectCreationExpr){
+                    // A new expression is created and thrown on the spot
+
+                    // Get type of thrown expression
+                    String typeOfExpr = ((ObjectCreationExpr) toThrow).getType().toString();
+
+                    // Create contract for what exception to be thrown
+                    sb.append("signals_only " + typeOfExpr + "\n");
+
+                    // Extract the condition that should hold once that contract is thrown
+                    sb.append("signal " + typeOfExpr + " (POSTCON FOR THIS BEHAVIOR)");
+                } else {
+                    // Thrown expression is some already defined variable
+
+                    // Do work
+                }
+
+
 
             } else {
                 // The first statement was not a return statement. Time to think.
