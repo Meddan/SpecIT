@@ -153,6 +153,15 @@ probably not useful
         StringBuilder sb = new StringBuilder();
 
         sb.append("requires ");
+        sb.append(concatPreCons(preCons));
+        sb.append("\n");
+
+        return sb.toString();
+    }
+
+    private String concatPreCons (LinkedList<String> preCons){
+
+        StringBuilder sb = new StringBuilder();
 
         for(String s : preCons){
 
@@ -163,9 +172,8 @@ probably not useful
             }
         }
 
-        sb.append("\n");
-
         return sb.toString();
+
     }
 
     /* Will most likely return some post-condition */
