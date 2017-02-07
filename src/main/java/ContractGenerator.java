@@ -243,6 +243,10 @@ probably not useful
                     VariableDeclarationExpr vde = (VariableDeclarationExpr) exp;
                     for(VariableDeclarator vd : vde.getVariables()){
                        localVar.add(vd.getName());
+                       if(vd.getInitializer().isPresent()){
+                           //TODO: 1. check if initializer contians method call
+                           //TODO: 2. check if method call is pure
+                       }
                     }
                 } else if (exp instanceof AssignExpr){
                     //might have to check if assigning the value of a method call
@@ -250,10 +254,20 @@ probably not useful
                     if(!localVar.contains(((NameExpr)ae.getTarget()).getName())){
                         return false;
                     }
+                    //TODO: 1. check if ae.getValue() contians method call
+                    //TODO: 2. check if method call is pure
                 }
             }
         }
         return true;
+    }
+    private boolean pureExpression(Expression e){
+        if(e instanceof MethodCallExpr){
+            //TODO: check if pure method
+            return false;
+        }
+        //TODO: collections map and for all child nodes
+        return false;
     }
 
     public static void main(String args[]){
