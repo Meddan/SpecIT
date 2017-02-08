@@ -107,7 +107,7 @@ public class Behavior {
 
         return isExceptional == b.getIsExceptional()
                 && preCons.equals(b.getPreCons())
-                && postCons.equals(b.getPreCons())
+                && postCons.equals(b.getPostCons())
                 && assignables.equals(b.getAssignables())
                 && exceptions.equals(b.getExceptions());
     }
@@ -140,16 +140,19 @@ public class Behavior {
     private String createAssignable(){
         StringBuilder sb = new StringBuilder();
 
-        sb.append("assignable ");
-        for(String s : assignables){
-            sb.append(s);
-            if(assignables.getLast().equals(s)){
-                // If we're at the last element
-                sb.append(";\n");
-            } else {
-                // If we're not at the last element
-                sb.append(", ");
+        if(assignables.isEmpty() == false) {
+            sb.append("assignable ");
+            for (String s : assignables) {
+                sb.append(s);
+                if (assignables.getLast().equals(s)) {
+                    // If we're at the last element
+                    sb.append(";\n");
+                } else {
+                    // If we're not at the last element
+                    sb.append(", ");
+                }
             }
+
         }
 
         return sb.toString();
@@ -166,16 +169,18 @@ public class Behavior {
     private String createSignalsOnly(){
         StringBuilder sb = new StringBuilder();
 
-        sb.append("signals_only ");
+        if(exceptions.isEmpty() == false) {
+            sb.append("signals_only ");
 
-        for(String s : exceptions) {
-            sb.append(s);
-            if (exceptions.getLast().equals(s)) {
-                // If we're at the last element
-                sb.append(";\n");
-            } else {
-                // If we're not at the last element
-                sb.append(", ");
+            for (String s : exceptions) {
+                sb.append(s);
+                if (exceptions.getLast().equals(s)) {
+                    // If we're at the last element
+                    sb.append(";\n");
+                } else {
+                    // If we're not at the last element
+                    sb.append(", ");
+                }
             }
         }
 
