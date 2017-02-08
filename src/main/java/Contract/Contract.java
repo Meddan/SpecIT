@@ -47,4 +47,21 @@ public class Contract {
         return behaviors;
     }
 
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("/*@");
+
+        for(Behavior b : behaviors){
+            sb.append(b.toString());
+            if(!behaviors.getLast().equals(b)){
+                sb.append("also\n");
+            }
+        }
+
+        sb.append("@*/");
+
+        return sb.toString();
+    }
+
 }
