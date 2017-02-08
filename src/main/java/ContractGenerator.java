@@ -10,6 +10,10 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
+import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserMethodDeclaration;
+import com.github.javaparser.symbolsolver.model.methods.MethodUsage;
+import com.github.javaparser.symbolsolver.model.resolution.SymbolReference;
 import com.github.javaparser.symbolsolver.resolution.SymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
@@ -281,6 +285,9 @@ probably not useful
                 }
             } else if (s instanceof IfStmt){
                 IfStmt sif = (IfStmt) s;
+                if(!pureExpression(sif.getCondition(), localVar)){
+                    return false;
+                }
                 if(sif.getThenStmt() instanceof BlockStmt){
                     if(!syntacticlyPure(((BlockStmt) sif.getThenStmt()).getStmts(), (ArrayList<SimpleName>) localVar.clone())){
                         return false;
@@ -344,12 +351,39 @@ probably not useful
     }
     private boolean pureExpression(Expression e, ArrayList<SimpleName> localVar){
         if(e instanceof MethodCallExpr){
-            //TODO: check if pure method
+            SymbolReference sr = JavaParserFacade.get(combinedTypeSolver).solve(e);
+            if(sr.getCorrespondingDeclaration() instanceof JavaParserMethodDeclaration){
+                MethodDeclaration md = ((JavaParserMethodDeclaration) sr.getCorrespondingDeclaration()).getWrappedNode();
+                return syntacticlyPure(md);
+            } else {
+                //TODO: Handle other method calls
+                return false;
+            }
+        } else if (e instanceof VariableDeclarationExpr){
+            //might have to check if assigning the value of a method call
+            VariableDeclarationExpr vde = (VariableDeclarationExpr) e;
+            boolean pure = true;
+            for(VariableDeclarator vd : vde.getVariables()){
+                localVar.add(vd.getId().getName());
+                if(vd.getInit().isPresent()){
+                    pure = pure && pureExpression(vd.getInit().get(), localVar);
+                }
+            }
+            return pure;
+        } else if (e instanceof AssignExpr){
+            AssignExpr ae = (AssignExpr) e;
+            if(!localVar.contains(((NameExpr)ae.getTarget()).getName())){
+                return false;
+            } else {
+                return pureExpression(ae.getValue(), localVar);
+            }
+        } else {
             return false;
         }
         //TODO: collections map and for all child nodes
-        return false;
+
     }
+
     public static void main(String args[]){
         File projectDir = new File("src/main/java/Examples");
         testClasses(projectDir);
