@@ -91,6 +91,24 @@ public class Behavior {
         return sb.toString();
     }
 
+    public boolean equals(Object o){
+        if(o == null){
+            return false;
+        }
+
+        if(getClass() != o.getClass()){
+            return false;
+        }
+
+        Behavior b = (Behavior) o;
+
+        return isExceptional == b.getIsExceptional()
+                && preCons.equals(b.getPreCons())
+                && postCons.equals(b.getPreCons())
+                && assignables.equals(b.getAssignables())
+                && exceptions.equals(b.getExceptions());
+    }
+
     private String createPreCons(){
         StringBuilder sb = new StringBuilder();
         // Write out preconditions
