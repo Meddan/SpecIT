@@ -271,16 +271,53 @@ probably not useful
         return true;
     }
     public boolean syntacticlyPure(MethodDeclaration md){
-        ArrayList<SimpleName> localVar = new ArrayList<SimpleName>();
-        NodeList<Statement> stmtList =  md.getBody().get().getStmts();
+        return syntacticlyPure(md.getBody().get().getStmts(), new ArrayList<SimpleName>());
+    }
+    public boolean syntacticlyPure(NodeList<Statement> stmtList, ArrayList<SimpleName> localVar){
         for(Statement s : stmtList){
-            if(s instanceof ExpressionStmt){
+            if(s instanceof ExpressionStmt) {
+                if (!pureExpression(((ExpressionStmt) s).getExpression(), localVar)) {
+                    return false;
+                }
+            } else if (s instanceof IfStmt){
+                IfStmt sif = (IfStmt) s;
+                if(sif.getThenStmt() instanceof BlockStmt){
+                    if(!syntacticlyPure(((BlockStmt) sif.getThenStmt()).getStmts(), (ArrayList<SimpleName>) localVar.clone())){
+                        return false;
+                    }
+                } else {
+                    NodeList<Statement> nl = new NodeList<>();
+                    nl.add(sif.getThenStmt());
+                    if(!syntacticlyPure(nl, localVar)){
+                        return false;
+                    }
+                }
+                if(sif.getElseStmt().isPresent()){
+                    Statement elseStmt = sif.getElseStmt().get();
+                    if(elseStmt instanceof BlockStmt) {
+                        if (!syntacticlyPure(((BlockStmt) elseStmt).getStmts(), (ArrayList<SimpleName>) localVar.clone())) {
+                            return false;
+                        }
+                    } else {
+                        NodeList<Statement> nl = new NodeList<>();
+                        nl.add(sif.getThenStmt());
+                        if(!syntacticlyPure(nl, localVar)){
+                            return false;
+                        }
+                    }
+                }
+
+
+            }
+
+                /*
+                Commented out due to restructuring
                 Expression exp =((ExpressionStmt) s).getExpression();
                 if(exp instanceof MethodCallExpr){
-                    /**
-                     * Until we get the SymbolSolver to work we cannot evaluate the purity of method calls
-                     * so we treat all method calls as unpure
-                     */
+
+                     // Until we get the SymbolSolver to work we cannot evaluate the purity of method calls
+                     // so we treat all method calls as unpure
+
                     return false;
                 } else if(exp instanceof VariableDeclarationExpr){
                     //might have to check if assigning the value of a method call
@@ -301,11 +338,11 @@ probably not useful
                     //TODO: 1. check if ae.getValue() contians method call
                     //TODO: 2. check if method call is pure
                 }
-            }
+                */
         }
         return true;
     }
-    private boolean pureExpression(Expression e){
+    private boolean pureExpression(Expression e, ArrayList<SimpleName> localVar){
         if(e instanceof MethodCallExpr){
             //TODO: check if pure method
             return false;
@@ -313,7 +350,6 @@ probably not useful
         //TODO: collections map and for all child nodes
         return false;
     }
-
     public static void main(String args[]){
         File projectDir = new File("src/main/java/Examples");
         testClasses(projectDir);
