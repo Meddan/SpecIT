@@ -275,7 +275,11 @@ probably not useful
         return true;
     }
     public boolean syntacticlyPure(MethodDeclaration md){
-        return syntacticlyPure(md.getBody().get().getStmts(), new ArrayList<SimpleName>());
+        ArrayList<SimpleName> params = new ArrayList<>();
+        for(Parameter p : md.getParameters()){
+            params.add(p.getName());
+        }
+        return syntacticlyPure(md.getBody().get().getStmts(), params);
     }
     public boolean syntacticlyPure(NodeList<Statement> stmtList, ArrayList<SimpleName> localVar){
         for(Statement s : stmtList){
@@ -351,7 +355,7 @@ probably not useful
     }
     private boolean pureExpression(Expression e, ArrayList<SimpleName> localVar){
         if(e instanceof MethodCallExpr){
-            SymbolReference sr = JavaParserFacade.get(combinedTypeSolver).solve(e);
+            SymbolReference sr = JavaParserFacade.get(combinedTypeSolver).solve((MethodCallExpr) e);
             if(sr.getCorrespondingDeclaration() instanceof JavaParserMethodDeclaration){
                 MethodDeclaration md = ((JavaParserMethodDeclaration) sr.getCorrespondingDeclaration()).getWrappedNode();
                 return syntacticlyPure(md);
@@ -377,7 +381,42 @@ probably not useful
             } else {
                 return pureExpression(ae.getValue(), localVar);
             }
+        } else if (e instanceof BinaryExpr){
+            BinaryExpr be = (BinaryExpr) e;
+            return pureExpression(be.getLeft(), localVar) && pureExpression(be.getRight(), localVar);
+
+        } else if(e instanceof UnaryExpr){
+            UnaryExpr ue = (UnaryExpr) e;
+            if(ue.getOperator() == UnaryExpr.Operator.postDecrement
+                    || ue.getOperator() == UnaryExpr.Operator.postIncrement
+                    || ue.getOperator() == UnaryExpr.Operator.preDecrement
+                    || ue.getOperator() == UnaryExpr.Operator.preIncrement){
+                return (localVar.contains(((NameExpr)ue.getExpr()).getName()));
+
+            }
+            return pureExpression(ue.getExpr(), localVar);
+        } else if (e instanceof NameExpr) {
+            return true;
+
+        } else if (e instanceof IntegerLiteralExpr){
+            return true;
+        } else if (e instanceof ObjectCreationExpr){
+            //TODO: Check if constructor is pure? What will this actually do? Maybe always false?
+            ObjectCreationExpr oce = (ObjectCreationExpr) e;
+            boolean pure = true;
+            for(Expression exp : oce.getArgs()){
+                pure = pure && pureExpression(exp, localVar);
+            }
+            if(pure) {
+                if (oce.getAnonymousClassBody().isPresent()) {
+                    //TODO: Evaluate body
+                    return false;
+                }
+            }
+            return true;
         } else {
+            System.out.println("Expression " + e + " of class " + e.getClass() + " is not covered");
+
             return false;
         }
         //TODO: collections map and for all child nodes
