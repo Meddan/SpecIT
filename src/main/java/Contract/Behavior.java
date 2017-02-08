@@ -29,11 +29,14 @@ public class Behavior {
     private LinkedList<String> exceptions = new LinkedList<String>();
 
     /**
-     * Constructs a new instance of a behavior.
-     *
-     * @param isExceptional Flag indicating whether behavior is exceptional or not
+     * Creates a ne behavior. Sets isExcpetional to false by default.
+     * Use setExceptional() to change.
      */
-    public Behavior(boolean isExceptional){
+    public Behavior(){
+        isExceptional = false;
+    }
+
+    public void setExceptional(boolean isExceptional){
         this.isExceptional = isExceptional;
     }
 

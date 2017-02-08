@@ -19,11 +19,9 @@ public class Contract {
     /**
      * Add a new behavior to this contract and sets the current behavior to
      * be the newly created one.
-     *
-     * @param isExceptional Flag indicating whether behavior is exceptional or not
      */
-    public void addBehavior(boolean isExceptional){
-        currentBehavior = new Behavior(isExceptional);
+    public void addBehavior(){
+        currentBehavior = new Behavior();
         behaviors.add(currentBehavior);
     }
 
@@ -41,6 +39,10 @@ public class Contract {
 
     public void addException(String exception){
         currentBehavior.addException(exception);
+    }
+
+    public void setExceptional(boolean isExceptional){
+        currentBehavior.setExceptional(isExceptional);
     }
 
     public Behavior getCurrentBehavior(){
