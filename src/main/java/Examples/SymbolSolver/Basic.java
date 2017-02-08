@@ -11,14 +11,13 @@ public class Basic {
         return a;
     }
     public static int method(){
-        System.out.println("doing method");
+        //System.out.println("doing method");
         return 0;
     }
 
     /**
      * tests that we create new contexts when entering if statements
      *
-     */
     public int advanced(){
         if(true){
             int f = 2;
@@ -32,4 +31,6 @@ public class Basic {
         return f;
 
     }
+
+     */
 }

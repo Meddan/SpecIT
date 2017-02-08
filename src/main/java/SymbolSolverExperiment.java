@@ -11,8 +11,11 @@ import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
+import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserMethodDeclaration;
 import com.github.javaparser.symbolsolver.model.methods.MethodUsage;
+import com.github.javaparser.symbolsolver.model.resolution.SymbolReference;
 import com.github.javaparser.symbolsolver.model.typesystem.Type;
+import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionMethodDeclaration;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
@@ -54,9 +57,19 @@ public class SymbolSolverExperiment {
                                 //combinedTypeSolver.add(jpts2);
                                 MethodUsage mu = JavaParserFacade.get(combinedTypeSolver).solveMethodAsUsage((MethodCallExpr) e);
                                 System.out.println("MU");
-                                System.out.println(mu);
-                                System.out.println("DECLARATION");
-                                System.out.println(mu.getDeclaration());
+                                //System.out.println(mu);
+                                //System.out.println("DECLARATION");
+                                //System.out.println(mu.getDeclaration());
+                                //System.out.println();
+                                SymbolReference sr = JavaParserFacade.get(combinedTypeSolver).solve((MethodCallExpr) e);
+                                System.out.println("SR");
+                                System.out.println(sr);
+                                System.out.println();
+                                System.out.println(sr.getCorrespondingDeclaration().getClass());
+                                System.out.println();
+                                System.out.println(((JavaParserMethodDeclaration)sr.getCorrespondingDeclaration()).getWrappedNode().getClass());
+                                System.out.println();
+                                //System.out.println(((ReflectionMethodDeclaration)sr.getCorrespondingDeclaration()).);
                                 System.out.println();
                             }
                             /*
