@@ -11,6 +11,9 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.symbolsolver.resolution.SymbolSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.google.common.base.Strings;
 
 import javax.swing.plaf.nimbus.State;
@@ -25,11 +28,16 @@ public class ContractGenerator {
     private ClassOrInterfaceDeclaration target;
     private ArrayList<FieldDeclaration> fields = new ArrayList<FieldDeclaration>();
     private HashMap<MethodDeclaration, String> contracts = new HashMap<>();
+    private CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+
     public ContractGenerator(ClassOrInterfaceDeclaration coid){
         this.target = coid;
         if(target.isInterface()){
             return;
         }
+        //Create the combinedTypeSolver
+        combinedTypeSolver.add(new ReflectionTypeSolver());
+        combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java/Examples")));
         //Save all class variables of the class
         for (BodyDeclaration<?> b : target.getMembers()){
             if(b instanceof FieldDeclaration){
