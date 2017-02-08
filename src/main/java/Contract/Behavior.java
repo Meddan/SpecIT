@@ -13,7 +13,7 @@ import java.util.LinkedList;
 public class Behavior {
 
     // Flag for showing whether behavior is exceptional or not
-    boolean isExceptional;
+    private boolean isExceptional;
 
     // List for representing preconditions. The pre-condition "requires !n"
     // should be represented in this list as "!n"
