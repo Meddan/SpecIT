@@ -282,51 +282,48 @@ probably not useful
         return syntacticlyPure(md.getBody().get().getStmts(), params);
     }
     public boolean syntacticlyPure(Statement s, ArrayList<SimpleName> localVar){
-        NodeList<Statement> list = new NodeList<>();
-        list.add(s);
-        return syntacticlyPure(list, localVar);
+        if(s instanceof ExpressionStmt) {
+           return pureExpression(((ExpressionStmt) s).getExpression(), localVar);
+        } else if (s instanceof IfStmt){
+            IfStmt sif = (IfStmt) s;
+            boolean pure = true;
+            if(!pureExpression(sif.getCondition(), localVar)){
+                return false;
+            }
+            if(!syntacticlyPure(sif.getThenStmt(), localVar)){
+                return false;
+            }
+            if(sif.getElseStmt().isPresent()){
+                if (!syntacticlyPure(sif.getElseStmt().get(), (ArrayList<SimpleName>) localVar.clone())) {
+                    return false;
+                }
+            }
+            return true;
+        } else if (s instanceof ReturnStmt){
+            ReturnStmt rs = (ReturnStmt) s;
+            if(rs.getExpr().isPresent()){
+                return pureExpression(rs.getExpr().get(), localVar);
+            }
+            return true;
+        } else if(s instanceof BlockStmt){
+            BlockStmt bs = (BlockStmt) s;
+            return syntacticlyPure(((BlockStmt) s).getStmts(), (ArrayList<SimpleName>) localVar.clone());
+        } else if (s instanceof ThrowStmt){
+            return false;
+        } else if (s instanceof AssertStmt){
+            AssertStmt as = (AssertStmt) s;
+            return pureExpression(as.getCheck(), localVar);
+        } else {
+            System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
+            return false;
+        }
     }
     public boolean syntacticlyPure(NodeList<Statement> stmtList, ArrayList<SimpleName> localVar){
+        boolean pure = true;
         for(Statement s : stmtList){
-            if(s instanceof ExpressionStmt) {
-                if (!pureExpression(((ExpressionStmt) s).getExpression(), localVar)) {
-                    return false;
-                }
-            } else if (s instanceof IfStmt){
-                IfStmt sif = (IfStmt) s;
-                boolean pure = true;
-                if(!pureExpression(sif.getCondition(), localVar)){
-                    return false;
-                }
-                if(!syntacticlyPure(sif.getThenStmt(), localVar)){
-                    return false;
-                }
-                if(sif.getElseStmt().isPresent()){
-                    if (!syntacticlyPure(sif.getElseStmt().get(), (ArrayList<SimpleName>) localVar.clone())) {
-                        return false;
-                    }
-                }
-            } else if (s instanceof ReturnStmt){
-                ReturnStmt rs = (ReturnStmt) s;
-                if(rs.getExpr().isPresent()){
-                    if(!pureExpression(rs.getExpr().get(), localVar)){
-                        return false;
-                    }
-                }
-            } else if(s instanceof BlockStmt){
-                BlockStmt bs = (BlockStmt) s;
-                return syntacticlyPure(((BlockStmt) s).getStmts(), (ArrayList<SimpleName>) localVar.clone());
-            } else if (s instanceof ThrowStmt){
-                return false;
-            } else if (s instanceof AssertStmt){
-                AssertStmt as = (AssertStmt) s;
-                //TODO: CODE HERE
-            } else {
-                System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
-            }
+            pure = pure && syntacticlyPure(s, localVar);
         }
-        System.out.println("End of statments");
-        return true;
+        return pure;
     }
     private boolean pureExpression(Expression e, ArrayList<SimpleName> localVar){
         if(e instanceof MethodCallExpr){
@@ -351,11 +348,14 @@ probably not useful
             return pure;
         } else if (e instanceof AssignExpr){
             AssignExpr ae = (AssignExpr) e;
-            if(!localVar.contains(((NameExpr)ae.getTarget()).getName())){
+            if(ae.getTarget() instanceof FieldAccessExpr){
                 return false;
-            } else {
-                return pureExpression(ae.getValue(), localVar);
+            } else if (ae.getTarget() instanceof NameExpr){
+                if(!localVar.contains(((NameExpr) ae.getTarget()).getName())){
+                    return false;
+                }
             }
+            return pureExpression(ae.getValue(), localVar);
         } else if (e instanceof BinaryExpr){
             BinaryExpr be = (BinaryExpr) e;
             return pureExpression(be.getLeft(), localVar) && pureExpression(be.getRight(), localVar);
@@ -370,6 +370,9 @@ probably not useful
 
             }
             return pureExpression(ue.getExpr(), localVar);
+        } else if (e instanceof FieldAccessExpr){
+            System.out.println("FAE");
+            return true;
         } else if (e instanceof NameExpr) {
             return true;
 

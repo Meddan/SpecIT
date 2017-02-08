@@ -10,4 +10,13 @@ public class SyntacticPure {
         int j = k++;
         return j;
     }
+    public int trickyVar(){
+        int k = 0;
+        this.k = k;
+        return this.k;
+    }
+    public int trickyVar2(){
+        int k = this.k;
+        return k;
+    }
 }
