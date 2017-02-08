@@ -43,6 +43,10 @@ public class Contract {
         currentBehavior.addException(exception);
     }
 
+    public Behavior getCurrentBehavior(){
+        return currentBehavior;
+    }
+
     public LinkedList<Behavior> getBehaviors(){
         return behaviors;
     }
