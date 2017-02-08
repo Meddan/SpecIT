@@ -30,7 +30,7 @@ public class Behavior {
      *
      * @param isExceptional Flag indicating whether behavior is exceptional or not
      */
-    public Behavior (boolean isExceptional){
+    public Behavior(boolean isExceptional){
         this.isExceptional = isExceptional;
     }
 
@@ -44,6 +44,22 @@ public class Behavior {
 
     public void addAssignable(String assignable){
         assignables.add(assignable);
+    }
+
+    public LinkedList<String> getPreCons(){
+        return preCons;
+    }
+
+    public LinkedList<String> getPostCons(){
+        return postCons;
+    }
+
+    public LinkedList<String> getAssignables(){
+        return assignables;
+    }
+
+    public boolean getIsExceptional(){
+        return isExceptional;
     }
 
 }
