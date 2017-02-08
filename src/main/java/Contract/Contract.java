@@ -68,4 +68,30 @@ public class Contract {
         return sb.toString();
     }
 
+    public boolean equals(Object o){
+        if(o == null){
+            return false;
+        }
+
+        if(getClass() != o.getClass()){
+            return false;
+        }
+
+        Contract c = (Contract) o;
+
+        if(behaviors.size() == c.getBehaviors().size()){ // Amount of behaviors must be equal
+            for(int i = 0; i < behaviors.size(); i++){
+                if(behaviors.get(i) != c.getBehaviors().get(i)){
+                    // If any two behaviors do not match, not equal
+                    return false;
+                }
+            }
+        } else {
+            return false;
+        }
+
+        return true;
+
+    }
+
 }
