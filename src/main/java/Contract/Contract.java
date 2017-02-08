@@ -56,16 +56,18 @@ public class Contract {
     public String toString(){
         StringBuilder sb = new StringBuilder();
 
-        sb.append("/*@");
+        if(behaviors.isEmpty() == false) {
+            sb.append("/*@\n");
 
-        for(Behavior b : behaviors){
-            sb.append(b.toString());
-            if(!behaviors.getLast().equals(b)){
-                sb.append("also\n");
+            for (Behavior b : behaviors) {
+                sb.append(b.toString());
+                if (!behaviors.getLast().equals(b)) {
+                    sb.append("also\n");
+                }
             }
-        }
 
-        sb.append("@*/");
+            sb.append("@*/");
+        }
 
         return sb.toString();
     }
