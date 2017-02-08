@@ -223,8 +223,8 @@ probably not useful
                     sb.append("signal " + typeOfExpr + " (" + concatPreCons(preCons) + ")\n");
                 } else {
                     // Thrown expression is some already defined variable
-
                     // TODO : Find type of variable
+                    System.out.println("NOT YET IMPLEMENTED\n");
                 }
 
 
