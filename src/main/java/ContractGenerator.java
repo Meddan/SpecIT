@@ -377,6 +377,8 @@ public class ContractGenerator {
             return true;
         } else if (e instanceof CharLiteralExpr){
             return true;
+        } else if (e instanceof NullLiteralExpr){
+            return true;
         } else if (e instanceof ClassExpr){
             return true;
         } else if (e instanceof AnnotationExpr){
