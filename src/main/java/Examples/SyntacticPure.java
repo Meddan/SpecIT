@@ -41,5 +41,13 @@ public class SyntacticPure {
     public void cast2(){
         double d = (double)k;
     }
+    public int conditional(){
+        int a = k == 0 ? 1 : 2;
+        return a;
+    }
+    public int conditional2(){
+        int a = k++ == 1 ? 2 : 3;
+        return a;
+    }
 
 }

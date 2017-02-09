@@ -409,6 +409,11 @@ public class ContractGenerator {
         } else if(e instanceof CastExpr){
             CastExpr ce = (CastExpr) e;
             return pureExpression(ce.getExpr(), localVar);
+        } else if (e instanceof ConditionalExpr){
+            ConditionalExpr ce = (ConditionalExpr) e;
+            return pureExpression(ce.getCondition(),localVar)
+                    && pureExpression(ce.getThenExpr(),localVar)
+                    && pureExpression(ce.getElseExpr(),localVar);
         } else {
             System.out.println("Expression " + e + " of " + e.getClass() + " is not covered");
 
