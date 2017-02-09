@@ -377,6 +377,8 @@ public class ContractGenerator {
             return true;
         } else if (e instanceof ClassExpr){
             return true;
+        } else if (e instanceof AnnotationExpr){
+            return true;
         } else if (e instanceof EnclosedExpr){
             if(((EnclosedExpr) e).getInner().isPresent()) {
                 return pureExpression(((EnclosedExpr) e).getInner().get(), localVar);
