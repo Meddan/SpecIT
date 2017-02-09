@@ -377,6 +377,13 @@ public class ContractGenerator {
             return true;
         } else if (e instanceof ClassExpr){
             return true;
+        } else if (e instanceof EnclosedExpr){
+            if(((EnclosedExpr) e).getInner().isPresent()) {
+                return pureExpression(((EnclosedExpr) e).getInner().get(), localVar);
+            } else {
+                //This should really not happen...
+                return true;
+            }
         } else if (e instanceof ObjectCreationExpr){
             //TODO: Check if constructor is pure? What will this actually do? Maybe always false?
             ObjectCreationExpr oce = (ObjectCreationExpr) e;
