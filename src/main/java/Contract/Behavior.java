@@ -1,5 +1,7 @@
 package Contract;
 
+import sun.awt.image.ImageWatched;
+
 import java.util.LinkedList;
 
 /**
@@ -44,16 +46,40 @@ public class Behavior {
         preCons.add(preCon);
     }
 
+    public void addPreCon(LinkedList<String> preCon){
+        for(String s : preCon){
+            addPreCon(s);
+        }
+    }
+
     public void addPostCon(String postCon){
         postCons.add(postCon);
+    }
+
+    public void addPostCon(LinkedList<String> postCon){
+        for(String s : postCon){
+            addPostCon(s);
+        }
     }
 
     public void addAssignable(String assignable){
         assignables.add(assignable);
     }
 
+    public void addAssignable(LinkedList<String> assignable){
+        for(String s : assignable){
+            addAssignable(s);
+        }
+    }
+
     public void addException(String exception){
         exceptions.add(exception);
+    }
+
+    public void addException(LinkedList<String> exception){
+        for(String s : exception){
+            addException(s);
+        }
     }
 
     public LinkedList<String> getPreCons(){

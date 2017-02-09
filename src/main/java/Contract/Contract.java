@@ -29,7 +29,15 @@ public class Contract {
         currentBehavior.addPreCon(preCon);
     }
 
+    public void addPreCon(LinkedList<String> preCon){
+        currentBehavior.addPreCon(preCon);
+    }
+
     public void addPostCon(String postCon){
+        currentBehavior.addPostCon(postCon);
+    }
+
+    public void addPostCon(LinkedList<String> postCon){
         currentBehavior.addPostCon(postCon);
     }
 
@@ -37,7 +45,15 @@ public class Contract {
         currentBehavior.addAssignable(assignable);
     }
 
+    public void addAssignable(LinkedList<String> assignable){
+        currentBehavior.addAssignable(assignable);
+    }
+
     public void addException(String exception){
+        currentBehavior.addException(exception);
+    }
+
+    public void addException(LinkedList<String> exception){
         currentBehavior.addException(exception);
     }
 
