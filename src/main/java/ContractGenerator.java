@@ -296,6 +296,13 @@ public class ContractGenerator {
         } else if (s instanceof AssertStmt){
             AssertStmt as = (AssertStmt) s;
             return pureExpression(as.getCheck(), localVar);
+        } else if (s instanceof BreakStmt){
+            return true;
+        } else if(s instanceof ContinueStmt){
+            return true;
+        } else if (s instanceof DoStmt){
+            DoStmt ds = (DoStmt) s;
+            return pureExpression(ds.getCondition(), localVar) && syntacticlyPure(ds.getBody(), (ArrayList<SimpleName>) localVar.clone());
         } else {
             System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
             return false;
