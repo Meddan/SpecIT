@@ -49,5 +49,14 @@ public class SyntacticPure {
         int a = k++ == 1 ? 2 : 3;
         return a;
     }
-
+    public int inherit(){
+        return 0;
+    }
+    public int inherit2(){
+        super.toString();
+        return k++;
+    }
+    public SyntacticPure(){
+        super();
+    }
 }

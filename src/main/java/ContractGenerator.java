@@ -23,6 +23,7 @@ import com.google.common.base.Strings;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Supplier;
 
 import Contract.*;
 
@@ -434,6 +435,11 @@ public class ContractGenerator {
         } else if (e instanceof LambdaExpr){
             LambdaExpr le = (LambdaExpr) e;
             return syntacticlyPure(le.getBody(), localVar);
+        } else if (e instanceof SuperExpr){
+            //TODO: Need to have entire package in scope
+            //TODO: Also implement this
+            System.out.println("SUPER EXPRESSION");
+            return false;
         } else {
             System.out.println("Expression " + e + " of " + e.getClass() + " is not covered");
 
@@ -457,7 +463,7 @@ public class ContractGenerator {
                         ContractGenerator cg = new ContractGenerator(n);
                     }
                 }.visit(JavaParser.parse(file), null);
-                System.out.println(); // empty line
+                //System.out.println(); // empty line
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
