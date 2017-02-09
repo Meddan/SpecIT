@@ -2,6 +2,7 @@ package Examples;
 
 public class SyntacticPure {
     int k = 0;
+    int[] a;
     public int basic(){
         int i = 3;
         return i;
@@ -19,4 +20,19 @@ public class SyntacticPure {
         int k = this.k;
         return k;
     }
+    public int arrays(){
+        int[] b = new int[4];
+        b[1] = 3;
+        return 0;
+    }
+    public int arrays2(){
+        a[4] = 0;
+        return 0;
+    }
+    public int arrays3(){
+        int[] b = new int[4];
+        b[k++] = 2;
+        return 0;
+    }
+
 }

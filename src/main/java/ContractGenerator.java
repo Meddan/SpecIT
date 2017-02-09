@@ -357,6 +357,14 @@ probably not useful
                 if(!localVar.contains(((NameExpr) ae.getTarget()).getName())){
                     return false;
                 }
+            } else if(ae.getTarget() instanceof ArrayAccessExpr){
+                ArrayAccessExpr aae = (ArrayAccessExpr) ae.getTarget();
+                if(!(localVar.contains(aae.getName()) && pureExpression(aae.getIndex(),localVar))){
+                    return false;
+                }
+            } else {
+                System.out.println("Assignment target " +  ae.getTarget() + " of " + ae.getTarget().getClass() + " not covered!");
+                return false;
             }
             return pureExpression(ae.getValue(), localVar);
         } else if (e instanceof BinaryExpr){
@@ -399,6 +407,23 @@ probably not useful
                 }
             }
             return true;
+        } else if(e instanceof ArrayCreationExpr){
+            ArrayCreationExpr ace = (ArrayCreationExpr) e;
+            if(ace.getInitializer().isPresent()){
+                return pureExpression(ace.getInitializer().get(), localVar);
+            } else {
+                return true;
+            }
+        } else if(e instanceof  ArrayInitializerExpr){
+            ArrayInitializerExpr aie = (ArrayInitializerExpr) e;
+            boolean pure = true;
+            for(Expression exp : aie.getValues()){
+                pure = pure && pureExpression(exp,localVar);
+            }
+            return pure;
+        } else if(e instanceof ArrayAccessExpr){
+            ArrayAccessExpr aae = (ArrayAccessExpr) e;
+            return pureExpression(aae.getIndex(), localVar);
         } else {
             System.out.println("Expression " + e + " of " + e.getClass() + " is not covered");
 
