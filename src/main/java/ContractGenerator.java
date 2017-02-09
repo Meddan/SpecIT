@@ -20,11 +20,9 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeS
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.google.common.base.Strings;
 
-import javax.swing.plaf.nimbus.State;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.locks.StampedLock;
 
 import Contract.*;
 
