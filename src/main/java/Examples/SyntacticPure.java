@@ -53,7 +53,8 @@ public class SyntacticPure {
         return 0;
     }
     public int inherit2(){
-        super.toString();
+        //super.toString();
+        this.toString();
         return k++;
     }
     public SyntacticPure(){
