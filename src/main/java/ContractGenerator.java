@@ -423,6 +423,8 @@ public class ContractGenerator {
             return pureExpression(ce.getCondition(),localVar)
                     && pureExpression(ce.getThenExpr(),localVar)
                     && pureExpression(ce.getElseExpr(),localVar);
+        } else if(e instanceof InstanceOfExpr){
+            return pureExpression(((InstanceOfExpr) e).getExpr(), localVar);
         } else {
             System.out.println("Expression " + e + " of " + e.getClass() + " is not covered");
 
