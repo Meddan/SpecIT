@@ -367,6 +367,8 @@ public class ContractGenerator {
             return true;
         } else if (e instanceof IntegerLiteralExpr){
             return true;
+        } else if (e instanceof DoubleLiteralExpr){
+            return true;
         } else if (e instanceof StringLiteralExpr){
             return true;
         } else if (e instanceof BooleanLiteralExpr) {
