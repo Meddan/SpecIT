@@ -386,12 +386,15 @@ probably not useful
             return true;
         } else if (e instanceof NameExpr) {
             return true;
-
         } else if (e instanceof IntegerLiteralExpr){
             return true;
         } else if (e instanceof StringLiteralExpr){
             return true;
         } else if (e instanceof BooleanLiteralExpr) {
+            return true;
+        } else if (e instanceof CharLiteralExpr){
+            return true;
+        } else if (e instanceof ClassExpr){
             return true;
         } else if (e instanceof ObjectCreationExpr){
             //TODO: Check if constructor is pure? What will this actually do? Maybe always false?
@@ -424,6 +427,9 @@ probably not useful
         } else if(e instanceof ArrayAccessExpr){
             ArrayAccessExpr aae = (ArrayAccessExpr) e;
             return pureExpression(aae.getIndex(), localVar);
+        } else if(e instanceof CastExpr){
+            CastExpr ce = (CastExpr) e;
+            return pureExpression(ce.getExpr(), localVar);
         } else {
             System.out.println("Expression " + e + " of " + e.getClass() + " is not covered");
 

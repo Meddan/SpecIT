@@ -34,5 +34,12 @@ public class SyntacticPure {
         b[k++] = 2;
         return 0;
     }
+    public void cast(){
+        int a = 3;
+        double d = (double)a;
+    }
+    public void cast2(){
+        double d = (double)k;
+    }
 
 }
