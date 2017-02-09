@@ -146,25 +146,6 @@ public class ContractGenerator {
         //System.out.println(c.toString());
         return c.toString();
     }
-/*
-probably not useful
-    private boolean ignoreableStmt(NodeList<Statement> stmtList, Statement s) {
-        int index = stmtList.indexOf(s);
-        for(int i = 0 ; i < index ; i++){
-            Statement stmt = stmtList.get(i);
-            if(stmt instanceof ExpressionStmt){
-                ExpressionStmt es = (ExpressionStmt) stmt;
-                if(!(((ExpressionStmt) stmt).getExpression() instanceof AssignExpr)){
-                    return false;
-                }
-            } else if(!(stmt instanceof AssertStmt)){
-                return false;
-            }
-        }
-        return true;
-    }
-*/
-
     /* Takes a list of Strings
      * Generates the pre-condition that is the negation of those strings */
     private String genElsePreCondition (LinkedList<String> preCons) {
@@ -435,8 +416,6 @@ probably not useful
 
             return false;
         }
-        //TODO: collections map and for all child nodes
-
     }
 
     public static void main(String args[]){
