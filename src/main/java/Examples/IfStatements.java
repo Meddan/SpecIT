@@ -58,6 +58,14 @@ public class IfStatements {
         }
     }
 
+    public void emptyReturn(String s){
+        if(!s.equals("FOO")){
+            return;
+        } else {
+            x = "BAR";
+        }
+    }
+
     private boolean someHelperMethod(int n){
         return n == 10;
     }
