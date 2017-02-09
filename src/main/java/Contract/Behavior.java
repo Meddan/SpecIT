@@ -53,12 +53,7 @@ public class Behavior {
     }
 
     public void addException(String exception){
-        if (isExceptional) {
-            exceptions.add(exception);
-        } else {
-            throw new Error("Behavior is not exceptional");
-        }
-
+        exceptions.add(exception);
     }
 
     public LinkedList<String> getPreCons(){
