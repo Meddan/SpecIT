@@ -53,6 +53,8 @@ public class ContractGenerator {
         for (BodyDeclaration<?> b : target.getMembers()){
             if(b instanceof MethodDeclaration){
                 contracts.put((MethodDeclaration) b, createContract((MethodDeclaration) b));
+            } else {
+                System.out.println("Bodydeclaration " + b + " of " + b.getClass() + " is not covered!");
             }
         }
         for(MethodDeclaration md : contracts.keySet()){
@@ -303,6 +305,8 @@ public class ContractGenerator {
         } else if (s instanceof DoStmt){
             DoStmt ds = (DoStmt) s;
             return pureExpression(ds.getCondition(), localVar) && syntacticlyPure(ds.getBody(), (ArrayList<SimpleName>) localVar.clone());
+        } else if(s instanceof EmptyStmt){
+            return true;
         } else {
             System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
             return false;
