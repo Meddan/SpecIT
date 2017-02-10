@@ -23,9 +23,9 @@ public class PostCondition {
 
     public String toString(){
         if(isReturn){
-            return "\result == " + expression.toString();
+            return "ensures \result == " + expression.toString();
         } else {
-            return expression.toString();
+            return "ensures " + expression.toString();
         }
     }
 
