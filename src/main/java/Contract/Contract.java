@@ -1,5 +1,9 @@
 package Contract;
 
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.type.Type;
+
 import java.util.LinkedList;
 
 /**
@@ -25,36 +29,28 @@ public class Contract {
         behaviors.add(currentBehavior);
     }
 
-    public void addPreCon(String preCon){
+    public void addPreCon(Expression preCon){
         currentBehavior.addPreCon(preCon);
     }
 
-    public void addPreCon(LinkedList<String> preCon){
+    public void addPreCon(LinkedList<Expression> preCon){
         currentBehavior.addPreCon(preCon);
     }
 
-    public void addPostCon(String postCon){
-        currentBehavior.addPostCon(postCon);
+    public void addPostCon(Expression postCon, boolean isReturn){
+        currentBehavior.addPostCon(postCon, isReturn);
     }
 
-    public void addPostCon(LinkedList<String> postCon){
-        currentBehavior.addPostCon(postCon);
-    }
-
-    public void addAssignable(String assignable){
+    public void addAssignable(SimpleName assignable){
         currentBehavior.addAssignable(assignable);
     }
 
-    public void addAssignable(LinkedList<String> assignable){
+    public void addAssignable(LinkedList<SimpleName> assignable){
         currentBehavior.addAssignable(assignable);
     }
 
-    public void addException(String exception){
-        currentBehavior.addException(exception);
-    }
-
-    public void addException(LinkedList<String> exception){
-        currentBehavior.addException(exception);
+    public void addException(Type t, Expression e){
+        currentBehavior.addException(t,e);
     }
 
     public void setExceptional(boolean isExceptional){

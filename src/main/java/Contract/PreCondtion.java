@@ -19,4 +19,7 @@ public class PreCondtion {
     public void setExpression(Expression expression) {
         this.expression = expression;
     }
+    public String toString(){
+        return "requires " + expression.toString() + ";";
+    }
 }

@@ -1,5 +1,8 @@
 package Contract;
 
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.type.Type;
 import sun.awt.image.ImageWatched;
 
 import java.util.LinkedList;
@@ -19,16 +22,16 @@ public class Behavior {
 
     // List for representing preconditions. The pre-condition "requires !n"
     // should be represented in this list as "!n"
-    private LinkedList<String> preCons = new LinkedList<String>();
+    private LinkedList<PreCondtion> preCons = new LinkedList<PreCondtion>();
 
     // List for represeting postconditions. See above for format.
-    private LinkedList<String> postCons = new LinkedList<String>();
+    private LinkedList<PostCondition> postCons = new LinkedList<PostCondition>();
 
     // List for representing any assignable variable
-    private LinkedList<String> assignables = new LinkedList<String>();
+    private LinkedList<SimpleName> assignables = new LinkedList<SimpleName>();
 
     // List for representing exceptions thrown when behavior is exceptional
-    private LinkedList<String> exceptions = new LinkedList<String>();
+    private LinkedList<ExceptionCondition> exceptions = new LinkedList<ExceptionCondition>();
 
     /**
      * Creates a ne behavior. Sets isExcpetional to false by default.
@@ -42,59 +45,47 @@ public class Behavior {
         this.isExceptional = isExceptional;
     }
 
-    public void addPreCon(String preCon){
-        preCons.add(preCon);
+    public void addPreCon(Expression preCon){
+        preCons.add(new PreCondtion(preCon));
     }
 
-    public void addPreCon(LinkedList<String> preCon){
-        for(String s : preCon){
-            addPreCon(s);
+    public void addPreCon(LinkedList<Expression> preCon){
+        for(Expression e : preCon){
+            addPreCon(e);
         }
     }
 
-    public void addPostCon(String postCon){
-        postCons.add(postCon);
+    public void addPostCon(Expression postCon, boolean isReturn){
+        postCons.add(new PostCondition(postCon, isReturn));
     }
 
-    public void addPostCon(LinkedList<String> postCon){
-        for(String s : postCon){
-            addPostCon(s);
-        }
-    }
-
-    public void addAssignable(String assignable){
+    public void addAssignable(SimpleName assignable){
         assignables.add(assignable);
     }
 
-    public void addAssignable(LinkedList<String> assignable){
-        for(String s : assignable){
+    public void addAssignable(LinkedList<SimpleName> assignable){
+        for(SimpleName s : assignable){
             addAssignable(s);
         }
     }
 
-    public void addException(String exception){
-        exceptions.add(exception);
+    public void addException(Type t, Expression e){
+        exceptions.add(new ExceptionCondition(t,e));
     }
 
-    public void addException(LinkedList<String> exception){
-        for(String s : exception){
-            addException(s);
-        }
-    }
-
-    public LinkedList<String> getPreCons(){
+    public LinkedList<PreCondtion> getPreCons(){
         return preCons;
     }
 
-    public LinkedList<String> getPostCons(){
+    public LinkedList<PostCondition> getPostCons(){
         return postCons;
     }
 
-    public LinkedList<String> getAssignables(){
+    public LinkedList<SimpleName> getAssignables(){
         return assignables;
     }
 
-    public LinkedList<String> getExceptions(){
+    public LinkedList<ExceptionCondition> getExceptions(){
         return exceptions;
     }
 
@@ -136,10 +127,8 @@ public class Behavior {
     private String createPreCons(){
         StringBuilder sb = new StringBuilder();
         // Write out preconditions
-        for(String s : preCons){
-            sb.append("requires ");
-            sb.append(s);
-            sb.append(";\n");
+        for(PreCondtion p : preCons){
+            sb.append(p.toString());
         }
 
         return sb.toString();
@@ -149,10 +138,8 @@ public class Behavior {
         StringBuilder sb = new StringBuilder();
 
         // Write out postconditions
-        for(String s : postCons){
-            sb.append("ensures ");
-            sb.append(s);
-            sb.append(";\n");
+        for(PostCondition p : postCons){
+            sb.append(p.toString());
         }
 
         return sb.toString();
@@ -161,10 +148,10 @@ public class Behavior {
     private String createAssignable(){
         StringBuilder sb = new StringBuilder();
 
-        if(assignables.isEmpty() == false) {
+        if(!assignables.isEmpty()) {
             sb.append("assignable ");
-            for (String s : assignables) {
-                sb.append(s);
+            for (SimpleName s : assignables) {
+                sb.append(s.toString());
                 if (assignables.getLast().equals(s)) {
                     // If we're at the last element
                     sb.append(";\n");
@@ -193,9 +180,9 @@ public class Behavior {
         if(exceptions.isEmpty() == false) {
             sb.append("signals_only ");
 
-            for (String s : exceptions) {
-                sb.append(s);
-                if (exceptions.getLast().equals(s)) {
+            for (ExceptionCondition ec : exceptions) {
+                sb.append(ec.toString());
+                if (exceptions.getLast().equals(ec)) {
                     // If we're at the last element
                     sb.append(";\n");
                 } else {
@@ -211,9 +198,9 @@ public class Behavior {
     private String createSignal(){
         StringBuilder sb = new StringBuilder();
 
-        for(String s : exceptions){
+        for(ExceptionCondition ec : exceptions){
             sb.append("signal ");
-            sb.append(s);
+            sb.append(ec.getName().toString());
             sb.append(" (");
             sb.append(concatPreCons());
             sb.append(");\n");
@@ -225,9 +212,9 @@ public class Behavior {
     private String concatPreCons(){
         StringBuilder sb = new StringBuilder();
 
-        for(String s : preCons){
-            sb.append(s);
-            if(!preCons.getLast().equals(s)){
+        for(PreCondtion p : preCons){
+            sb.append(p.toString());
+            if(!preCons.getLast().equals(p)){
                 sb.append(" && ");
             }
         }
