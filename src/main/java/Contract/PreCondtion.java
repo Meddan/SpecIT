@@ -20,6 +20,6 @@ public class PreCondtion {
         this.expression = expression;
     }
     public String toString(){
-        return "requires " + expression.toString() + ";";
+        return "requires " + expression.toString() + ";\n";
     }
 }
