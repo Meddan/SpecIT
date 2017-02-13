@@ -300,7 +300,7 @@ public class ContractGenerator {
                     return false;
                 }
             }
-            return true;
+            return false;
         } else if(e instanceof ArrayCreationExpr){
             ArrayCreationExpr ace = (ArrayCreationExpr) e;
             if(ace.getInitializer().isPresent()){
