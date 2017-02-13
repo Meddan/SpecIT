@@ -23,7 +23,7 @@ public class PostCondition {
 
     public String toString(){
         if(isReturn){
-            return "ensures \result == " + expression.toString() + ";\n";
+            return "ensures \\result == " + expression.toString() + ";\n";
         } else {
             return "ensures " + expression.toString() + ";\n";
         }
