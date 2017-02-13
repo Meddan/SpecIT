@@ -62,7 +62,7 @@ public class ContractGenerator {
             System.out.println();
             System.out.println(md.getName() + "\n" + contracts.get(md));
             System.out.println();
-            //System.out.println("Purity status: " + syntacticlyPure(md));
+            System.out.println("Purity status: " + contracts.get(md).isPure());
             System.out.println();
             System.out.println("-----------------");
         }
@@ -173,7 +173,6 @@ public class ContractGenerator {
             return createContract(((BlockStmt) s).getStmts(), (ArrayList<SimpleName>) localVar.clone(), c);
         } else if (s instanceof ThrowStmt){
             //TODO: Add throw behavior
-            c.setPure(false);
             return c;
         } else if (s instanceof AssertStmt){
             AssertStmt as = (AssertStmt) s;
