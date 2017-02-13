@@ -22,7 +22,7 @@ public class Behavior {
 
     // List for representing preconditions. The pre-condition "requires !n"
     // should be represented in this list as "!n"
-    private LinkedList<PreCondtion> preCons = new LinkedList<PreCondtion>();
+    private LinkedList<PreCondition> preCons = new LinkedList<PreCondition>();
 
     // List for represeting postconditions. See above for format.
     private LinkedList<PostCondition> postCons = new LinkedList<PostCondition>();
@@ -46,7 +46,7 @@ public class Behavior {
     }
 
     public void addPreCon(Expression preCon){
-        preCons.add(new PreCondtion(preCon));
+        preCons.add(new PreCondition(preCon));
     }
 
     public void addPreCon(LinkedList<Expression> preCon){
@@ -73,7 +73,7 @@ public class Behavior {
         exceptions.add(new ExceptionCondition(t,e));
     }
 
-    public LinkedList<PreCondtion> getPreCons(){
+    public LinkedList<PreCondition> getPreCons(){
         return preCons;
     }
 
@@ -127,7 +127,7 @@ public class Behavior {
     private String createPreCons(){
         StringBuilder sb = new StringBuilder();
         // Write out preconditions
-        for(PreCondtion p : preCons){
+        for(PreCondition p : preCons){
             sb.append(p.toString());
         }
 
@@ -212,7 +212,7 @@ public class Behavior {
     private String concatPreCons(){
         StringBuilder sb = new StringBuilder();
 
-        for(PreCondtion p : preCons){
+        for(PreCondition p : preCons){
             sb.append(p.toString());
             if(!preCons.getLast().equals(p)){
                 sb.append(" && ");
