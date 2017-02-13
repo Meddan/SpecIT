@@ -33,6 +33,9 @@ public class Behavior {
     // List for representing exceptions thrown when behavior is exceptional
     private LinkedList<ExceptionCondition> exceptions = new LinkedList<ExceptionCondition>();
 
+    private Behavior parent;
+
+    private LinkedList<Behavior> children = new LinkedList<Behavior>();
     /**
      * Creates a ne behavior. Sets isExcpetional to false by default.
      * Use setExceptional() to change.
@@ -55,8 +58,16 @@ public class Behavior {
         }
     }
 
+    public void addPreConFromParent(LinkedList<PreCondition> preCon){
+        preCons.addAll(preCon);
+    }
+
     public void addPostCon(Expression postCon, boolean isReturn){
         postCons.add(new PostCondition(postCon, isReturn));
+    }
+
+    public void addPostConFromParent(LinkedList<PostCondition> postCon){
+        postCons.addAll(postCon);
     }
 
     public void addAssignable(SimpleName assignable){
@@ -71,6 +82,10 @@ public class Behavior {
 
     public void addException(Type t, Expression e){
         exceptions.add(new ExceptionCondition(t,e));
+    }
+
+    public void addExceptionsFromParent(LinkedList<ExceptionCondition> exception){
+        exceptions.addAll(exception);
     }
 
     public LinkedList<PreCondition> getPreCons(){
@@ -222,4 +237,23 @@ public class Behavior {
         return sb.toString();
     }
 
+    public Behavior getParent() {
+        return parent;
+    }
+
+    public void setParent(Behavior parent) {
+        this.parent = parent;
+    }
+
+    public LinkedList<Behavior> getChildren() {
+        return children;
+    }
+
+    public void setChildren(LinkedList<Behavior> children) {
+        this.children = children;
+    }
+
+    public void addChild(Behavior child){
+        this.children.add(child);
+    }
 }
