@@ -77,7 +77,9 @@ public class ContractGenerator {
         for(Parameter p : md.getParameters()){
             params.add(p.getName());
         }
-        return createContract(stmtList, params, new Contract(md));
+        Contract c = new Contract(md);
+        c.addBehavior();
+        return createContract(stmtList, params, c);
 
     }
     /* Takes a list of Strings
@@ -177,11 +179,9 @@ public class ContractGenerator {
             AssertStmt as = (AssertStmt) s;
             //TODO: Should not have to add a new behavior, should only change current one
             if(startAssert(c.getMethodDeclaration(), as)){
-                c.addBehavior();
                 c.addPreCon(as.getCheck());
             }
             if(endAssrt(c.getMethodDeclaration(), as)){
-                c.addBehavior();
                 c.addPostCon(as.getCheck(), false);
             }
             c.setPure(pureExpression(as.getCheck(), localVar));
