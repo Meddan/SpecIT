@@ -83,34 +83,6 @@ public class ContractGenerator {
         return c;
 
     }
-    /* Takes a list of Strings
-     * Generates the pre-condition that is the negation of those strings */
-    private String genElsePreCondition (LinkedList<String> preCons) {
-
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(concatPreCons(preCons));
-
-        return sb.toString();
-    }
-
-    private String concatPreCons (LinkedList<String> preCons){
-
-        StringBuilder sb = new StringBuilder();
-
-        for(String s : preCons){
-
-            sb.append("!(" + s + ")");
-
-            if(!preCons.getLast().equals(s)){
-                sb.append(" && ");
-            }
-        }
-
-        return sb.toString();
-
-    }
-
 
     private boolean endAssrt(MethodDeclaration md, Statement s) {
         NodeList<Statement> stmtList = md.getBody().get().getStmts();
