@@ -32,7 +32,7 @@ public class ContractGenerator {
     //Should be initialized with a class
     private ClassOrInterfaceDeclaration target;
     private ArrayList<FieldDeclaration> fields = new ArrayList<FieldDeclaration>();
-    private HashMap<MethodDeclaration, String> contracts = new HashMap<>();
+    private HashMap<MethodDeclaration, Contract> contracts = new HashMap<>();
     private CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
 
     public ContractGenerator(ClassOrInterfaceDeclaration coid){
@@ -62,90 +62,24 @@ public class ContractGenerator {
             System.out.println();
             System.out.println(md.getName() + "\n" + contracts.get(md));
             System.out.println();
-            System.out.println("Purity status: " + syntacticlyPure(md));
+            //System.out.println("Purity status: " + syntacticlyPure(md));
             System.out.println();
             System.out.println("-----------------");
         }
 
 
     }
-    public String createContract(MethodDeclaration md){
+    public Contract createContract(MethodDeclaration md){
         //Get row for md
         //Get top-level assertions
         NodeList<Statement> stmtList =  md.getBody().get().getStmts();
-        StringBuilder sb = new StringBuilder();
         Contract c = new Contract();
-        for(Statement s : stmtList){
-            if(s instanceof AssertStmt){
-
-                c.addBehavior();
-                //Checks if assertions are at the start of function and can be added as preconditions
-                if(startAssert(stmtList, s)){
-                    //sb.append( "requires " + ((AssertStmt) s).getCheck().toString() + "\n");
-                    c.addPreCon(((AssertStmt) s).getCheck().toString());
-                }
-                //Checks if assertions are at the end of function and can be added as postconditions
-                if(endAssrt(stmtList, s)){
-                    //sb.append( "ensures " + ((AssertStmt) s).getCheck().toString() + "\n");
-                    c.addPostCon(((AssertStmt) s).getCheck().toString());
-                }
-                //Checks if we can ignore/integrate statements before assertions.
-
-
-            }
-
-            Statement temp = s;
-            LinkedList preCons = new LinkedList<String>();
-            while(temp instanceof IfStmt){
-                c.addBehavior();
-
-                // Begin building behavior for first case
-                c.addPreCon(((IfStmt) temp).getCondition().toString());
-
-                // Add expressions of pre-conditions for safekeeping
-                preCons.add(((IfStmt) temp).getCondition().toString());
-
-                // Check if-body for contract info
-                checkIfBody(((IfStmt) temp).getThenStmt(), c);
-
-                // If the next statement is also an if-statement, redo the loop
-                if(((IfStmt) temp).getElseStmt().isPresent()){ // There is some statement
-
-                    if(((IfStmt) temp).getElseStmt().get() instanceof IfStmt){
-                        // That statement is an if-statement
-
-                        // Set temp to new if-statement, so next iteration of
-                        // loop will handle contract generation
-                        temp = ((IfStmt) temp).getElseStmt().get();
-
-                    } else {
-                        // This is the else-statement. It should be written as a new behavior
-                        // with a pre-condition that is the negation of all previous requirements.
-
-                        // Add new behavior
-                        c.addBehavior();
-
-                        // Add preconditions for new behavior
-                        c.addPreCon(genElsePreCondition(preCons));
-
-                        // It is not an if-statement (but it is the body of an else)
-                        // Therefore, it is a block-statement or some single-line statement
-                        // Check body to extract contract (post-condition)
-                        checkIfBody(((IfStmt) temp).getElseStmt().get(), c);
-
-                        break; // Break out of while-loop as there are no more if-cases
-                    }
-
-                } else { // There is no else-statement
-                    // What do we do?! Panic.
-                    break; // No more if-cases and no else-statement, break out of loop
-                }
-
-            }
+        ArrayList<SimpleName> params = new ArrayList<>();
+        for(Parameter p : md.getParameters()){
+            params.add(p.getName());
         }
+        return createContract(stmtList, params, new Contract());
 
-        //System.out.println(c.toString());
-        return c.toString();
     }
     /* Takes a list of Strings
      * Generates the pre-condition that is the negation of those strings */
@@ -175,68 +109,6 @@ public class ContractGenerator {
 
     }
 
-    private void createReturntStmtPostCon(ReturnStmt rs, Contract c){
-        if(rs.getExpr().isPresent()){
-            c.addPostCon("\\result == " + rs.getExpr().get());
-        } else {
-            // TODO : Is this correct?
-            c.addPostCon(c.getCurrentBehavior().getPreCons());
-        }
-    }
-
-    /* Will most likely return some post-condition */
-    private void checkIfBody (Statement body, Contract c){
-
-        if(body instanceof BlockStmt){
-            // It's a block statement, likely to be many statements
-            // But could still be only one
-
-            // Get all highest level statements in block
-            List<Node> bodyStmts = body.getChildNodes();
-
-            if(bodyStmts.get(0) instanceof ReturnStmt){
-                // Is the first statement a return statement? Easy money.
-                createReturntStmtPostCon((ReturnStmt) bodyStmts.get(0), c);
-            } else if (bodyStmts.get(0) instanceof ThrowStmt) {
-                // Is the first statement a throw statement? Big dollahs.
-
-                c.setExceptional(true);
-
-                // Extract expression to be thrown
-                Expression toThrow = ((ThrowStmt) bodyStmts.get(0)).getExpr();
-
-                if(toThrow instanceof ObjectCreationExpr){
-                    // A new expression is created and thrown on the spot
-
-                    // Get type of thrown expression
-                    String typeOfExpr = ((ObjectCreationExpr) toThrow).getType().toString();
-
-                    c.addException(typeOfExpr);
-                } else {
-                    // Thrown expression is some already defined variable
-                    // TODO : Find type of variable
-                    c.addPostCon("NOT YET IMPLEMENTED");
-                }
-
-            } else {
-                // The first statement was not a return statement. Time to think.
-                // TODO : Implement logic
-                c.addPostCon("NOT YET IMPLEMENTED");
-            }
-
-
-            // Check body for return
-
-            // TODO : Fill with logic
-        } else if (body instanceof ReturnStmt){
-            // Body is only a return, not enclosed by { }
-            createReturntStmtPostCon((ReturnStmt) body, c);
-        } else {
-            c.addPostCon("NOT YET IMPLEMENTED");
-            // It's not a return but some other single line expression/statement
-            // TODO : Fill with logic
-        }
-    }
 
     private boolean endAssrt(NodeList<Statement> stmtList, Statement s) {
         int index = stmtList.indexOf(s);
@@ -259,72 +131,65 @@ public class ContractGenerator {
         }
         return true;
     }
-    public boolean syntacticlyPure(MethodDeclaration md){
-        ArrayList<SimpleName> params = new ArrayList<>();
-        for(Parameter p : md.getParameters()){
-            params.add(p.getName());
+    public Contract createContract(NodeList<Statement> stmtList, ArrayList<SimpleName> localVar, Contract c){
+        boolean pure = true;
+        for(Statement s : stmtList){
+           createContract(s, localVar, c);
         }
-        return syntacticlyPure(md.getBody().get().getStmts(), params);
+        return c;
     }
-    public boolean syntacticlyPure(Statement s, ArrayList<SimpleName> localVar){
+    public Contract createContract(Statement s, ArrayList<SimpleName> localVar, Contract c){
         if(s instanceof ExpressionStmt) {
-           return pureExpression(((ExpressionStmt) s).getExpression(), localVar);
+           c.setPure(pureExpression(((ExpressionStmt) s).getExpression(), localVar));
+           return c;
         } else if (s instanceof IfStmt){
             IfStmt sif = (IfStmt) s;
             boolean pure = true;
-            if(!pureExpression(sif.getCondition(), localVar)){
-                return false;
-            }
-            if(!syntacticlyPure(sif.getThenStmt(), localVar)){
-                return false;
-            }
-            if(sif.getElseStmt().isPresent()){
-                if (!syntacticlyPure(sif.getElseStmt().get(), (ArrayList<SimpleName>) localVar.clone())) {
-                    return false;
-                }
-            }
-            return true;
+            c.setPure(pureExpression(sif.getCondition(), localVar));
+
+            //TODO: Evaluate body of if
+            return c;
         } else if (s instanceof ReturnStmt){
             ReturnStmt rs = (ReturnStmt) s;
             if(rs.getExpr().isPresent()){
-                return pureExpression(rs.getExpr().get(), localVar);
+                c.setPure(pureExpression(rs.getExpr().get(), localVar));
             }
-            return true;
+            return c;
         } else if(s instanceof BlockStmt){
             BlockStmt bs = (BlockStmt) s;
-            return syntacticlyPure(((BlockStmt) s).getStmts(), (ArrayList<SimpleName>) localVar.clone());
+            return createContract(((BlockStmt) s).getStmts(), (ArrayList<SimpleName>) localVar.clone(), c);
         } else if (s instanceof ThrowStmt){
-            return false;
+            //TODO: Add throw behavior
+            c.setPure(false);
+            return c;
         } else if (s instanceof AssertStmt){
             AssertStmt as = (AssertStmt) s;
-            return pureExpression(as.getCheck(), localVar);
+            //TODO: Assert
+            c.setPure(pureExpression(as.getCheck(), localVar));
+            return c;
         } else if (s instanceof BreakStmt){
-            return true;
+            return c;
         } else if(s instanceof ContinueStmt){
-            return true;
+            return c;
         } else if (s instanceof DoStmt){
             DoStmt ds = (DoStmt) s;
-            return pureExpression(ds.getCondition(), localVar) && syntacticlyPure(ds.getBody(), (ArrayList<SimpleName>) localVar.clone());
+            c.setPure(pureExpression(ds.getCondition(), localVar));
+            createContract(ds.getBody(), (ArrayList<SimpleName>) localVar.clone(), c);
+            return c;
         } else if(s instanceof EmptyStmt){
-            return true;
+            return c;
         } else {
             System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
-            return false;
+            return c;
         }
     }
-    public boolean syntacticlyPure(NodeList<Statement> stmtList, ArrayList<SimpleName> localVar){
-        boolean pure = true;
-        for(Statement s : stmtList){
-            pure = pure && syntacticlyPure(s, localVar);
-        }
-        return pure;
-    }
+
     private boolean pureExpression(Expression e, ArrayList<SimpleName> localVar){
         if(e instanceof MethodCallExpr){
             SymbolReference sr = JavaParserFacade.get(combinedTypeSolver).solve((MethodCallExpr) e);
             if(sr.getCorrespondingDeclaration() instanceof JavaParserMethodDeclaration){
                 MethodDeclaration md = ((JavaParserMethodDeclaration) sr.getCorrespondingDeclaration()).getWrappedNode();
-                return syntacticlyPure(md);
+                return createContract(md).isPure();
             } else {
                 //TODO: Handle other method calls
                 return false;
@@ -447,7 +312,7 @@ public class ContractGenerator {
             return pureExpression(((InstanceOfExpr) e).getExpr(), localVar);
         } else if (e instanceof LambdaExpr){
             LambdaExpr le = (LambdaExpr) e;
-            return syntacticlyPure(le.getBody(), localVar);
+            return createContract(le.getBody(), localVar, new Contract()).isPure();
         } else if (e instanceof SuperExpr){
             //TODO: Need to have entire package in scope
             //TODO: Also implement this
