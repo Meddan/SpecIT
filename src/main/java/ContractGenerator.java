@@ -34,8 +34,10 @@ public class ContractGenerator {
     private ArrayList<FieldDeclaration> fields = new ArrayList<FieldDeclaration>();
     private HashMap<MethodDeclaration, Contract> contracts = new HashMap<>();
     private CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+    private ArrayList<Class> ignorableExpressions = new ArrayList<>();
 
     public ContractGenerator(ClassOrInterfaceDeclaration coid){
+        addIgnorableExpressions();
         this.target = coid;
         if(target.isInterface()){
             return;
@@ -69,6 +71,22 @@ public class ContractGenerator {
 
 
     }
+
+    private void addIgnorableExpressions() {
+        ignorableExpressions.add(FieldAccessExpr.class);
+        ignorableExpressions.add(NameExpr.class);
+        ignorableExpressions.add(IntegerLiteralExpr.class);
+        ignorableExpressions.add(DoubleLiteralExpr.class);
+        ignorableExpressions.add(LongLiteralExpr.class);
+        ignorableExpressions.add(StringLiteralExpr.class);
+        ignorableExpressions.add(BooleanLiteralExpr.class);
+        ignorableExpressions.add(CharLiteralExpr.class);
+        ignorableExpressions.add(NullLiteralExpr.class);
+        ignorableExpressions.add(ClassExpr.class);
+        ignorableExpressions.add(AnnotationExpr.class);
+        ignorableExpressions.add(TypeExpr.class);
+    }
+
     public Contract createContract(MethodDeclaration md){
         //Get row for md
         //Get top-level assertions
@@ -164,12 +182,13 @@ public class ContractGenerator {
             return;
         } else {
             System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
-            return;
         }
     }
 
     private void createContract(Expression e, ArrayList<SimpleName> localVar, Contract c){
-        if(e instanceof MethodCallExpr){
+        if(ignorableExpressions.contains(e.getClass())){g
+            return;
+        } else if(e instanceof MethodCallExpr){
             SymbolReference sr = JavaParserFacade.get(combinedTypeSolver).solve((MethodCallExpr) e);
             if(sr.getCorrespondingDeclaration() instanceof JavaParserMethodDeclaration){
                 MethodDeclaration md = ((JavaParserMethodDeclaration) sr.getCorrespondingDeclaration()).getWrappedNode();
@@ -189,15 +208,15 @@ public class ContractGenerator {
             }
         } else if (e instanceof AssignExpr){
             AssignExpr ae = (AssignExpr) e;
+            //TODO: Add contract for assignment
             if(ae.getTarget() instanceof FieldAccessExpr){
                 c.setPure(false);
-                //TODO: Add contract for assignment
             } else if (ae.getTarget() instanceof NameExpr){
                 c.setPure(localVar.contains(((NameExpr) ae.getTarget()).getName()));
             } else if(ae.getTarget() instanceof ArrayAccessExpr){
                 ArrayAccessExpr aae = (ArrayAccessExpr) ae.getTarget();
                 createContract(aae.getIndex(), localVar, c);
-                c.setPure(localVar.contains(aae.getName()));
+                c.setPure(localVar.contains(((NameExpr)aae.getName()).getName()));
             } else {
                 System.out.println("Assignment target " +  ae.getTarget() + " of " + ae.getTarget().getClass() + " not covered!");
                 c.setPure(false);
@@ -218,30 +237,6 @@ public class ContractGenerator {
                 //TODO: add to contract
             }
             createContract(ue.getExpr(), localVar, c);
-        } else if (e instanceof FieldAccessExpr){
-            return;
-        } else if (e instanceof NameExpr) {
-            return;
-        } else if (e instanceof IntegerLiteralExpr){
-            return;
-        } else if (e instanceof DoubleLiteralExpr){
-            return;
-        } else if (e instanceof LongLiteralExpr){
-            return;
-        } else if (e instanceof StringLiteralExpr){
-            return;
-        } else if (e instanceof BooleanLiteralExpr) {
-            return;
-        } else if (e instanceof CharLiteralExpr){
-            return;
-        } else if (e instanceof NullLiteralExpr){
-            return;
-        } else if (e instanceof ClassExpr){
-            return;
-        } else if (e instanceof AnnotationExpr){
-            return;
-        } else if (e instanceof TypeExpr){
-            return;
         } else if (e instanceof EnclosedExpr){
             if(((EnclosedExpr) e).getInner().isPresent()) {
                 createContract(((EnclosedExpr) e).getInner().get(), localVar, c);
@@ -264,7 +259,7 @@ public class ContractGenerator {
             c.setPure(false);
         } else if(e instanceof ArrayCreationExpr){
             ArrayCreationExpr ace = (ArrayCreationExpr) e;
-            if(ace.getInitializer().isPresent()){
+            if(ace.getInitializer().isPresent()) {
                 createContract(ace.getInitializer().get(), localVar, c);
             }
         } else if(e instanceof  ArrayInitializerExpr){
@@ -281,10 +276,10 @@ public class ContractGenerator {
         } else if (e instanceof ConditionalExpr){
             ConditionalExpr ce = (ConditionalExpr) e;
             createContract(ce.getCondition(),localVar, c);
-            createContract(ce.getThenExpr(),localVar, c);
-            createContract(ce.getElseExpr(),localVar, c);
-        } else if(e instanceof InstanceOfExpr){
-           createContract(((InstanceOfExpr) e).getExpr(), localVar, c);
+            createContract(ce.getThenExpr(), localVar, c);
+            createContract(ce.getElseExpr(), localVar, c);
+        } else if(e instanceof InstanceOfExpr) {
+            createContract(((InstanceOfExpr) e).getExpr(), localVar, c);
         } else if (e instanceof LambdaExpr){
             System.out.println("LAMDA EXPRESSIONS ARE NOT SUPPORTED");
             c.setPure(false);
