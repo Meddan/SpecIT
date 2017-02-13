@@ -43,8 +43,14 @@ public class Behavior {
      * Creates a ne behavior. Sets isExcpetional to false by default.
      * Use setExceptional() to change.
      */
-    public Behavior(){
+    public Behavior(Behavior parent){
         isExceptional = false;
+        this.parent = parent;
+        if(parent != null){
+            this.level = parent.getLevel()+1;
+        } else {
+            this.level = 0;
+        }
     }
 
     public void setExceptional(boolean isExceptional){
@@ -244,10 +250,6 @@ public class Behavior {
         return parent;
     }
 
-    public void setParent(Behavior parent) {
-        this.parent = parent;
-    }
-
     public LinkedList<Behavior> getChildren() {
         return children;
     }
@@ -262,9 +264,5 @@ public class Behavior {
 
     public int getLevel() {
         return level;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
     }
 }

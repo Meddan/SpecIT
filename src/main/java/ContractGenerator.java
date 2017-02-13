@@ -96,7 +96,6 @@ public class ContractGenerator {
             params.add(p.getName());
         }
         Contract c = new Contract(md);
-        c.addBehavior();
         createContract(stmtList, params, c);
         return c;
 
@@ -139,7 +138,8 @@ public class ContractGenerator {
             IfStmt sif = (IfStmt) s;
 
             //Create new behavior for if-statement
-            c.addBehavior();
+            //c.addBehavior();
+            //TODO: Make split
 
             // Set purity
             createContract(sif.getCondition(), localVar, c);

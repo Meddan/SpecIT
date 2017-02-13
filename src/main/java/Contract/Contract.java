@@ -37,6 +37,8 @@ public class Contract {
     public Contract(MethodDeclaration md){
         pure = true;
         this.methodDeclaration = md;
+        currentBehavior = new Behavior(null);
+        behaviors.add(currentBehavior);
     }
 
     public boolean isPure() {
@@ -48,15 +50,6 @@ public class Contract {
     }
     public MethodDeclaration getMethodDeclaration() {
         return methodDeclaration;
-    }
-
-    /**
-     * Add a new behavior to this contract and sets the current behavior to
-     * be the newly created one.
-     */
-    public void addBehavior(){
-        currentBehavior = new Behavior();
-        behaviors.add(currentBehavior);
     }
 
     public void addPreCon(Expression preCon){
@@ -80,7 +73,7 @@ public class Contract {
     }
 
     public void addException(Type t, Expression e){
-        currentBehavior.addException(t,e);
+        currentBehavior.addException(t, e);
     }
 
     public void setExceptional(boolean isExceptional){
@@ -115,12 +108,8 @@ public class Contract {
 
     public void splitBehavior(Expression condition){
         // Create the two behavior that will be the split
-        Behavior splitA = new Behavior();
-        Behavior splitB = new Behavior();
-
-        // Set current behavior as parent
-        splitA.setParent(currentBehavior);
-        splitB.setParent(currentBehavior);
+        Behavior splitA = new Behavior(currentBehavior);
+        Behavior splitB = new Behavior(currentBehavior);
 
         // Set new behaviors as children
         currentBehavior.addChild(splitA);
@@ -155,7 +144,6 @@ public class Contract {
             b.addAssignable(p.getAssignables());
             b.addExceptionsFromParent(p.getExceptions());
             b.setExceptional(p.getIsExceptional());
-            b.setLevel(p.getLevel() + 1);
             p = p.getParent();
         }
     }
