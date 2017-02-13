@@ -20,6 +20,20 @@ public class Contract {
 
     Behavior currentBehavior;
 
+    public Contract(){
+        pure = true;
+    }
+
+    public boolean isPure() {
+        return pure;
+    }
+
+    public void setPure(boolean pure) {
+        this.pure = this.pure && pure;
+    }
+
+    private boolean pure;
+
     /**
      * Add a new behavior to this contract and sets the current behavior to
      * be the newly created one.
