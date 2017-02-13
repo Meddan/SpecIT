@@ -1,5 +1,6 @@
 package Contract;
 
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.type.Type;
@@ -18,10 +19,16 @@ public class Contract {
 
     LinkedList<Behavior> behaviors = new LinkedList<Behavior>();
 
+    public MethodDeclaration getMethodDeclaration() {
+        return methodDeclaration;
+    }
+
+    MethodDeclaration methodDeclaration;
     Behavior currentBehavior;
 
-    public Contract(){
+    public Contract(MethodDeclaration md){
         pure = true;
+        this.methodDeclaration = md;
     }
 
     public boolean isPure() {

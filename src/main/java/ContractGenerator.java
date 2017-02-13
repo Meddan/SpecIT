@@ -73,12 +73,11 @@ public class ContractGenerator {
         //Get row for md
         //Get top-level assertions
         NodeList<Statement> stmtList =  md.getBody().get().getStmts();
-        Contract c = new Contract();
         ArrayList<SimpleName> params = new ArrayList<>();
         for(Parameter p : md.getParameters()){
             params.add(p.getName());
         }
-        return createContract(stmtList, params, new Contract());
+        return createContract(stmtList, params, new Contract(md));
 
     }
     /* Takes a list of Strings
@@ -110,7 +109,8 @@ public class ContractGenerator {
     }
 
 
-    private boolean endAssrt(NodeList<Statement> stmtList, Statement s) {
+    private boolean endAssrt(MethodDeclaration md, Statement s) {
+        NodeList<Statement> stmtList = md.getBody().get().getStmts();
         int index = stmtList.indexOf(s);
         for(int i = index ; i < stmtList.size() ; i++){
             if(stmtList.get(i) instanceof ReturnStmt){
@@ -122,7 +122,8 @@ public class ContractGenerator {
         return true;
     }
 
-    private boolean startAssert(NodeList<Statement> stmtList, Statement s){
+    private boolean startAssert(MethodDeclaration md, Statement s){
+        NodeList<Statement> stmtList = md.getBody().get().getStmts();
         int index = stmtList.indexOf(s);
         for(int i = 0 ; i < index ; i++){
             if(!(stmtList.get(i) instanceof AssertStmt)){
@@ -164,7 +165,15 @@ public class ContractGenerator {
             return c;
         } else if (s instanceof AssertStmt){
             AssertStmt as = (AssertStmt) s;
-            //TODO: Assert
+            //TODO: Should not have to add a new behavior, should only change current one
+            if(startAssert(c.getMethodDeclaration(), as)){
+                c.addBehavior();
+                c.addPreCon(as.getCheck());
+            }
+            if(endAssrt(c.getMethodDeclaration(), as)){
+                c.addBehavior();
+                c.addPostCon(as.getCheck(), false);
+            }
             c.setPure(pureExpression(as.getCheck(), localVar));
             return c;
         } else if (s instanceof BreakStmt){
@@ -311,8 +320,8 @@ public class ContractGenerator {
         } else if(e instanceof InstanceOfExpr){
             return pureExpression(((InstanceOfExpr) e).getExpr(), localVar);
         } else if (e instanceof LambdaExpr){
-            LambdaExpr le = (LambdaExpr) e;
-            return createContract(le.getBody(), localVar, new Contract()).isPure();
+            System.out.println("LAMDA EXPRESSIONS ARE NOT SUPPORTED");
+            return false;
         } else if (e instanceof SuperExpr){
             //TODO: Need to have entire package in scope
             //TODO: Also implement this
