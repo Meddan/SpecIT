@@ -17,14 +17,15 @@ import java.util.LinkedList;
  */
 public class Contract {
 
-    LinkedList<Behavior> behaviors = new LinkedList<Behavior>();
+    private LinkedList<Behavior> behaviors = new LinkedList<Behavior>();
 
     public MethodDeclaration getMethodDeclaration() {
         return methodDeclaration;
     }
 
     MethodDeclaration methodDeclaration;
-    Behavior currentBehavior;
+
+    private Behavior currentBehavior;
 
     public Contract(MethodDeclaration md){
         pure = true;
