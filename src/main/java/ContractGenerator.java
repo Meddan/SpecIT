@@ -145,8 +145,18 @@ public class ContractGenerator {
            return c;
         } else if (s instanceof IfStmt){
             IfStmt sif = (IfStmt) s;
-            boolean pure = true;
+
+            //Create new behavior for if-statement
+            c.addBehavior();
+
+            // Set purity
             c.setPure(pureExpression(sif.getCondition(), localVar));
+
+            c.addPreCon(sif.getCondition());
+            // Create contract from if-body
+            createContract(sif.getThenStmt(), localVar, c);
+
+            System.out.println(sif.getElseStmt());
 
             //TODO: Evaluate body of if
             return c;
