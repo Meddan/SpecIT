@@ -186,7 +186,7 @@ public class ContractGenerator {
     }
 
     private void createContract(Expression e, ArrayList<SimpleName> localVar, Contract c){
-        if(ignorableExpressions.contains(e.getClass())){g
+        if(ignorableExpressions.contains(e.getClass())){
             return;
         } else if(e instanceof MethodCallExpr){
             SymbolReference sr = JavaParserFacade.get(combinedTypeSolver).solve((MethodCallExpr) e);
