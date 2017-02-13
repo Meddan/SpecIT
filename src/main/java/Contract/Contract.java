@@ -4,6 +4,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.type.Type;
+import sun.awt.image.ImageWatched;
 
 import java.util.LinkedList;
 
@@ -17,9 +18,17 @@ import java.util.LinkedList;
  */
 public class Contract {
 
+    private LinkedList<Behavior> closedBehaviors = new LinkedList<Behavior>();
+
     private LinkedList<Behavior> behaviors = new LinkedList<Behavior>();
 
-    MethodDeclaration methodDeclaration;
+    /**
+     * A list of active behaviors. The last element of this list should
+     * be the same as currentBehavior
+     */
+    private LinkedList<Behavior> activeBehaviors = new LinkedList<Behavior>();
+
+    private MethodDeclaration methodDeclaration;
 
     private Behavior currentBehavior;
 
@@ -84,6 +93,71 @@ public class Contract {
 
     public LinkedList<Behavior> getBehaviors(){
         return behaviors;
+    }
+
+    /**
+     * Closes the currently active behavior.
+     *
+     * The next active behavior will be the that is next in the list of active
+     * behaviors.
+     * @return the newly active behavior
+     */
+    public Behavior closeBehavior(){
+        if(activeBehaviors.getLast().equals(currentBehavior)){
+            activeBehaviors.remove(activeBehaviors.getLast());
+            closedBehaviors.add(currentBehavior);
+            currentBehavior = activeBehaviors.getLast();
+            return currentBehavior;
+        } else {
+            throw new Error("Mismatch between activeBehaviors and currentBehavior");
+        }
+    }
+
+    public void splitBehavior(Expression condition){
+        // Create the two behavior that will be the split
+        Behavior splitA = new Behavior();
+        Behavior splitB = new Behavior();
+
+        // Set current behavior as parent
+        splitA.setParent(currentBehavior);
+        splitB.setParent(currentBehavior);
+
+        // Set new behaviors as children
+        currentBehavior.addChild(splitA);
+        currentBehavior.addChild(splitB);
+
+        // Add condition as pre-condition
+        splitA.addPreCon(condition);
+        splitB.addPreCon(condition);
+
+        // Add to active behaviors
+        activeBehaviors.add(splitB);
+        activeBehaviors.add(splitA);
+
+        // Add to list of all behaviors
+        behaviors.add(splitA);
+        behaviors.add(splitB);
+
+        // Extract contract-info from parents
+        extractParentalBehavior(splitA);
+        extractParentalBehavior(splitB);
+
+        // Set splitA as currentBehavior
+        currentBehavior = splitA;
+    }
+
+    private void extractParentalBehavior(Behavior b){
+        Behavior p = b.getParent();
+
+        while(p != null){
+            b.addPreConFromParent(p.getPreCons());
+            b.addPostConFromParent(p.getPostCons());
+            b.addAssignable(p.getAssignables());
+            b.addExceptionsFromParent(p.getExceptions());
+            b.setExceptional(p.getIsExceptional());
+            b.setLevel(p.getLevel() + 1);
+            p = p.getParent();
+        }
     }
 
     public String toString(){
