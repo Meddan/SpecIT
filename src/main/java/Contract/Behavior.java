@@ -17,6 +17,9 @@ import java.util.LinkedList;
  */
 public class Behavior {
 
+    // The level this node has in the behavior tree
+    private int level;
+
     // Flag for showing whether behavior is exceptional or not
     private boolean isExceptional;
 
@@ -255,5 +258,13 @@ public class Behavior {
 
     public void addChild(Behavior child){
         this.children.add(child);
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
     }
 }
