@@ -158,14 +158,13 @@ public class ContractGenerator {
             // Create contract from if-body
             createContract(sif.getThenStmt(), localVar, c);
 
-            System.out.println(sif.getElseStmt());
-
             //TODO: Evaluate body of if
             return c;
         } else if (s instanceof ReturnStmt){
             ReturnStmt rs = (ReturnStmt) s;
             if(rs.getExpr().isPresent()){
                 c.setPure(pureExpression(rs.getExpr().get(), localVar));
+                c.addPostCon(rs.getExpr().get(), true);
             }
             return c;
         } else if(s instanceof BlockStmt){
