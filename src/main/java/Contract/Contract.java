@@ -19,13 +19,11 @@ public class Contract {
 
     private LinkedList<Behavior> behaviors = new LinkedList<Behavior>();
 
-    public MethodDeclaration getMethodDeclaration() {
-        return methodDeclaration;
-    }
-
     MethodDeclaration methodDeclaration;
 
     private Behavior currentBehavior;
+
+    private boolean pure;
 
     public Contract(MethodDeclaration md){
         pure = true;
@@ -39,8 +37,9 @@ public class Contract {
     public void setPure(boolean pure) {
         this.pure = this.pure && pure;
     }
-
-    private boolean pure;
+    public MethodDeclaration getMethodDeclaration() {
+        return methodDeclaration;
+    }
 
     /**
      * Add a new behavior to this contract and sets the current behavior to
