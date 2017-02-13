@@ -5,10 +5,10 @@ import com.github.javaparser.ast.expr.Expression;
 /**
  * Created by meddan on 10/02/17.
  */
-public class PreCondtion {
+public class PreCondition {
     private Expression expression;
 
-    public PreCondtion(Expression e){
+    public PreCondition(Expression e){
         expression = e;
     }
 
