@@ -232,6 +232,11 @@ public class ContractGenerator {
             if(ae.getTarget() instanceof FieldAccessExpr){
                 c.setPure(false);
             } else if (ae.getTarget() instanceof NameExpr){
+                NameExpr ne = (NameExpr) ae.getTarget();
+
+                c.addAssignable(ne.getName());
+                c.addPostCon(ae, false);
+
                 c.setPure(localVar.contains(((NameExpr) ae.getTarget()).getName()));
             } else if(ae.getTarget() instanceof ArrayAccessExpr){
                 ArrayAccessExpr aae = (ArrayAccessExpr) ae.getTarget();
