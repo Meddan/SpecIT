@@ -60,10 +60,10 @@ public class Behavior {
      * @param original the behavior from which to extract
      */
     private void extractInformation(Behavior original){
-        this.preCons = original.getPreCons();
-        this.postCons = original.getPostCons();
-        this.assignables = original.getAssignables();
-        this.exceptions = original.getExceptions();
+        this.preCons = (LinkedList<PreCondition>) original.getPreCons().clone();
+        this.postCons = (LinkedList<PostCondition>) original.getPostCons().clone();
+        this.assignables = (LinkedList<SimpleName>) original.getAssignables().clone();
+        this.exceptions = (LinkedList<ExceptionCondition>) original.getExceptions().clone();
         this.isExceptional = original.getIsExceptional();
     }
 
@@ -72,6 +72,7 @@ public class Behavior {
     }
 
     public void addPreCon(Expression preCon){
+        System.out.println("Adding precon");
         preCons.add(new PreCondition(preCon));
     }
 

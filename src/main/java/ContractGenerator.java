@@ -136,19 +136,31 @@ public class ContractGenerator {
            createContract(((ExpressionStmt) s).getExpression(), localVar, c);
         } else if (s instanceof IfStmt){
             IfStmt sif = (IfStmt) s;
+            Behavior b = c.getCurrentBehavior();
+            Behavior a = new Behavior(b);
+            b.addChild(a);
+            c.addBehavior(a);
+            c.setCurrentBehavior(a);
+            a.addPreCon(sif.getCondition());
+            createContract(sif.getThenStmt(), (ArrayList<SimpleName>) localVar.clone(), c);
 
-            //Create new behavior for if-statement
-            //c.addBehavior();
-            //TODO: Make split
+            if(sif.getElseStmt().isPresent()){
+                System.out.println("Else is present");
+                Behavior d = new Behavior(b);
+                b.addChild(d);
+                c.addBehavior(d);
+                //TODO: d.addPreCon(); need to negate sif.getCondition()
+                c.setCurrentBehavior(d);
+                createContract(sif.getElseStmt().get(), (ArrayList<SimpleName>) localVar.clone(), c);
+            } else {
+                Behavior e = new Behavior(b);
+                c.addBehavior(e);
+                //TODO: e.addPreCon(); need to negate sif.getCondition()
+                b.addChild(e);
+            }
 
-            // Set purity
-            createContract(sif.getCondition(), localVar, c);
+            c.setCurrentBehavior(b);
 
-            c.addPreCon(sif.getCondition());
-            // Create contract from if-body
-            createContract(sif.getThenStmt(), localVar, c);
-
-            //TODO: Evaluate body of if
         } else if (s instanceof ReturnStmt){
             ReturnStmt rs = (ReturnStmt) s;
             if(rs.getExpr().isPresent()){
@@ -295,7 +307,7 @@ public class ContractGenerator {
     }
 
     public static void main(String args[]){
-        File projectDir = new File("src/main/java/Examples");
+        File projectDir = new File("src/main/java/Examples/SingleExample");
         testClasses(projectDir);
     }
     public static void testClasses(File projectDir) {

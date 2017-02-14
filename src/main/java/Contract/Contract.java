@@ -83,9 +83,15 @@ public class Contract {
     public Behavior getCurrentBehavior(){
         return currentBehavior;
     }
+    public void setCurrentBehavior(Behavior b){
+        this.currentBehavior = b;
+    }
 
     public LinkedList<Behavior> getBehaviors(){
         return behaviors;
+    }
+    public void addBehavior(Behavior b){
+        behaviors.add(b);
     }
 
     /**
