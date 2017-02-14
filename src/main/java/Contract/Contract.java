@@ -17,16 +17,12 @@ import java.util.LinkedList;
     a complete contract.
  */
 public class Contract {
-
-    private LinkedList<Behavior> closedBehaviors = new LinkedList<Behavior>();
-
     private LinkedList<Behavior> behaviors = new LinkedList<Behavior>();
 
     /**
      * A list of active behaviors. The last element of this list should
      * be the same as currentBehavior
      */
-    private LinkedList<Behavior> activeBehaviors = new LinkedList<Behavior>();
 
     private MethodDeclaration methodDeclaration;
 
@@ -64,6 +60,19 @@ public class Contract {
         currentBehavior.addPostCon(postCon, isReturn);
     }
 
+    public void addToAllActive(Expression postCon, boolean isReturn){
+        for(Behavior b : behaviors){
+            if(!b.isClosed()){
+                b.addPostCon(postCon, isReturn);
+            }
+        }
+    }
+    public void closeAllActive(){
+        for(Behavior b : behaviors){
+            b.setClosed(true);
+        }
+    }
+
     public void addAssignable(SimpleName assignable){
         currentBehavior.addAssignable(assignable);
     }
@@ -94,23 +103,6 @@ public class Contract {
         behaviors.add(b);
     }
 
-    /**
-     * Closes the currently active behavior.
-     *
-     * The next active behavior will be the that is next in the list of active
-     * behaviors.
-     * @return the newly active behavior
-     */
-    public Behavior closeBehavior(){
-        if(activeBehaviors.getLast().equals(currentBehavior)){
-            activeBehaviors.remove(activeBehaviors.getLast());
-            closedBehaviors.add(currentBehavior);
-            currentBehavior = activeBehaviors.getLast();
-            return currentBehavior;
-        } else {
-            throw new Error("Mismatch between activeBehaviors and currentBehavior");
-        }
-    }
 
     /**
      * Add properties of closed behaviors to current behavior when there is an else.
@@ -135,9 +127,6 @@ public class Contract {
         splitB.addPreCon(condition); // TODO : This condition should be negated
 
 
-        // Add to active behaviors
-        activeBehaviors.add(splitB);
-        activeBehaviors.add(splitA);
 
         // Add to list of all behaviors
         behaviors.add(splitA);
