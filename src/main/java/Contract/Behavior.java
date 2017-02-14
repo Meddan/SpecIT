@@ -148,6 +148,13 @@ public class Behavior {
                 && exceptions.equals(b.getExceptions());
     }
 
+    public boolean isEmpty(){
+        return preCons.isEmpty()
+                && postCons.isEmpty()
+                && assignables.isEmpty()
+                && exceptions.isEmpty();
+    }
+
     private String createPreCons(){
         StringBuilder sb = new StringBuilder();
         // Write out preconditions
