@@ -48,9 +48,23 @@ public class Behavior {
         this.parent = parent;
         if(parent != null){
             this.level = parent.getLevel()+1;
+            extractInformation(parent);
         } else {
             this.level = 0;
         }
+    }
+
+    /**
+     * Extract all info from given behavior except info regarding
+     * the tree (such as level, children etc)
+     * @param original the behavior from which to extract
+     */
+    private void extractInformation(Behavior original){
+        this.preCons = original.getPreCons();
+        this.postCons = original.getPostCons();
+        this.assignables = original.getAssignables();
+        this.exceptions = original.getExceptions();
+        this.isExceptional = original.getIsExceptional();
     }
 
     public void setExceptional(boolean isExceptional){
