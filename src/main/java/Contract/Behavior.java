@@ -37,6 +37,7 @@ public class Behavior {
     private LinkedList<ExceptionCondition> exceptions = new LinkedList<ExceptionCondition>();
 
     private Behavior parent;
+    private boolean closed = false;
 
     private LinkedList<Behavior> children = new LinkedList<Behavior>();
     /**
@@ -72,7 +73,6 @@ public class Behavior {
     }
 
     public void addPreCon(Expression preCon){
-        System.out.println("Adding precon");
         preCons.add(new PreCondition(preCon));
     }
 
@@ -286,5 +286,13 @@ public class Behavior {
 
     public int getLevel() {
         return level;
+    }
+
+    public boolean isClosed() {
+        return closed;
+    }
+
+    public void setClosed(boolean closed) {
+        this.closed = closed;
     }
 }
