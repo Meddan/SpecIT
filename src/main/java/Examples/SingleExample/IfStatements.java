@@ -4,10 +4,18 @@ package Examples.SingleExample;
  * Created by dover on 2017-02-03.
  */
 public class IfStatements {
-    public boolean simplestCase(int n){
-        if(n == 1)
-            return true;
-        else
-            return false;
+    int a;
+    public String simplestCase(int n){
+        boolean b = true;
+        boolean c = false;
+        if(!b) {
+            if(c){
+                a = 1;
+            }
+            a = 2;
+        } else {
+            a = 3;
+        }
+        return "hello";
     }
 }

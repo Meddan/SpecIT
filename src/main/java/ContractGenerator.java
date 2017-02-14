@@ -137,6 +137,7 @@ public class ContractGenerator {
         } else if (s instanceof IfStmt){
             IfStmt sif = (IfStmt) s;
             Behavior b = c.getCurrentBehavior();
+            b.setClosed(true);
             Behavior a = new Behavior(b);
             b.addChild(a);
             c.addBehavior(a);
@@ -145,17 +146,23 @@ public class ContractGenerator {
             createContract(sif.getThenStmt(), (ArrayList<SimpleName>) localVar.clone(), c);
 
             if(sif.getElseStmt().isPresent()){
-                System.out.println("Else is present");
                 Behavior d = new Behavior(b);
                 b.addChild(d);
                 c.addBehavior(d);
-                //TODO: d.addPreCon(); need to negate sif.getCondition()
+                //TODO: d.addPreCon(); need to fix double negation
+                d.addPreCon(new UnaryExpr(sif.getCondition(), UnaryExpr.Operator.not));
                 c.setCurrentBehavior(d);
                 createContract(sif.getElseStmt().get(), (ArrayList<SimpleName>) localVar.clone(), c);
             } else {
                 Behavior e = new Behavior(b);
+                e.addPreCon(new UnaryExpr(sif.getCondition(), UnaryExpr.Operator.not));
                 c.addBehavior(e);
-                //TODO: e.addPreCon(); need to negate sif.getCondition()
+                System.out.println("ADDING E");
+                System.out.println(e.getPreCons().size());
+                for(PreCondition p : e.getPreCons()){
+                    System.out.println(p.toString());
+                }
+                //TODO: e.addPreCon(); need to fix double negation
                 b.addChild(e);
             }
 
@@ -164,8 +171,9 @@ public class ContractGenerator {
         } else if (s instanceof ReturnStmt){
             ReturnStmt rs = (ReturnStmt) s;
             if(rs.getExpr().isPresent()){
-                c.addPostCon(rs.getExpr().get(), true);
                 createContract(rs.getExpr().get(), localVar, c);
+                c.addToAllActive(rs.getExpr().get(), true);
+                c.closeAllActive();
             }
         } else if(s instanceof BlockStmt){
             BlockStmt bs = (BlockStmt) s;
