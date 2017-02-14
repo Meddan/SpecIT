@@ -106,6 +106,15 @@ public class Contract {
         }
     }
 
+    /**
+     * Add properties of closed behaviors to current behavior when there is an else.
+     *
+     * Throws away current behavior
+     */
+    public void makeMethodNamesGreatAgain(){
+
+    }
+
     public void splitBehavior(Expression condition){
         // Create the two behavior that will be the split
         Behavior splitA = new Behavior(currentBehavior);
@@ -117,7 +126,8 @@ public class Contract {
 
         // Add condition as pre-condition
         splitA.addPreCon(condition);
-        splitB.addPreCon(condition);
+        splitB.addPreCon(condition); // TODO : This condition should be negated
+
 
         // Add to active behaviors
         activeBehaviors.add(splitB);
@@ -155,9 +165,11 @@ public class Contract {
             sb.append("/*@\n");
 
             for (Behavior b : behaviors) {
-                sb.append(b.toString());
-                if (!behaviors.getLast().equals(b)) {
-                    sb.append("also\n");
+                if(!b.isEmpty()) {
+                    sb.append(b.toString());
+                    if (!behaviors.getLast().equals(b)) {
+                        sb.append("also\n");
+                    }
                 }
             }
 
