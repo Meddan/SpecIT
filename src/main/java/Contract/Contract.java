@@ -27,6 +27,7 @@ public class Contract {
     private MethodDeclaration methodDeclaration;
 
     private Behavior currentBehavior;
+    private final Behavior initialBehavior;
 
     private boolean pure;
 
@@ -34,6 +35,7 @@ public class Contract {
         pure = true;
         this.methodDeclaration = md;
         currentBehavior = new Behavior(null);
+        initialBehavior = currentBehavior;
         behaviors.add(currentBehavior);
     }
 
@@ -152,6 +154,20 @@ public class Contract {
             p = p.getParent();
         }
     }
+    public LinkedList<Behavior> getLeafs(){
+        return getLeafs(initialBehavior);
+    }
+    private LinkedList<Behavior> getLeafs(Behavior b){
+        LinkedList<Behavior> list = new LinkedList<Behavior>();
+        if(b.getChildren().isEmpty()){
+            list.add(b);
+        } else {
+            for (Behavior c : b.getChildren()) {
+                list.addAll(getLeafs(c));
+            }
+        }
+        return list;
+    }
 
     public String toString(){
         StringBuilder sb = new StringBuilder();
@@ -159,7 +175,7 @@ public class Contract {
         if(behaviors.isEmpty() == false) {
             sb.append("/*@\n");
 
-            for (Behavior b : behaviors) {
+            for (Behavior b : getLeafs()) {
                 if(!b.isEmpty()) {
                     sb.append(b.toString());
                     if (!behaviors.getLast().equals(b)) {
