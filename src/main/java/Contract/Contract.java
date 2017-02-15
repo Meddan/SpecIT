@@ -60,7 +60,7 @@ public class Contract {
     }
 
     public void addPostCon(Expression postCon, boolean isReturn){
-        for(Behavior b : getLeafs()){
+        for(Behavior b : getLeafs(currentBehavior)){
             b.addPostCon(postCon, isReturn);
         }
     }
