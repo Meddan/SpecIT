@@ -155,10 +155,17 @@ public class ContractGenerator {
                 c.closeAllActive();
             }
         } else {
+            //We are doing further modifications to our code thus we cannot guarantee our postconditions will hold.
             c.clearPostAssert();
             if (s instanceof ExpressionStmt) {
                 createContract(((ExpressionStmt) s).getExpression(), localVar, c);
             } else if (s instanceof IfStmt) {
+                /**
+                 * When evaluating a if-statement we split the current behavior in 2, one that enters the then-block and
+                 * one that enters the else-block (if present). When evaluating the blocks the new behaviors created are
+                 * set as the current behavior for their respective block. Once the if-statement is done the current
+                 * behavior is set to the initial one.
+                 */
                 IfStmt sif = (IfStmt) s;
                 Behavior b = c.getCurrentBehavior();
                 b.setClosed(true);
