@@ -314,7 +314,7 @@ public class ContractGenerator {
         } else if (e instanceof SuperExpr){
             //TODO: Need to have entire package in scope
             //TODO: Also implement this
-            System.out.println("SUPER EXPRESSION");
+            System.out.println("Super expression is not covered");
             c.setPure(false);
         } else {
             System.out.println("Expression " + e + " of " + e.getClass() + " is not covered");
