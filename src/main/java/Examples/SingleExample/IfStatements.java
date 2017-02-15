@@ -15,7 +15,10 @@ public class IfStatements {
             a = 2;
         } else {
             a = 3;
+            assert false;
+            return "hi";
         }
+        assert (true);
         return "hello";
     }
 }

@@ -104,6 +104,10 @@ public class ContractGenerator {
     private boolean endAssrt(MethodDeclaration md, Statement s) {
         NodeList<Statement> stmtList = md.getBody().get().getStmts();
         int index = stmtList.indexOf(s);
+        if(index < 0){
+            System.out.println("Assert statement not in method declaration block");
+            return false;
+        }
         for(int i = index ; i < stmtList.size() ; i++){
             if(stmtList.get(i) instanceof ReturnStmt){
                 return true;
@@ -132,42 +136,17 @@ public class ContractGenerator {
         return c;
     }
     public void createContract(Statement s, ArrayList<SimpleName> localVar, Contract c){
-        if(s instanceof ExpressionStmt) {
-           createContract(((ExpressionStmt) s).getExpression(), localVar, c);
-        } else if (s instanceof IfStmt){
-            IfStmt sif = (IfStmt) s;
-            Behavior b = c.getCurrentBehavior();
-            b.setClosed(true);
-            Behavior a = new Behavior(b);
-            b.addChild(a);
-            c.addBehavior(a);
-            c.setCurrentBehavior(a);
-            a.addPreCon(sif.getCondition());
-            createContract(sif.getThenStmt(), (ArrayList<SimpleName>) localVar.clone(), c);
-
-            if(sif.getElseStmt().isPresent()){
-                Behavior d = new Behavior(b);
-                b.addChild(d);
-                c.addBehavior(d);
-                //TODO: d.addPreCon(); need to fix double negation
-                d.addPreCon(new UnaryExpr(sif.getCondition(), UnaryExpr.Operator.not));
-                c.setCurrentBehavior(d);
-                createContract(sif.getElseStmt().get(), (ArrayList<SimpleName>) localVar.clone(), c);
-            } else {
-                Behavior e = new Behavior(b);
-                e.addPreCon(new UnaryExpr(sif.getCondition(), UnaryExpr.Operator.not));
-                c.addBehavior(e);
-                System.out.println("ADDING E");
-                System.out.println(e.getPreCons().size());
-                for(PreCondition p : e.getPreCons()){
-                    System.out.println(p.toString());
-                }
-                //TODO: e.addPreCon(); need to fix double negation
-                b.addChild(e);
+        /* We first identify if the current statement is assert or return in which case we want to make sure our
+        assertions (ensures) are handled correctly.
+        */
+        if (s instanceof AssertStmt){
+            AssertStmt as = (AssertStmt) s;
+            //TODO: Should not have to add a new behavior, should only change current one
+            if(startAssert(c.getMethodDeclaration(), as)){
+                c.addPreCon(as.getCheck());
             }
-
-            c.setCurrentBehavior(b);
-
+            c.addPostAssert(as);
+            createContract(as.getCheck(), localVar, c);
         } else if (s instanceof ReturnStmt){
             ReturnStmt rs = (ReturnStmt) s;
             if(rs.getExpr().isPresent()){
@@ -175,33 +154,57 @@ public class ContractGenerator {
                 c.addToAllActive(rs.getExpr().get(), true);
                 c.closeAllActive();
             }
-        } else if(s instanceof BlockStmt){
-            BlockStmt bs = (BlockStmt) s;
-            createContract(((BlockStmt) s).getStmts(), (ArrayList<SimpleName>) localVar.clone(), c);
-        } else if (s instanceof ThrowStmt){
-            //TODO: Add throw behavior
-        } else if (s instanceof AssertStmt){
-            AssertStmt as = (AssertStmt) s;
-            //TODO: Should not have to add a new behavior, should only change current one
-            if(startAssert(c.getMethodDeclaration(), as)){
-                c.addPreCon(as.getCheck());
-            }
-            if(endAssrt(c.getMethodDeclaration(), as)){
-                c.addPostCon(as.getCheck(), false);
-            }
-            createContract(as.getCheck(), localVar, c);
-        } else if (s instanceof BreakStmt){
-            return;
-        } else if(s instanceof ContinueStmt){
-            return;
-        } else if (s instanceof DoStmt){
-            DoStmt ds = (DoStmt) s;
-            createContract(ds.getCondition(), localVar, c);
-            createContract(ds.getBody(), (ArrayList<SimpleName>) localVar.clone(), c);
-        } else if(s instanceof EmptyStmt){
-            return;
         } else {
-            System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
+            c.clearPostAssert();
+            if (s instanceof ExpressionStmt) {
+                createContract(((ExpressionStmt) s).getExpression(), localVar, c);
+            } else if (s instanceof IfStmt) {
+                IfStmt sif = (IfStmt) s;
+                Behavior b = c.getCurrentBehavior();
+                b.setClosed(true);
+                Behavior a = new Behavior(b);
+                b.addChild(a);
+                c.addBehavior(a);
+                c.setCurrentBehavior(a);
+                a.addPreCon(sif.getCondition());
+                createContract(sif.getThenStmt(), (ArrayList<SimpleName>) localVar.clone(), c);
+
+                if (sif.getElseStmt().isPresent()) {
+                    Behavior d = new Behavior(b);
+                    b.addChild(d);
+                    c.addBehavior(d);
+                    //TODO: d.addPreCon(); need to fix double negation
+                    d.addPreCon(new UnaryExpr(sif.getCondition(), UnaryExpr.Operator.not));
+                    c.setCurrentBehavior(d);
+                    createContract(sif.getElseStmt().get(), (ArrayList<SimpleName>) localVar.clone(), c);
+                } else {
+                    Behavior e = new Behavior(b);
+                    e.addPreCon(new UnaryExpr(sif.getCondition(), UnaryExpr.Operator.not));
+                    c.addBehavior(e);
+                    //TODO: e.addPreCon(); need to fix double negation
+                    b.addChild(e);
+                }
+
+                c.setCurrentBehavior(b);
+
+            } else if (s instanceof BlockStmt) {
+                BlockStmt bs = (BlockStmt) s;
+                createContract(((BlockStmt) s).getStmts(), (ArrayList<SimpleName>) localVar.clone(), c);
+            } else if (s instanceof ThrowStmt) {
+                //TODO: Add throw behavior
+            } else if (s instanceof BreakStmt) {
+                return;
+            } else if (s instanceof ContinueStmt) {
+                return;
+            } else if (s instanceof DoStmt) {
+                DoStmt ds = (DoStmt) s;
+                createContract(ds.getCondition(), localVar, c);
+                createContract(ds.getBody(), (ArrayList<SimpleName>) localVar.clone(), c);
+            } else if (s instanceof EmptyStmt) {
+                return;
+            } else {
+                System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
+            }
         }
     }
 
