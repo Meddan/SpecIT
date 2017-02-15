@@ -141,19 +141,23 @@ public class ContractGenerator {
         */
         if (s instanceof AssertStmt){
             AssertStmt as = (AssertStmt) s;
-            //TODO: Should not have to add a new behavior, should only change current one
+            //An assert-statement can be seen as a precondition if it appears at the start of a funciton
             if(startAssert(c.getMethodDeclaration(), as)){
                 c.addPreCon(as.getCheck());
             }
+            //Add the assertion as a potential postcondition
             c.addPostAssert(as);
+            //Create contract for the expression in the assertion
             createContract(as.getCheck(), localVar, c);
         } else if (s instanceof ReturnStmt){
             ReturnStmt rs = (ReturnStmt) s;
             if(rs.getExpr().isPresent()){
+                //Create contracts for the return expression and add the return statement to the contract
                 createContract(rs.getExpr().get(), localVar, c);
                 c.addPostCon(rs.getExpr().get(), true);
-                c.closeAllActive();
             }
+            //Path of execution ends and we close all behaviors on this path
+            c.closeAllActive();
         } else {
             //We are doing further modifications to our code thus we cannot guarantee our postconditions will hold.
             c.clearPostAssert();
