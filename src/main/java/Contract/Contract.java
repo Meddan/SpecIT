@@ -96,7 +96,9 @@ public class Contract {
     }
 
     public void setExceptional(boolean isExceptional){
-        currentBehavior.setExceptional(isExceptional);
+        for(Behavior b : getLeafs(currentBehavior)) {
+            currentBehavior.setExceptional(isExceptional);
+        }
     }
 
     public Behavior getCurrentBehavior(){
