@@ -139,7 +139,7 @@ public class Contract {
         for (Behavior b : getLeafs(initialBehavior)) {
             if (!b.isEmpty()) {
                 sb.append(b.toString());
-                sb.append("also\n");
+                sb.append("\nalso\n\n");
             }
         }
         return sb.substring(0, sb.lastIndexOf("also\n")) + "@*/";
