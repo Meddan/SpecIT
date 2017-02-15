@@ -3,6 +3,7 @@ package Contract;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.stmt.AssertStmt;
 import com.github.javaparser.ast.type.Type;
 import sun.awt.image.ImageWatched;
 
@@ -59,7 +60,19 @@ public class Contract {
     }
 
     public void addPostCon(Expression postCon, boolean isReturn){
-        currentBehavior.addPostCon(postCon, isReturn);
+        for(Behavior b : getLeafs()){
+            b.addPostCon(postCon, isReturn);
+        }
+    }
+    public void addPostAssert(AssertStmt as){
+        for (Behavior b : getLeafs(currentBehavior)){
+            b.addPostAssert(as);
+        }
+    }
+    public void clearPostAssert(){
+        for (Behavior b : getLeafs(currentBehavior)){
+            b.getAsserts().clear();
+        }
     }
 
     public void addToAllActive(Expression postCon, boolean isReturn){
