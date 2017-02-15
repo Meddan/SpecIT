@@ -18,7 +18,6 @@ import java.util.LinkedList;
     a complete contract.
  */
 public class Contract {
-    private LinkedList<Behavior> behaviors = new LinkedList<Behavior>();
 
     /**
      * A list of active behaviors. The last element of this list should
@@ -37,7 +36,6 @@ public class Contract {
         this.methodDeclaration = md;
         currentBehavior = new Behavior(null);
         initialBehavior = currentBehavior;
-        behaviors.add(currentBehavior);
     }
 
     public boolean isPure() {
@@ -75,15 +73,8 @@ public class Contract {
         }
     }
 
-    public void addToAllActive(Expression postCon, boolean isReturn){
-        for(Behavior b : behaviors){
-            if(!b.isClosed()){
-                b.addPostCon(postCon, isReturn);
-            }
-        }
-    }
     public void closeAllActive(){
-        for(Behavior b : behaviors){
+        for(Behavior b : getLeafs(currentBehavior)){
             b.setClosed(true);
         }
     }
@@ -115,50 +106,6 @@ public class Contract {
         this.currentBehavior = b;
     }
 
-    public LinkedList<Behavior> getBehaviors(){
-        return behaviors;
-    }
-    public void addBehavior(Behavior b){
-        behaviors.add(b);
-    }
-
-
-    /**
-     * Add properties of closed behaviors to current behavior when there is an else.
-     *
-     * Throws away current behavior
-     */
-    public void makeMethodNamesGreatAgain(){
-
-    }
-
-    public void splitBehavior(Expression condition){
-        // Create the two behavior that will be the split
-        Behavior splitA = new Behavior(currentBehavior);
-        Behavior splitB = new Behavior(currentBehavior);
-
-        // Set new behaviors as children
-        currentBehavior.addChild(splitA);
-        currentBehavior.addChild(splitB);
-
-        // Add condition as pre-condition
-        splitA.addPreCon(condition);
-        splitB.addPreCon(condition); // TODO : This condition should be negated
-
-
-
-        // Add to list of all behaviors
-        behaviors.add(splitA);
-        behaviors.add(splitB);
-
-        // Extract contract-info from parents
-        extractParentalBehavior(splitA);
-        extractParentalBehavior(splitB);
-
-        // Set splitA as currentBehavior
-        currentBehavior = splitA;
-    }
-
     private void extractParentalBehavior(Behavior b){
         Behavior p = b.getParent();
 
@@ -186,25 +133,16 @@ public class Contract {
         return list;
     }
 
-    public String toString(){
+    public String toString() {
         StringBuilder sb = new StringBuilder();
-
-        if(behaviors.isEmpty() == false) {
-            sb.append("/*@\n");
-
-            for (Behavior b : getLeafs()) {
-                if(!b.isEmpty()) {
-                    sb.append(b.toString());
-                    if (!behaviors.getLast().equals(b)) {
-                        sb.append("also\n");
-                    }
-                }
+        sb.append("/*@\n");
+        for (Behavior b : getLeafs(initialBehavior)) {
+            if (!b.isEmpty()) {
+                sb.append(b.toString());
+                sb.append("also\n");
             }
-
-            sb.append("@*/");
         }
-
-        return sb.toString();
+        return sb.substring(0, sb.lastIndexOf("also\n")) + "@*/";
     }
 
     public boolean equals(Object o){
@@ -218,18 +156,7 @@ public class Contract {
 
         Contract c = (Contract) o;
 
-        if(behaviors.size() == c.getBehaviors().size()){ // Amount of behaviors must be equal
-            for(int i = 0; i < behaviors.size(); i++){
-                if(behaviors.get(i) != c.getBehaviors().get(i)){
-                    // If any two behaviors do not match, not equal
-                    return false;
-                }
-            }
-        } else {
-            return false;
-        }
-
-        return true;
+        return initialBehavior.equals(c.initialBehavior) && currentBehavior.equals(c.getCurrentBehavior());
 
     }
 

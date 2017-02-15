@@ -151,7 +151,7 @@ public class ContractGenerator {
             ReturnStmt rs = (ReturnStmt) s;
             if(rs.getExpr().isPresent()){
                 createContract(rs.getExpr().get(), localVar, c);
-                c.addToAllActive(rs.getExpr().get(), true);
+                c.addPostCon(rs.getExpr().get(), true);
                 c.closeAllActive();
             }
         } else {
@@ -171,7 +171,6 @@ public class ContractGenerator {
                 b.setClosed(true);
                 Behavior a = new Behavior(b);
                 b.addChild(a);
-                c.addBehavior(a);
                 c.setCurrentBehavior(a);
                 a.addPreCon(sif.getCondition());
                 createContract(sif.getThenStmt(), (ArrayList<SimpleName>) localVar.clone(), c);
@@ -179,7 +178,6 @@ public class ContractGenerator {
                 if (sif.getElseStmt().isPresent()) {
                     Behavior d = new Behavior(b);
                     b.addChild(d);
-                    c.addBehavior(d);
                     //TODO: d.addPreCon(); need to fix double negation
                     d.addPreCon(new UnaryExpr(sif.getCondition(), UnaryExpr.Operator.not));
                     c.setCurrentBehavior(d);
@@ -187,7 +185,6 @@ public class ContractGenerator {
                 } else {
                     Behavior e = new Behavior(b);
                     e.addPreCon(new UnaryExpr(sif.getCondition(), UnaryExpr.Operator.not));
-                    c.addBehavior(e);
                     //TODO: e.addPreCon(); need to fix double negation
                     b.addChild(e);
                 }
