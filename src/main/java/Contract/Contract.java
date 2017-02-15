@@ -99,7 +99,9 @@ public class Contract {
     }
 
     public void addException(Type t, Expression e){
-        currentBehavior.addException(t, e);
+        for(Behavior b : getLeafs(currentBehavior)){
+            currentBehavior.addException(t, e);
+        }
     }
 
     public void setExceptional(boolean isExceptional){
