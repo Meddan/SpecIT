@@ -77,7 +77,9 @@ public class Behavior {
     }
 
     public void addPreCon(Expression preCon){
-        preCons.add(new PreCondition(preCon));
+        if(!this.closed) {
+            preCons.add(new PreCondition(preCon));
+        }
     }
 
     public void addPreCon(LinkedList<Expression> preCon){
@@ -87,19 +89,25 @@ public class Behavior {
     }
 
     public void addPreConFromParent(LinkedList<PreCondition> preCon){
-        preCons.addAll(preCon);
+        if(!closed) {
+            preCons.addAll(preCon);
+        }
     }
 
     public void addPostCon(Expression postCon, boolean isReturn){
-        postCons.add(new PostCondition(postCon, isReturn));
+        if(!closed) {
+            postCons.add(new PostCondition(postCon, isReturn));
+        }
     }
 
     public void addPostConFromParent(LinkedList<PostCondition> postCon){
-        postCons.addAll(postCon);
+        if(!closed) {
+            postCons.addAll(postCon);
+        }
     }
 
     public void addAssignable(SimpleName assignable){
-        if(!assignables.contains(assignable)){
+        if(!assignables.contains(assignable) && !closed){
             assignables.add(assignable);
         }
     }
@@ -111,11 +119,15 @@ public class Behavior {
     }
 
     public void addException(Type t, Expression e){
-        exceptions.add(new ExceptionCondition(t,e));
+        if(!closed) {
+            exceptions.add(new ExceptionCondition(t, e));
+        }
     }
 
     public void addExceptionsFromParent(LinkedList<ExceptionCondition> exception){
-        exceptions.addAll(exception);
+        if(!closed) {
+            exceptions.addAll(exception);
+        }
     }
 
     public LinkedList<PreCondition> getPreCons(){
