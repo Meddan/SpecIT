@@ -2,6 +2,7 @@ package Contract;
 
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.stmt.AssertStmt;
 import com.github.javaparser.ast.type.Type;
 import sun.awt.image.ImageWatched;
 
@@ -36,6 +37,8 @@ public class Behavior {
     // List for representing exceptions thrown when behavior is exceptional
     private LinkedList<ExceptionCondition> exceptions = new LinkedList<ExceptionCondition>();
 
+    private LinkedList<AssertStmt> asserts = new LinkedList<AssertStmt>();
+
     private Behavior parent;
     private boolean closed = false;
 
@@ -65,6 +68,7 @@ public class Behavior {
         this.postCons = (LinkedList<PostCondition>) original.getPostCons().clone();
         this.assignables = (LinkedList<SimpleName>) original.getAssignables().clone();
         this.exceptions = (LinkedList<ExceptionCondition>) original.getExceptions().clone();
+        this.asserts = (LinkedList<AssertStmt>) original.getAsserts().clone();
         this.isExceptional = original.getIsExceptional();
     }
 
@@ -187,6 +191,9 @@ public class Behavior {
         for(PostCondition p : postCons){
             sb.append(p.toString());
         }
+        for(AssertStmt as : asserts){
+            sb.append("ensures " + as.getCheck().toString() + ";\n");
+        }
 
         return sb.toString();
     }
@@ -294,5 +301,13 @@ public class Behavior {
 
     public void setClosed(boolean closed) {
         this.closed = closed;
+    }
+
+    public void addPostAssert(AssertStmt as) {
+        asserts.add(as);
+    }
+
+    public LinkedList<AssertStmt> getAsserts() {
+        return asserts;
     }
 }
