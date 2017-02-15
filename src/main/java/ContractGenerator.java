@@ -233,10 +233,10 @@ public class ContractGenerator {
             AssignExpr ae = (AssignExpr) e;
             //TODO: Add contract for assignment
             if(ae.getTarget() instanceof FieldAccessExpr){
+                c.addAssignable(((FieldAccessExpr) ae.getTarget()).getField());
                 c.setPure(false);
             } else if (ae.getTarget() instanceof NameExpr){
                 NameExpr ne = (NameExpr) ae.getTarget();
-
                 c.addAssignable(ne.getName());
                 c.addPostCon(ae, false);
 

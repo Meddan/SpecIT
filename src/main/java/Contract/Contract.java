@@ -89,7 +89,9 @@ public class Contract {
     }
 
     public void addAssignable(SimpleName assignable){
-        currentBehavior.addAssignable(assignable);
+        for(Behavior b : getLeafs(currentBehavior)){
+            b.addAssignable(assignable);
+        }
     }
 
     public void addAssignable(LinkedList<SimpleName> assignable){

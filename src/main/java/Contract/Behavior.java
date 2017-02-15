@@ -99,7 +99,9 @@ public class Behavior {
     }
 
     public void addAssignable(SimpleName assignable){
-        assignables.add(assignable);
+        if(!assignables.contains(assignable)){
+            assignables.add(assignable);
+        }
     }
 
     public void addAssignable(LinkedList<SimpleName> assignable){
