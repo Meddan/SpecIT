@@ -73,7 +73,9 @@ public class Behavior {
     }
 
     public void setExceptional(boolean isExceptional){
-        this.isExceptional = isExceptional;
+        if(!this.closed) {
+            this.isExceptional = isExceptional;
+        }
     }
 
     public void addPreCon(Expression preCon){
@@ -149,7 +151,7 @@ public class Behavior {
     public boolean getIsExceptional(){
         return isExceptional;
     }
-
+    
     public String toString(){
         StringBuilder sb = new StringBuilder();
 
