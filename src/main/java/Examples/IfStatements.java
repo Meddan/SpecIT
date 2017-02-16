@@ -66,6 +66,19 @@ public class IfStatements {
         }
     }
 
+    public void moreExceptions(int n){
+        if(n > 0){
+            if(n < 10){
+                x = "Small error";
+            } else {
+                x = "Big error";
+            }
+            throw new IllegalArgumentException();
+        } else {
+            x = "This is good number" + n;
+        }
+    }
+
     private boolean someHelperMethod(int n){
         return n == 10;
     }
