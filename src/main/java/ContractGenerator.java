@@ -184,7 +184,7 @@ public class ContractGenerator {
             if (s instanceof ExpressionStmt) {
                 createContract(((ExpressionStmt) s).getExpression(), localVar, c);
             } else if (s instanceof IfStmt) {
-                /**
+                /*
                  * When evaluating a if-statement we split the current behavior in 2, one that enters the then-block and
                  * one that enters the else-block (if present). When evaluating the blocks the new behaviors created are
                  * set as the current behavior for their respective block. Once the if-statement is done the current
