@@ -144,7 +144,11 @@ public class Contract {
                 sb.append("\nalso\n\n");
             }
         }
-        return sb.substring(0, sb.lastIndexOf("also\n")) + "@*/";
+        if(sb.lastIndexOf("also\n") != -1) {
+            return sb.substring(0, sb.lastIndexOf("also\n")) + "@*/";
+        } else {
+            return sb.append("@*/").toString();
+        }
     }
 
     public boolean equals(Object o){
