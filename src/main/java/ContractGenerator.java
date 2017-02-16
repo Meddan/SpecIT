@@ -158,6 +158,26 @@ public class ContractGenerator {
             }
             //Path of execution ends and we close all behaviors on this path
             c.closeAllActive();
+        } else if (s instanceof ThrowStmt) {
+            ThrowStmt ts = (ThrowStmt) s;
+            c.setExceptional(true);
+            if(ts.getExpr() instanceof ObjectCreationExpr){
+                // These conditions is what will hold after we throw an exception
+                LinkedList<PostCondition> listOfPostCons = c.getCurrentBehavior().getPostCons();
+                LinkedList<Expression> listOfExprs = new LinkedList<>();
+
+                for(PostCondition pc : listOfPostCons){
+                    listOfExprs.add(pc.getExpression());
+                }
+
+                c.addException(((ObjectCreationExpr) ts.getExpr()).getType(), listOfExprs);
+                // We create a new object when throwing
+                // TODO : Make more intelligent
+            } else {
+                // We're throwing some already created exception
+                // TODO : Get type and add to contract
+            }
+            c.closeAllActive();
         } else {
             //We are doing further modifications to our code thus we cannot guarantee our postconditions will hold.
             c.clearPostAssert();
@@ -198,8 +218,6 @@ public class ContractGenerator {
             } else if (s instanceof BlockStmt) {
                 BlockStmt bs = (BlockStmt) s;
                 createContract(((BlockStmt) s).getStmts(), (ArrayList<SimpleName>) localVar.clone(), c);
-            } else if (s instanceof ThrowStmt) {
-                //TODO: Add throw behavior
             } else if (s instanceof BreakStmt) {
                 return;
             } else if (s instanceof ContinueStmt) {
