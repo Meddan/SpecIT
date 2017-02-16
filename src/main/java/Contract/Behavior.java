@@ -126,6 +126,12 @@ public class Behavior {
         }
     }
 
+    public void addException(Type t, LinkedList<Expression> e){
+        if(!closed){
+            exceptions.add(new ExceptionCondition(t, e));
+        }
+    }
+
     public void addExceptionsFromParent(LinkedList<ExceptionCondition> exception){
         if(!closed) {
             exceptions.addAll(exception);
@@ -150,6 +156,12 @@ public class Behavior {
 
     public boolean getIsExceptional(){
         return isExceptional;
+    }
+
+    public LinkedList<PostCondition> complementPostConAgainstParent(){
+        LinkedList<PostCondition> clonedList = (LinkedList<PostCondition>) postCons.clone();
+        clonedList.removeAll(parent.getPostCons());
+        return clonedList;
     }
     
     public String toString(){

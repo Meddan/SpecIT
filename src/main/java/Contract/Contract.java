@@ -95,6 +95,12 @@ public class Contract {
         }
     }
 
+    public void addException(Type t, LinkedList<Expression> e){
+        for(Behavior b : getLeafs(currentBehavior)){
+            b.addException(t, e);
+        }
+    }
+
     public void setExceptional(boolean isExceptional){
         for(Behavior b : getLeafs(currentBehavior)) {
             b.setExceptional(isExceptional);
