@@ -262,7 +262,7 @@ public class Behavior {
             sb.append("signals_only ");
 
             for (ExceptionCondition ec : exceptions) {
-                sb.append(ec.toString());
+                sb.append(ec.getType().toString());
                 if (exceptions.getLast().equals(ec)) {
                     // If we're at the last element
                     sb.append(";\n");
@@ -280,11 +280,7 @@ public class Behavior {
         StringBuilder sb = new StringBuilder();
 
         for(ExceptionCondition ec : exceptions){
-            sb.append("signal ");
-            sb.append(ec.getName().toString());
-            sb.append(" (");
-            sb.append(concatPreCons());
-            sb.append(");\n");
+            sb.append(ec.toString());
         }
 
         return sb.toString();
