@@ -29,4 +29,35 @@ public class ExceptionCondition {
     public LinkedList<Expression> getName() {
         return expressions;
     }
+
+    /**
+     * Creates a string representation of this ExceptionCondition.
+     *
+     * Use when wanting to create a signal property for a behavior.
+     *
+     * @return a string representation of this ExceptionCondition
+     */
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("signal ");
+        sb.append(type.toString());
+        sb.append(" (");
+
+        if(expressions.isEmpty()){
+            sb.append("true");
+        } else {
+            for(Expression e : expressions){
+                sb.append(e.toString());
+                if(!expressions.getLast().equals(e)){
+                    sb.append(" && ");
+                }
+            }
+        }
+
+        sb.append(");\n");
+
+        return sb.toString();
+
+    }
 }
