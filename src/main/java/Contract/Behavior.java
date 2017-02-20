@@ -1,11 +1,14 @@
 package Contract;
 
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.SimpleName;
+import ContractGeneration.Resources;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.AssertStmt;
 import com.github.javaparser.ast.type.Type;
-import sun.awt.image.ImageWatched;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
@@ -42,7 +45,29 @@ public class Behavior {
     private Behavior parent;
     private boolean closed = false;
 
+    public boolean isPure() {
+        return pure;
+    }
+
+    public void setPure(boolean pure) {
+        this.pure = this.pure && pure;
+    }
+
+    private boolean pure = true;
+
     private LinkedList<Behavior> children = new LinkedList<Behavior>();
+
+    private HashMap<SimpleName, Expression> assignedValues = new HashMap<>();
+
+    public MethodDeclaration getMethodDeclaration() {
+        return methodDeclaration;
+    }
+
+    public void setMethodDeclaration(MethodDeclaration methodDeclaration) {
+        this.methodDeclaration = methodDeclaration;
+    }
+
+    private MethodDeclaration methodDeclaration;
     /**
      * Creates a ne behavior. Sets isExcpetional to false by default.
      * Use setExceptional() to change.
@@ -70,6 +95,9 @@ public class Behavior {
         this.exceptions = (LinkedList<ExceptionCondition>) original.getExceptions().clone();
         this.asserts = (LinkedList<AssertStmt>) original.getAsserts().clone();
         this.isExceptional = original.getIsExceptional();
+        this.assignedValues = (HashMap<SimpleName, Expression>) original.getAssignedValues().clone();
+        this.methodDeclaration = original.getMethodDeclaration();
+        this.pure = original.isPure();
     }
 
     public void setExceptional(boolean isExceptional){
@@ -79,14 +107,11 @@ public class Behavior {
     }
 
     public void addPreCon(Expression preCon){
+        for(Behavior b : children){
+            b.addPreCon(preCon);
+        }
         if(!this.closed) {
             preCons.add(new PreCondition(preCon));
-        }
-    }
-
-    public void addPreCon(LinkedList<Expression> preCon){
-        for(Expression e : preCon){
-            addPreCon(e);
         }
     }
 
@@ -97,6 +122,9 @@ public class Behavior {
     }
 
     public void addPostCon(Expression postCon, boolean isReturn){
+        for(Behavior b : children){
+            b.addPostCon(postCon, isReturn);
+        }
         if(!closed) {
             postCons.add(new PostCondition(postCon, isReturn));
         }
@@ -121,6 +149,9 @@ public class Behavior {
     }
 
     public void addException(Type t, Expression e){
+        for(Behavior b : children){
+            b.addException(t, e);
+        }
         if(!closed) {
             exceptions.add(new ExceptionCondition(t, e));
         }
@@ -172,7 +203,14 @@ public class Behavior {
         sb.append(createPostCons());
         sb.append(createSignalsOnly());
         sb.append(createSignal());
+        for(SimpleName sn : assignedValues.keySet()){
+            sb.append("ensures " + sn + " = " + assignedValues.get(sn) + "\n");
+        }
         sb.append(createAssignable());
+
+        sb.append("ASSIGNED VALUES AT END: " + assignedValues.keySet().size());
+
+
 
         return sb.toString();
     }
@@ -325,6 +363,9 @@ public class Behavior {
 
     public void setClosed(boolean closed) {
         this.closed = closed;
+        for(Behavior b : children){
+            b.setClosed(closed);
+        }
     }
 
     public void addPostAssert(AssertStmt as) {
@@ -333,5 +374,18 @@ public class Behavior {
 
     public LinkedList<AssertStmt> getAsserts() {
         return asserts;
+    }
+
+    public HashMap<SimpleName, Expression> getAssignedValues() {
+        return assignedValues;
+    }
+
+    public void clearPostAssert() {
+        if(!closed){
+            this.postCons.clear();
+        }
+        for (Behavior b : children){
+            b.clearPostAssert();
+        }
     }
 }

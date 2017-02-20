@@ -1,12 +1,12 @@
 package Contract;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.AssertStmt;
 import com.github.javaparser.ast.type.Type;
 import sun.awt.image.ImageWatched;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
@@ -53,15 +53,24 @@ public class Contract {
         currentBehavior.addPreCon(preCon);
     }
 
-    public void addPreCon(LinkedList<Expression> preCon){
-        currentBehavior.addPreCon(preCon);
-    }
-
     public void addPostCon(Expression postCon, boolean isReturn){
         for(Behavior b : getLeafs(currentBehavior)){
-            b.addPostCon(postCon, isReturn);
+                b.addPostCon(postCon, isReturn);
         }
     }
+
+    public HashMap<Behavior, Expression> ResolveName(NameExpr nameExpr){
+        HashMap<Behavior, Expression> map = new HashMap<>();
+        for (Behavior b : getLeafs()){
+            if( b.getAssignedValues().containsKey(nameExpr.getName()) ){
+                map.put(b, b.getAssignedValues().get(nameExpr.getName()));
+            } else {
+                map.put(b, nameExpr);
+            }
+        }
+        return map;
+    }
+
     public void addPostAssert(AssertStmt as){
         for (Behavior b : getLeafs(currentBehavior)){
             b.addPostAssert(as);
