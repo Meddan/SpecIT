@@ -14,3 +14,6 @@ hs_err_pid*
 #IntelliJ
 *.iml
 .idea/*
+
+# Generated contracts
+Generated/*
