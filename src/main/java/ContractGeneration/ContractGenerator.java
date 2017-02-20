@@ -8,8 +8,12 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.comments.BlockComment;
+import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
+import com.github.javaparser.ast.visitor.GenericVisitor;
+import com.github.javaparser.ast.visitor.VoidVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserMethodDeclaration;
@@ -21,6 +25,11 @@ import com.google.common.base.Strings;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import Contract.*;
@@ -33,7 +42,7 @@ public class ContractGenerator {
     private HashMap<MethodDeclaration, Contract> contracts = new HashMap<>();
     private CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
 
-    public ContractGenerator(ClassOrInterfaceDeclaration coid){
+    public ContractGenerator(ClassOrInterfaceDeclaration coid, String path){
         this.target = coid;
         if(target.isInterface()){
             return;
@@ -63,7 +72,10 @@ public class ContractGenerator {
             System.out.println("Purity status: " + contracts.get(md).isPure());
             System.out.println();
             System.out.println("-----------------");
+            md.setComment(new BlockComment(contracts.get(md).toString()));
         }
+
+        writeToFile(path, coid.toString());
 
 
     }
@@ -385,6 +397,35 @@ public class ContractGenerator {
         }
     }
 
+    private void writeToFile(String path, String toPrint){
+
+        Path p = Paths.get("Generated" + path);
+        int nmbrOfFolders = p.getNameCount();
+
+        // Check that all directories exist
+        for(int i = 1; i < p.getNameCount(); i++){
+            Path currentPath = p.subpath(0,i);
+
+            // If not, create them
+            if(!Files.exists(currentPath)){
+                try{
+                    Files.createDirectories(currentPath);
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+
+        }
+
+        // Now we write to file
+        try {
+            Files.write(p, Arrays.asList(toPrint), Charset.forName("UTF-8"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public static void main(String args[]){
         File projectDir = new File("src/main/java/Examples");
         testClasses(projectDir);
@@ -398,7 +439,7 @@ public class ContractGenerator {
                     @Override
                     public void visit(ClassOrInterfaceDeclaration n, Object arg) {
                         super.visit(n, arg);
-                        ContractGenerator cg = new ContractGenerator(n);
+                        ContractGenerator cg = new ContractGenerator(n, path);
                     }
                 }.visit(JavaParser.parse(file), null);
                 //System.out.println(); // empty line
