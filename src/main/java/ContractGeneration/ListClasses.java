@@ -1,3 +1,6 @@
+package ContractGeneration;
+
+import ContractGeneration.DirExplorer;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.body.BodyDeclaration;

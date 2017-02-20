@@ -1,3 +1,5 @@
+package ContractGeneration;
+
 import com.github.javaparser.ast.Node;
 
 public class NodeIterator {

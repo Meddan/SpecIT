@@ -1,3 +1,5 @@
+package ContractGeneration;
+
 import java.io.File;
 
 public class DirExplorer {
