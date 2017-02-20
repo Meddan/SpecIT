@@ -72,7 +72,7 @@ public class Contract {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("/*@\n");
+        sb.append("@\n");
         for (Behavior b : getLeafs(initialBehavior)) {
             if (!b.isEmpty()) {
                 sb.append(b.toString());
@@ -80,9 +80,9 @@ public class Contract {
             }
         }
         if(sb.lastIndexOf("also\n") != -1) {
-            return sb.substring(0, sb.lastIndexOf("also\n")) + "@*/";
+            return sb.substring(0, sb.lastIndexOf("also\n")) + "@";
         } else {
-            return sb.append("@*/").toString();
+            return sb.append("@").toString();
         }
     }
 
