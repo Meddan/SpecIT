@@ -279,32 +279,41 @@ public class ContractGenerator {
 
         } else if(e instanceof UnaryExpr){
             UnaryExpr ue = (UnaryExpr) e;
-            NameExpr nameExpr = (NameExpr) ue.getExpr();
-            SimpleName name = nameExpr.getName();
-            IntegerLiteralExpr ile = new IntegerLiteralExpr();
-            ile.setValue("1");
-            Expression temp = b.getAssignedValues().get(nameExpr.getName());
-            BinaryExpr be = new BinaryExpr();
-            be.setLeft(temp);
-            be.setRight(ile);
-            if(ue.getOperator() == UnaryExpr.Operator.postDecrement) {
-                be.setOperator(BinaryExpr.Operator.minus);
-                b.putAssignedValue(name, be);
-                return temp;
-            } else if (ue.getOperator() == UnaryExpr.Operator.postIncrement) {
-                be.setOperator(BinaryExpr.Operator.plus);
-                b.putAssignedValue(name, be);
-                return temp;
-            } else if (ue.getOperator() == UnaryExpr.Operator.preDecrement) {
-                be.setOperator(BinaryExpr.Operator.minus);
-                b.putAssignedValue(name, be);
-                return be;
-            } else if(ue.getOperator() == UnaryExpr.Operator.preIncrement) {
-                be.setOperator(BinaryExpr.Operator.plus);
-                b.putAssignedValue(name, be);
-                return be;
+            if (ue.getExpr() instanceof NameExpr) {
+                NameExpr nameExpr = (NameExpr) ue.getExpr();
+                SimpleName name = nameExpr.getName();
+                IntegerLiteralExpr ile = new IntegerLiteralExpr();
+                ile.setValue("1");
+                Expression temp;
+                if(b.getAssignedValues().containsKey(nameExpr.getName())){
+                    temp = b.getAssignedValues().get(nameExpr.getName());
+                } else {
+                    temp = nameExpr;
+                }
+                BinaryExpr be = new BinaryExpr();
+                be.setLeft(temp);
+                be.setRight(ile);
+                if(ue.getOperator() == UnaryExpr.Operator.postDecrement) {
+                    be.setOperator(BinaryExpr.Operator.minus);
+                    b.putAssignedValue(name, be);
+                    return temp;
+                } else if (ue.getOperator() == UnaryExpr.Operator.postIncrement) {
+                    be.setOperator(BinaryExpr.Operator.plus);
+                    b.putAssignedValue(name, be);
+                    return temp;
+                } else if (ue.getOperator() == UnaryExpr.Operator.preDecrement) {
+                    be.setOperator(BinaryExpr.Operator.minus);
+                    b.putAssignedValue(name, be);
+                    return be;
+                } else if(ue.getOperator() == UnaryExpr.Operator.preIncrement) {
+                    be.setOperator(BinaryExpr.Operator.plus);
+                    b.putAssignedValue(name, be);
+                    return be;
+                } else {
+                    return e;
+                }
             } else {
-                return e;
+                return ue.setExpr(createContract(ue.getExpr(), localVar, b));
             }
         } else if (e instanceof EnclosedExpr){
             if(((EnclosedExpr) e).getInner().isPresent()) {
@@ -377,7 +386,7 @@ public class ContractGenerator {
     }
 
     public static void main(String args[]){
-        File projectDir = new File("src/main/java/Examples/SingleExample");
+        File projectDir = new File("src/main/java/Examples");
         testClasses(projectDir);
     }
     public static void testClasses(File projectDir) {
