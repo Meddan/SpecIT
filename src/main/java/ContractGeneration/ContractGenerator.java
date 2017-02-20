@@ -2,6 +2,7 @@ package ContractGeneration;
 
 import ContractGeneration.Resources;
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.body.BodyDeclaration;
@@ -11,6 +12,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.imports.*;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.visitor.GenericVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitor;
@@ -42,7 +44,7 @@ public class ContractGenerator {
     private HashMap<MethodDeclaration, Contract> contracts = new HashMap<>();
     private CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
 
-    public ContractGenerator(ClassOrInterfaceDeclaration coid, String path){
+    public ContractGenerator(ClassOrInterfaceDeclaration coid, String path, File projectDir){
         this.target = coid;
         if(target.isInterface()){
             return;
@@ -75,7 +77,7 @@ public class ContractGenerator {
             md.setComment(new BlockComment(contracts.get(md).toString()));
         }
 
-        writeToFile(path, coid.toString());
+        writeToFile(path, projectDir, coid.toString());
 
 
     }
@@ -402,7 +404,12 @@ public class ContractGenerator {
         }
     }
 
-    private void writeToFile(String path, String toPrint){
+    private void writeToFile(String path, File projectDir, String toPrint){
+
+        // TODO : Generate package signature
+
+        // Extract imports
+        String packageAndImports = extractImports(new File(projectDir + path));
 
         Path p = Paths.get("Generated" + path);
 
@@ -423,11 +430,41 @@ public class ContractGenerator {
 
         // Now we write to file
         try {
-            Files.write(p, Arrays.asList(toPrint), Charset.forName("UTF-8"));
+            Files.write(p, Arrays.asList(packageAndImports + toPrint), Charset.forName("UTF-8"));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private String extractImports(File fileDir){
+        StringBuilder sb = new StringBuilder();
+
+        new DirExplorer((level, path, file) -> true, (level, path, file) -> {
+            try {
+                new VoidVisitorAdapter<Object>() {
+                    @Override
+                    public void visit(CompilationUnit n, Object arg) {
+                        super.visit(n, arg);
+
+                        // Extract package if it exists
+                        if(n.getPackage().isPresent()){
+                            sb.append(n.getPackage().get().toString());
+                        }
+
+                        // Extract all imports
+                        NodeList<ImportDeclaration> imports = n.getImports();
+                        for(ImportDeclaration id : imports){
+                            sb.append(id.toString());
+                        }
+                    }
+                }.visit(JavaParser.parse(file), null);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).explore(fileDir);
+
+        return sb.toString();
     }
 
     public static void main(String args[]){
@@ -443,7 +480,7 @@ public class ContractGenerator {
                     @Override
                     public void visit(ClassOrInterfaceDeclaration n, Object arg) {
                         super.visit(n, arg);
-                        ContractGenerator cg = new ContractGenerator(n, path);
+                        ContractGenerator cg = new ContractGenerator(n, path, projectDir);
                     }
                 }.visit(JavaParser.parse(file), null);
                 //System.out.println(); // empty line
