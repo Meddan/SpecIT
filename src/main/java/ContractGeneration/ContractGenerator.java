@@ -400,7 +400,6 @@ public class ContractGenerator {
     private void writeToFile(String path, String toPrint){
 
         Path p = Paths.get("Generated" + path);
-        int nmbrOfFolders = p.getNameCount();
 
         // Check that all directories exist
         for(int i = 1; i < p.getNameCount(); i++){
