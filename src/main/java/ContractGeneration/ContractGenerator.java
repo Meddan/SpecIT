@@ -254,13 +254,17 @@ public class ContractGenerator {
                 if(vd.getInit().isPresent()){
                     //If we initialize a variable we save the name in the behaviors assigned values with the
                     // value of the expression that we get from evaluating the initializer
-                    b.putAssignedValue(vd.getId().getName(), createContract(vd.getInit().get(), localVar, b));
+                    if(!(vd.getInit().get() instanceof ArrayCreationExpr)){
+                        //b.putAssignedValue(vd.getId().getName(), new NameExpr(vd.getId().getName()));
+                        b.putAssignedValue(vd.getId().getName(), createContract(vd.getInit().get(), localVar, b));
+                    }
                 }
             }
             return null;
         } else if (e instanceof AssignExpr){
             AssignExpr ae = (AssignExpr) e;
             //TODO: Probably can remove a lot since Contract does these things.
+
             if(ae.getTarget() instanceof FieldAccessExpr){
                 b.putAssignedValue(((FieldAccessExpr) ae.getTarget()).getField(), createContract(ae.getValue(), localVar, b));
                 b.setPure(false);
@@ -271,9 +275,9 @@ public class ContractGenerator {
                 b.setPure(localVar.contains(((NameExpr) ae.getTarget()).getName()));
             } else if(ae.getTarget() instanceof ArrayAccessExpr){
                 ArrayAccessExpr aae = (ArrayAccessExpr) ae.getTarget();
-                String s = createContract(aae.getName(), localVar, b).toString();
-                String s2 = createContract(aae.getIndex(), localVar, b).toString();
-                SimpleName name = new SimpleName( s + s2);
+                String arrayName = createContract(aae.getName(), localVar, b).toString();
+                String index = createContract(aae.getIndex(), localVar, b).toString();
+                SimpleName name = new SimpleName( arrayName + "[" + index + "]");
                 b.putAssignedValue(name, createContract(ae.getValue(), localVar, b));
                 if(aae.getName() instanceof NameExpr){
                     b.setPure(localVar.contains(((NameExpr) aae.getName()).getName()));
@@ -356,6 +360,7 @@ public class ContractGenerator {
             }
             return e;
         } else if(e instanceof  ArrayInitializerExpr){
+
             ArrayInitializerExpr aie = (ArrayInitializerExpr) e;
             for(Expression exp : aie.getValues()){
                 createContract(exp,localVar,b);
