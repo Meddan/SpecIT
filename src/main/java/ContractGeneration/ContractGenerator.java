@@ -242,7 +242,7 @@ public class ContractGenerator {
                 if(vd.getInit().isPresent()){
                     //If we initialize a variable we save the name in the behaviors assigned values with the
                     // value of the expression that we get from evaluating the initializer
-                    b.getAssignedValues().put(vd.getId().getName(), createContract(vd.getInit().get(), localVar, b));
+                    b.putAssignedValue(vd.getId().getName(), createContract(vd.getInit().get(), localVar, b));
                 }
             }
             return null;
@@ -250,11 +250,11 @@ public class ContractGenerator {
             AssignExpr ae = (AssignExpr) e;
             //TODO: Probably can remove a lot since Contract does these things.
             if(ae.getTarget() instanceof FieldAccessExpr){
-                b.getAssignedValues().put(((FieldAccessExpr) ae.getTarget()).getField(), createContract(ae.getValue(), localVar, b));
+                b.putAssignedValue(((FieldAccessExpr) ae.getTarget()).getField(), createContract(ae.getValue(), localVar, b));
                 b.setPure(false);
             } else if (ae.getTarget() instanceof NameExpr){
                 NameExpr ne = (NameExpr) ae.getTarget();
-                b.getAssignedValues().put(((NameExpr) ae.getTarget()).getName(), createContract(ae.getValue(), localVar, b));
+                b.putAssignedValue(((NameExpr) ae.getTarget()).getName(), createContract(ae.getValue(), localVar, b));
                 b.addPostCon(ae, false);
                 b.setPure(localVar.contains(((NameExpr) ae.getTarget()).getName()));
             } else if(ae.getTarget() instanceof ArrayAccessExpr){
@@ -262,7 +262,7 @@ public class ContractGenerator {
                 String s = createContract(aae.getName(), localVar, b).toString();
                 String s2 = createContract(aae.getIndex(), localVar, b).toString();
                 SimpleName name = new SimpleName( s + s2);
-                b.getAssignedValues().put(name, createContract(ae.getValue(), localVar, b));
+                b.putAssignedValue(name, createContract(ae.getValue(), localVar, b));
                 if(aae.getName() instanceof NameExpr){
                     b.setPure(localVar.contains(((NameExpr) aae.getName()).getName()));
                 }
@@ -289,19 +289,19 @@ public class ContractGenerator {
             be.setRight(ile);
             if(ue.getOperator() == UnaryExpr.Operator.postDecrement) {
                 be.setOperator(BinaryExpr.Operator.minus);
-                b.getAssignedValues().put(name, be);
+                b.putAssignedValue(name, be);
                 return temp;
             } else if (ue.getOperator() == UnaryExpr.Operator.postIncrement) {
                 be.setOperator(BinaryExpr.Operator.plus);
-                b.getAssignedValues().put(name, be);
+                b.putAssignedValue(name, be);
                 return temp;
             } else if (ue.getOperator() == UnaryExpr.Operator.preDecrement) {
                 be.setOperator(BinaryExpr.Operator.minus);
-                b.getAssignedValues().put(name, be);
+                b.putAssignedValue(name, be);
                 return be;
             } else if(ue.getOperator() == UnaryExpr.Operator.preIncrement) {
                 be.setOperator(BinaryExpr.Operator.plus);
-                b.getAssignedValues().put(name, be);
+                b.putAssignedValue(name, be);
                 return be;
             } else {
                 return e;

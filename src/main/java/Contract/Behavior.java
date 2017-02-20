@@ -335,4 +335,8 @@ public class Behavior {
             b.clearPostAssert();
         }
     }
+
+    public void putAssignedValue(SimpleName name, Expression e){
+        assignedValues.put(name, e);
+    }
 }
