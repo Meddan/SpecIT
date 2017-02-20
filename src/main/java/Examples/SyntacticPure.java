@@ -1,5 +1,8 @@
 package Examples;
 
+import java.util.*;
+import static java.lang.Math.*;
+
 public class SyntacticPure {
     int k = 0;
     int[] a;
