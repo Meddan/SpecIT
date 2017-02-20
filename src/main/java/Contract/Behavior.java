@@ -112,24 +112,12 @@ public class Behavior {
         }
     }
 
-    public void addPreConFromParent(LinkedList<PreCondition> preCon){
-        if(!closed) {
-            preCons.addAll(preCon);
-        }
-    }
-
     public void addPostCon(Expression postCon, boolean isReturn){
         for(Behavior b : children){
             b.addPostCon(postCon, isReturn);
         }
         if(!closed) {
             postCons.add(new PostCondition(postCon, isReturn));
-        }
-    }
-
-    public void addPostConFromParent(LinkedList<PostCondition> postCon){
-        if(!closed) {
-            postCons.addAll(postCon);
         }
     }
 
@@ -145,12 +133,6 @@ public class Behavior {
     public void addException(Type t, LinkedList<Expression> e){
         if(!closed){
             exceptions.add(new ExceptionCondition(t, e));
-        }
-    }
-
-    public void addExceptionsFromParent(LinkedList<ExceptionCondition> exception){
-        if(!closed) {
-            exceptions.addAll(exception);
         }
     }
 
@@ -306,29 +288,12 @@ public class Behavior {
         return sb.toString();
     }
 
-    private String concatPreCons(){
-        StringBuilder sb = new StringBuilder();
-
-        for(PreCondition p : preCons){
-            sb.append(p.toString());
-            if(!preCons.getLast().equals(p)){
-                sb.append(" && ");
-            }
-        }
-
-        return sb.toString();
-    }
-
     public Behavior getParent() {
         return parent;
     }
 
     public LinkedList<Behavior> getChildren() {
         return children;
-    }
-
-    public void setChildren(LinkedList<Behavior> children) {
-        this.children = children;
     }
 
     public void addChild(Behavior child){

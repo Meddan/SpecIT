@@ -57,7 +57,7 @@ public class Contract {
     public LinkedList<Behavior> getLeafs(){
         return getLeafs(initialBehavior);
     }
-    
+
     private LinkedList<Behavior> getLeafs(Behavior b){
         LinkedList<Behavior> list = new LinkedList<Behavior>();
         if(b.getChildren().isEmpty()){
