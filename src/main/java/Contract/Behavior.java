@@ -10,6 +10,7 @@ import com.github.javaparser.ast.type.Type;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * Created by dover on 2017-02-08.
@@ -33,9 +34,6 @@ public class Behavior {
 
     // List for represeting postconditions. See above for format.
     private LinkedList<PostCondition> postCons = new LinkedList<PostCondition>();
-
-    // List for representing any assignable variable
-    private LinkedList<SimpleName> assignables = new LinkedList<SimpleName>();
 
     // List for representing exceptions thrown when behavior is exceptional
     private LinkedList<ExceptionCondition> exceptions = new LinkedList<ExceptionCondition>();
@@ -91,7 +89,6 @@ public class Behavior {
     private void extractInformation(Behavior original){
         this.preCons = (LinkedList<PreCondition>) original.getPreCons().clone();
         this.postCons = (LinkedList<PostCondition>) original.getPostCons().clone();
-        this.assignables = (LinkedList<SimpleName>) original.getAssignables().clone();
         this.exceptions = (LinkedList<ExceptionCondition>) original.getExceptions().clone();
         this.asserts = (LinkedList<AssertStmt>) original.getAsserts().clone();
         this.isExceptional = original.getIsExceptional();
@@ -136,18 +133,6 @@ public class Behavior {
         }
     }
 
-    public void addAssignable(SimpleName assignable){
-        if(!assignables.contains(assignable) && !closed){
-            assignables.add(assignable);
-        }
-    }
-
-    public void addAssignable(LinkedList<SimpleName> assignable){
-        for(SimpleName s : assignable){
-            addAssignable(s);
-        }
-    }
-
     public void addException(Type t, Expression e){
         for(Behavior b : children){
             b.addException(t, e);
@@ -177,8 +162,8 @@ public class Behavior {
         return postCons;
     }
 
-    public LinkedList<SimpleName> getAssignables(){
-        return assignables;
+    public Set<SimpleName> getAssignables(){
+        return assignedValues.keySet();
     }
 
     public LinkedList<ExceptionCondition> getExceptions(){
@@ -229,14 +214,14 @@ public class Behavior {
         return isExceptional == b.getIsExceptional()
                 && preCons.equals(b.getPreCons())
                 && postCons.equals(b.getPostCons())
-                && assignables.equals(b.getAssignables())
+                && assignedValues.equals(b.getAssignedValues())
                 && exceptions.equals(b.getExceptions());
     }
 
     public boolean isEmpty(){
         return preCons.isEmpty()
                 && postCons.isEmpty()
-                && assignables.isEmpty()
+                && assignedValues.keySet().isEmpty()
                 && exceptions.isEmpty();
     }
 
@@ -267,21 +252,18 @@ public class Behavior {
     private String createAssignable(){
         StringBuilder sb = new StringBuilder();
 
-        if(!assignables.isEmpty()) {
+        if(!assignedValues.keySet().isEmpty()) {
             sb.append("assignable ");
-            for (SimpleName s : assignables) {
+            for (SimpleName s : assignedValues.keySet()) {
                 sb.append(s.toString());
-                if (assignables.getLast().equals(s)) {
-                    // If we're at the last element
-                    sb.append(";\n");
-                } else {
-                    // If we're not at the last element
-                    sb.append(", ");
-                }
+                sb.append(", ");
             }
-
+            if(sb.lastIndexOf(", ") != -1) {
+                return sb.substring(0, sb.lastIndexOf(", ")) + ";\n";
+            } else {
+                return sb.append(";\n").toString();
+            }
         }
-
         return sb.toString();
     }
 

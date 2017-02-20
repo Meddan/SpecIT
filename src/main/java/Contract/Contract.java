@@ -88,16 +88,6 @@ public class Contract {
         }
     }
 
-    public void addAssignable(SimpleName assignable){
-        for(Behavior b : getLeafs(currentBehavior)){
-            b.addAssignable(assignable);
-        }
-    }
-
-    public void addAssignable(LinkedList<SimpleName> assignable){
-        currentBehavior.addAssignable(assignable);
-    }
-
     public void addException(Type t, Expression e){
         for(Behavior b : getLeafs(currentBehavior)){
             b.addException(t, e);
@@ -129,7 +119,6 @@ public class Contract {
         while(p != null){
             b.addPreConFromParent(p.getPreCons());
             b.addPostConFromParent(p.getPostCons());
-            b.addAssignable(p.getAssignables());
             b.addExceptionsFromParent(p.getExceptions());
             b.setExceptional(p.getIsExceptional());
             p = p.getParent();

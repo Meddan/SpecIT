@@ -250,12 +250,10 @@ public class ContractGenerator {
             AssignExpr ae = (AssignExpr) e;
             //TODO: Probably can remove a lot since Contract does these things.
             if(ae.getTarget() instanceof FieldAccessExpr){
-                b.addAssignable(((FieldAccessExpr) ae.getTarget()).getField());
                 b.getAssignedValues().put(((FieldAccessExpr) ae.getTarget()).getField(), createContract(ae.getValue(), localVar, b));
                 b.setPure(false);
             } else if (ae.getTarget() instanceof NameExpr){
                 NameExpr ne = (NameExpr) ae.getTarget();
-                b.addAssignable(ne.getName());
                 b.getAssignedValues().put(((NameExpr) ae.getTarget()).getName(), createContract(ae.getValue(), localVar, b));
                 b.addPostCon(ae, false);
                 b.setPure(localVar.contains(((NameExpr) ae.getTarget()).getName()));
