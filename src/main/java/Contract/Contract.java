@@ -29,81 +29,22 @@ public class Contract {
     private Behavior currentBehavior;
     private final Behavior initialBehavior;
 
-    private boolean pure;
-
     public Contract(MethodDeclaration md){
-        pure = true;
         this.methodDeclaration = md;
         currentBehavior = new Behavior(null);
         initialBehavior = currentBehavior;
     }
 
     public boolean isPure() {
+        boolean pure = true;
+        for (Behavior b : getLeafs()){
+            pure &= b.isPure();
+        }
         return pure;
     }
 
-    public void setPure(boolean pure) {
-        this.pure = this.pure && pure;
-    }
     public MethodDeclaration getMethodDeclaration() {
         return methodDeclaration;
-    }
-
-    public void addPreCon(Expression preCon){
-        currentBehavior.addPreCon(preCon);
-    }
-
-    public void addPostCon(Expression postCon, boolean isReturn){
-        for(Behavior b : getLeafs(currentBehavior)){
-                b.addPostCon(postCon, isReturn);
-        }
-    }
-
-    public HashMap<Behavior, Expression> ResolveName(NameExpr nameExpr){
-        HashMap<Behavior, Expression> map = new HashMap<>();
-        for (Behavior b : getLeafs()){
-            if( b.getAssignedValues().containsKey(nameExpr.getName()) ){
-                map.put(b, b.getAssignedValues().get(nameExpr.getName()));
-            } else {
-                map.put(b, nameExpr);
-            }
-        }
-        return map;
-    }
-
-    public void addPostAssert(AssertStmt as){
-        for (Behavior b : getLeafs(currentBehavior)){
-            b.addPostAssert(as);
-        }
-    }
-    public void clearPostAssert(){
-        for (Behavior b : getLeafs(currentBehavior)){
-            b.getAsserts().clear();
-        }
-    }
-
-    public void closeAllActive(){
-        for(Behavior b : getLeafs(currentBehavior)){
-            b.setClosed(true);
-        }
-    }
-
-    public void addException(Type t, Expression e){
-        for(Behavior b : getLeafs(currentBehavior)){
-            b.addException(t, e);
-        }
-    }
-
-    public void addException(Type t, LinkedList<Expression> e){
-        for(Behavior b : getLeafs(currentBehavior)){
-            b.addException(t, e);
-        }
-    }
-
-    public void setExceptional(boolean isExceptional){
-        for(Behavior b : getLeafs(currentBehavior)) {
-            b.setExceptional(isExceptional);
-        }
     }
 
     public Behavior getCurrentBehavior(){
@@ -113,20 +54,10 @@ public class Contract {
         this.currentBehavior = b;
     }
 
-    private void extractParentalBehavior(Behavior b){
-        Behavior p = b.getParent();
-
-        while(p != null){
-            b.addPreConFromParent(p.getPreCons());
-            b.addPostConFromParent(p.getPostCons());
-            b.addExceptionsFromParent(p.getExceptions());
-            b.setExceptional(p.getIsExceptional());
-            p = p.getParent();
-        }
-    }
     public LinkedList<Behavior> getLeafs(){
         return getLeafs(initialBehavior);
     }
+    
     private LinkedList<Behavior> getLeafs(Behavior b){
         LinkedList<Behavior> list = new LinkedList<Behavior>();
         if(b.getChildren().isEmpty()){
