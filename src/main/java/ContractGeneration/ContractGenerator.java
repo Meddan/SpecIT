@@ -220,9 +220,9 @@ public class ContractGenerator {
                     createContract(sif.getElseStmt().get(), (ArrayList<SimpleName>) localVar.clone(), d);
                 } else {
                     Behavior e = new Behavior(b);
+                    b.addChild(e);
                     e.addPreCon(new UnaryExpr(ifCond, UnaryExpr.Operator.not));
                     //TODO: e.addPreCon(); need to fix double negation
-                    b.addChild(e);
                 }
 
             } else if (s instanceof BlockStmt) {
@@ -395,11 +395,12 @@ public class ContractGenerator {
             createContract(ce.getExpr(), localVar, b);
             return e;
         } else if (e instanceof ConditionalExpr){
-            ConditionalExpr ce = (ConditionalExpr) e;
-            ce.setCondition(createContract(ce.getCondition(), localVar, b));
-            ce.setThenExpr(createContract(ce.getThenExpr(), localVar, b));
-            ce.setElseExpr(createContract(ce.getElseExpr(), localVar, b));
-            return ce;
+            //ConditionalExpr ce = (ConditionalExpr) e;
+            //ce.setCondition(createContract(ce.getCondition(), localVar, b));
+            //ce.setThenExpr(createContract(ce.getThenExpr(), localVar, b));
+            //ce.setElseExpr(createContract(ce.getElseExpr(), localVar, b));
+            //TODO: A lot of work has to be done in order to properly evaluate conditionals.
+            return null;
         } else if(e instanceof InstanceOfExpr) {
             if(((InstanceOfExpr) e).getExpr() instanceof MethodCallExpr){
                 createContract(((InstanceOfExpr) e).getExpr(), localVar, b);

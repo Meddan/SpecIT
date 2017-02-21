@@ -10,6 +10,7 @@ public class IfStatements {
         if(a++ > 4 ){
             return "hi";
         }
+        a = b == 3 ? 2 : 1;
         return "hello";
     }
 }

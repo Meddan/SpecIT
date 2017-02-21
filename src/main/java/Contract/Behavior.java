@@ -171,7 +171,9 @@ public class Behavior {
         sb.append(createSignalsOnly());
         sb.append(createSignal());
         for(SimpleName sn : assignedValues.keySet()){
-            sb.append("ensures " + sn + " = " + assignedValues.get(sn) + "\n");
+            if(assignedValues.get(sn) != null) {
+                sb.append("ensures " + sn + " = " + assignedValues.get(sn) + "\n");
+            }
         }
         sb.append(createAssignable());
 
@@ -337,6 +339,13 @@ public class Behavior {
     }
 
     public void putAssignedValue(SimpleName name, Expression e){
-        assignedValues.put(name, e);
+        //System.out.println("Adding " + name + " with " + e);
+        if(!closed) {
+            assignedValues.put(name, e);
+        }
+        //System.out.println("Getting " + name + " is " + assignedValues.get(name));
+        for(Behavior b : children){
+            b.putAssignedValue(name, e);
+        }
     }
 }
