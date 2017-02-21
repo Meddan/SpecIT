@@ -5,20 +5,11 @@ package Examples.SingleExample;
  */
 public class IfStatements {
     int a;
+    int b = 3 + a;
     public String simplestCase(int n){
-        boolean b = true;
-        boolean c = false;
-        if(!b) {
-            if(c){
-                a = 1;
-            }
-            a = 2;
-        } else {
-            a = 3;
-            assert false;
+        if(a++ > 4 ){
             return "hi";
         }
-        assert (true);
         return "hello";
     }
 }

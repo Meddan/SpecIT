@@ -62,8 +62,6 @@ public class ContractGenerator {
         for (BodyDeclaration<?> b : target.getMembers()){
             if(b instanceof MethodDeclaration){
                 contracts.put((MethodDeclaration) b, createContract((MethodDeclaration) b));
-            } else {
-                System.out.println("Bodydeclaration " + b + " of " + b.getClass() + " is not covered!");
             }
         }
         for(MethodDeclaration md : contracts.keySet()){
@@ -114,12 +112,31 @@ public class ContractGenerator {
         //Get row for md
         //Get top-level assertions
         NodeList<Statement> stmtList =  md.getBody().get().getStmts();
+        //TODO:
         ArrayList<SimpleName> params = new ArrayList<>();
+        Contract c = new Contract(md);
+        Behavior b = c.getCurrentBehavior();
+        b.setMethodDeclaration(md);
         for(Parameter p : md.getParameters()){
             params.add(p.getName());
+            b.putAssignedValue(p.getName(), new NameExpr(new SimpleName("\\old(" + p.getName() + ")")));
         }
-        Contract c = new Contract(md);
-        c.getCurrentBehavior().setMethodDeclaration(md);
+        for(FieldDeclaration fd : fields){
+            for(VariableDeclarator vd : fd.getVariables()){
+                params.add(vd.getId().getName());
+                if(vd.getInit().isPresent()){
+                    //If we initialize a variable we save the name in the behaviors assigned values with the
+                    // value of the expression that we get from evaluating the initializer
+                    if(!(vd.getInit().get() instanceof ArrayCreationExpr)){
+                        //b.putAssignedValue(vd.getId().getName(), new NameExpr(vd.getId().getName()));
+                        b.putAssignedValue(vd.getId().getName(), createContract(vd.getInit().get(), params, b));
+                    }
+                } else {
+                    b.putAssignedValue(vd.getId().getName(), new NameExpr(new SimpleName("\\old(" + vd.getId().getName() + ")")));
+                }
+            }
+        }
+
         createContract(stmtList, params, c.getCurrentBehavior());
         return c;
 
@@ -188,8 +205,8 @@ public class ContractGenerator {
                  * behavior is set to the initial one.
                  */
                 IfStmt sif = (IfStmt) s;
-                Behavior a = new Behavior(b);
                 Expression ifCond = createContract(sif.getCondition(),localVar, b);
+                Behavior a = new Behavior(b);
                 a.addPreCon(ifCond);
                 b.setClosed(true);
                 b.addChild(a);
@@ -231,9 +248,12 @@ public class ContractGenerator {
         if(Resources.ignorableExpression(e)){
             return e;
         } else if (e instanceof NameExpr){
-            if(b.getAssignedValues().keySet().contains(((NameExpr) e).getName())){
-                return b.getAssignedValues().get(((NameExpr) e).getName());
+            NameExpr ne = (NameExpr) e;
+            if(b.getAssignedValues().keySet().contains((ne.getName()))){
+                return b.getAssignedValues().get((ne.getName()));
             } else {
+                NameExpr old = new NameExpr(new SimpleName("\\old(" + ne.getName() + ")"));
+                b.putAssignedValue(ne.getName(), old);
                 return e;
             }
         } else if(e instanceof MethodCallExpr){
@@ -466,7 +486,7 @@ public class ContractGenerator {
     }
 
     public static void main(String args[]){
-        File projectDir = new File("src/main/java/Examples");
+        File projectDir = new File("src/main/java/Examples/SingleExample");
         testClasses(projectDir);
     }
     public static void testClasses(File projectDir) {
