@@ -211,8 +211,6 @@ public class ContractGenerator {
             } else if (s instanceof BlockStmt) {
                 BlockStmt bs = (BlockStmt) s;
                 createContract(((BlockStmt) s).getStmts(), (ArrayList<SimpleName>) localVar.clone(), b);
-            } else if (s instanceof ThrowStmt) {
-                //TODO: Add throw behavior
             } else if (s instanceof BreakStmt) {
                 return;
             } else if (s instanceof ContinueStmt) {
