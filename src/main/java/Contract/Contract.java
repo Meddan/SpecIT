@@ -59,15 +59,7 @@ public class Contract {
     }
 
     private LinkedList<Behavior> getLeafs(Behavior b){
-        LinkedList<Behavior> list = new LinkedList<Behavior>();
-        if(b.getChildren().isEmpty()){
-            list.add(b);
-        } else {
-            for (Behavior c : b.getChildren()) {
-                list.addAll(getLeafs(c));
-            }
-        }
-        return list;
+        return b.getLeafs();
     }
 
     public String toString() {

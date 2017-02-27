@@ -8,6 +8,7 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.AssertStmt;
 import com.github.javaparser.ast.type.Type;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
@@ -347,5 +348,16 @@ public class Behavior {
         for(Behavior b : children){
             b.putAssignedValue(name, e);
         }
+    }
+    public LinkedList<Behavior> getLeafs(){
+        LinkedList<Behavior> list = new LinkedList<>();
+        if(this.children.isEmpty()){
+            list.add(this);
+        } else {
+            for(Behavior b : this.children){
+                list.addAll(b.getLeafs());
+            }
+        }
+        return list;
     }
 }
