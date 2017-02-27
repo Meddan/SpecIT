@@ -145,7 +145,7 @@ public class ContractGenerator {
     public void createContract(NodeList<Statement> stmtList, ArrayList<SimpleName> localVar, Behavior b){
         boolean pure = true;
         for(Statement s : stmtList){
-           createContract(s, localVar, b);
+            createContract(s, localVar, b);
         }
     }
     public void createContract(Statement s, ArrayList<SimpleName> localVar, Behavior b){
@@ -232,12 +232,26 @@ public class ContractGenerator {
                 return;
             } else if (s instanceof ContinueStmt) {
                 return;
-            } else if (s instanceof DoStmt) {
-                DoStmt ds = (DoStmt) s;
-                createContract(ds.getCondition(), localVar, b);
-                createContract(ds.getBody(), (ArrayList<SimpleName>) localVar.clone(), b);
             } else if (s instanceof EmptyStmt) {
                 return;
+            } else if (s instanceof WhileStmt){
+                System.out.println("WhileStmt");
+                WhileStmt ws = (WhileStmt) s;
+                Statement body = ws.getBody();
+                Behavior temporary = new Behavior(null);
+                createContract(ws.getCondition(), localVar, temporary);
+                createContract(body, localVar, temporary);
+                for(Behavior leaf : temporary.getLeafs()){
+                    for(SimpleName sn : leaf.getAssignables()){
+                        b.putAssignedValue(sn, null);
+                        System.out.println("Removing: " + sn);
+                    }
+                }
+
+
+                System.out.println("WHILE DONE");
+            } else if (s instanceof ForStmt || s instanceof ForeachStmt || s instanceof DoStmt){
+                //TODO: implement
             } else {
                 System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
             }
@@ -252,8 +266,6 @@ public class ContractGenerator {
             if(b.getAssignedValues().keySet().contains((ne.getName()))){
                 return b.getAssignedValues().get((ne.getName()));
             } else {
-                NameExpr old = new NameExpr(new SimpleName("\\old(" + ne.getName() + ")"));
-                b.putAssignedValue(ne.getName(), old);
                 return e;
             }
         } else if(e instanceof MethodCallExpr){
@@ -283,7 +295,6 @@ public class ContractGenerator {
             return null;
         } else if (e instanceof AssignExpr){
             AssignExpr ae = (AssignExpr) e;
-            //TODO: Probably can remove a lot since Contract does these things.
 
             if(ae.getTarget() instanceof FieldAccessExpr){
                 b.putAssignedValue(((FieldAccessExpr) ae.getTarget()).getField(), createContract(ae.getValue(), localVar, b));
@@ -307,119 +318,127 @@ public class ContractGenerator {
                 b.setPure(false);
             }
             return null;
-        } else if (e instanceof BinaryExpr){
-            BinaryExpr be = (BinaryExpr) e;
-            be.setLeft(createContract(be.getLeft(), localVar, b));
-            be.setRight(createContract(be.getRight(), localVar, b));
-            return be;
+        } else {
+            if (e instanceof BinaryExpr) {
+                BinaryExpr be = (BinaryExpr) e;
+                Expression left = createContract(be.getLeft(), localVar, b);
+                Expression right = createContract(be.getRight(), localVar, b);
 
-        } else if(e instanceof UnaryExpr){
-            UnaryExpr ue = (UnaryExpr) e;
-            if (ue.getExpr() instanceof NameExpr) {
-                NameExpr nameExpr = (NameExpr) ue.getExpr();
-                SimpleName name = nameExpr.getName();
-                IntegerLiteralExpr ile = new IntegerLiteralExpr();
-                ile.setValue("1");
-                Expression temp;
-                if(b.getAssignedValues().containsKey(nameExpr.getName())){
-                    temp = b.getAssignedValues().get(nameExpr.getName());
-                } else {
-                    temp = nameExpr;
-                }
-                BinaryExpr be = new BinaryExpr();
-                be.setLeft(temp);
-                be.setRight(ile);
-                if(ue.getOperator() == UnaryExpr.Operator.postDecrement) {
-                    be.setOperator(BinaryExpr.Operator.minus);
-                    b.putAssignedValue(name, be);
-                    return temp;
-                } else if (ue.getOperator() == UnaryExpr.Operator.postIncrement) {
-                    be.setOperator(BinaryExpr.Operator.plus);
-                    b.putAssignedValue(name, be);
-                    return temp;
-                } else if (ue.getOperator() == UnaryExpr.Operator.preDecrement) {
-                    be.setOperator(BinaryExpr.Operator.minus);
-                    b.putAssignedValue(name, be);
-                    return be;
-                } else if(ue.getOperator() == UnaryExpr.Operator.preIncrement) {
-                    be.setOperator(BinaryExpr.Operator.plus);
-                    b.putAssignedValue(name, be);
+                if (left != null && right != null) {
+                    be.setLeft(left);
+                    be.setRight(right);
                     return be;
                 } else {
-                    return e;
+                    return null;
                 }
+            } else if (e instanceof UnaryExpr) {
+                UnaryExpr ue = (UnaryExpr) e;
+                if (ue.getExpr() instanceof NameExpr) {
+                    NameExpr nameExpr = (NameExpr) ue.getExpr();
+                    SimpleName name = nameExpr.getName();
+                    IntegerLiteralExpr ile = new IntegerLiteralExpr();
+                    ile.setValue("1");
+                    Expression temp;
+                    if (b.getAssignedValues().containsKey(nameExpr.getName())) {
+                        temp = b.getAssignedValues().get(nameExpr.getName());
+                    } else {
+                        temp = nameExpr;
+                    }
+                    BinaryExpr be = new BinaryExpr();
+                    be.setLeft(temp);
+                    be.setRight(ile);
+                    if (ue.getOperator() == UnaryExpr.Operator.postDecrement) {
+                        be.setOperator(BinaryExpr.Operator.minus);
+                        b.putAssignedValue(name, be);
+                        return temp;
+                    } else if (ue.getOperator() == UnaryExpr.Operator.postIncrement) {
+                        be.setOperator(BinaryExpr.Operator.plus);
+                        b.putAssignedValue(name, be);
+                        return temp;
+                    } else if (ue.getOperator() == UnaryExpr.Operator.preDecrement) {
+                        be.setOperator(BinaryExpr.Operator.minus);
+                        b.putAssignedValue(name, be);
+                        return be;
+                    } else if (ue.getOperator() == UnaryExpr.Operator.preIncrement) {
+                        be.setOperator(BinaryExpr.Operator.plus);
+                        b.putAssignedValue(name, be);
+                        return be;
+                    } else {
+                        return e;
+                    }
+                } else {
+                    return ue.setExpr(createContract(ue.getExpr(), localVar, b));
+                }
+            } else if (e instanceof EnclosedExpr) {
+                if (((EnclosedExpr) e).getInner().isPresent()) {
+                    return ((EnclosedExpr) e).setInner(createContract(((EnclosedExpr) e).getInner().get(), localVar, b));
+                } else {
+                    //This should really not happen...
+                    System.out.println("This is not covered! Enclosed expression is non-existent!");
+                    return null;
+                }
+            } else if (e instanceof ObjectCreationExpr) {
+                //TODO: Check if constructor is pure? What will this actually do? Maybe always false?
+                ObjectCreationExpr oce = (ObjectCreationExpr) e;
+                boolean pure = true;
+                for (Expression exp : oce.getArgs()) {
+                    createContract(exp, localVar, b);
+                }
+                if (oce.getAnonymousClassBody().isPresent()) {
+                    //TODO: Evaluate body
+                    b.setPure(false);
+
+                }
+                b.setPure(false);
+                return e;
+            } else if (e instanceof ArrayCreationExpr) {
+                ArrayCreationExpr ace = (ArrayCreationExpr) e;
+                if (ace.getInitializer().isPresent()) {
+                    createContract(ace.getInitializer().get(), localVar, b);
+                }
+                return e;
+            } else if (e instanceof ArrayInitializerExpr) {
+
+                ArrayInitializerExpr aie = (ArrayInitializerExpr) e;
+                for (Expression exp : aie.getValues()) {
+                    createContract(exp, localVar, b);
+                }
+                return e;
+            } else if (e instanceof ArrayAccessExpr) {
+                ArrayAccessExpr aae = (ArrayAccessExpr) e;
+                createContract(aae.getIndex(), localVar, b);
+                return e;
+            } else if (e instanceof CastExpr) {
+                CastExpr ce = (CastExpr) e;
+                createContract(ce.getExpr(), localVar, b);
+                return e;
+            } else if (e instanceof ConditionalExpr) {
+                //ConditionalExpr ce = (ConditionalExpr) e;
+                //ce.setCondition(createContract(ce.getCondition(), localVar, b));
+                //ce.setThenExpr(createContract(ce.getThenExpr(), localVar, b));
+                //ce.setElseExpr(createContract(ce.getElseExpr(), localVar, b));
+                //TODO: A lot of work has to be done in order to properly evaluate conditionals.
+                return null;
+            } else if (e instanceof InstanceOfExpr) {
+                if (((InstanceOfExpr) e).getExpr() instanceof MethodCallExpr) {
+                    createContract(((InstanceOfExpr) e).getExpr(), localVar, b);
+                }
+                return e;
+            } else if (e instanceof LambdaExpr) {
+                System.out.println("LAMDA EXPRESSIONS ARE NOT SUPPORTED");
+                b.setPure(false);
+                return e;
+            } else if (e instanceof SuperExpr) {
+                //TODO: Need to have entire package in scope
+                //TODO: Also implement this
+                System.out.println("Super expression is not covered");
+                b.setPure(false);
+                return e;
             } else {
-                return ue.setExpr(createContract(ue.getExpr(), localVar, b));
-            }
-        } else if (e instanceof EnclosedExpr){
-            if(((EnclosedExpr) e).getInner().isPresent()) {
-                return ((EnclosedExpr) e).setInner(createContract(((EnclosedExpr) e).getInner().get(), localVar, b));
-            } else {
-                //This should really not happen...
-                System.out.println("This is not covered! Enclosed expression is non-existent!");
+                System.out.println("Expression " + e + " of " + e.getClass() + " is not covered");
+                b.setPure(false);
                 return null;
             }
-        } else if (e instanceof ObjectCreationExpr){
-            //TODO: Check if constructor is pure? What will this actually do? Maybe always false?
-            ObjectCreationExpr oce = (ObjectCreationExpr) e;
-            boolean pure = true;
-            for(Expression exp : oce.getArgs()){
-                createContract(exp, localVar, b);
-            }
-            if (oce.getAnonymousClassBody().isPresent()) {
-                //TODO: Evaluate body
-                b.setPure(false);
-
-            }
-            b.setPure(false);
-            return e;
-        } else if(e instanceof ArrayCreationExpr){
-            ArrayCreationExpr ace = (ArrayCreationExpr) e;
-            if(ace.getInitializer().isPresent()) {
-                createContract(ace.getInitializer().get(), localVar, b);
-            }
-            return e;
-        } else if(e instanceof  ArrayInitializerExpr){
-
-            ArrayInitializerExpr aie = (ArrayInitializerExpr) e;
-            for(Expression exp : aie.getValues()){
-                createContract(exp,localVar,b);
-            }
-            return e;
-        } else if(e instanceof ArrayAccessExpr){
-            ArrayAccessExpr aae = (ArrayAccessExpr) e;
-            createContract(aae.getIndex(), localVar, b);
-            return e;
-        } else if(e instanceof CastExpr){
-            CastExpr ce = (CastExpr) e;
-            createContract(ce.getExpr(), localVar, b);
-            return e;
-        } else if (e instanceof ConditionalExpr){
-            //ConditionalExpr ce = (ConditionalExpr) e;
-            //ce.setCondition(createContract(ce.getCondition(), localVar, b));
-            //ce.setThenExpr(createContract(ce.getThenExpr(), localVar, b));
-            //ce.setElseExpr(createContract(ce.getElseExpr(), localVar, b));
-            //TODO: A lot of work has to be done in order to properly evaluate conditionals.
-            return null;
-        } else if(e instanceof InstanceOfExpr) {
-            if(((InstanceOfExpr) e).getExpr() instanceof MethodCallExpr){
-                createContract(((InstanceOfExpr) e).getExpr(), localVar, b);
-            }
-            return e;
-        } else if (e instanceof LambdaExpr){
-            System.out.println("LAMDA EXPRESSIONS ARE NOT SUPPORTED");
-            b.setPure(false);
-            return e;
-        } else if (e instanceof SuperExpr){
-            //TODO: Need to have entire package in scope
-            //TODO: Also implement this
-            System.out.println("Super expression is not covered");
-            b.setPure(false);
-            return e;
-        } else {
-            System.out.println("Expression " + e + " of " + e.getClass() + " is not covered");
-            b.setPure(false);
-            return null;
         }
     }
 
