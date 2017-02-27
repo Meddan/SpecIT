@@ -250,8 +250,36 @@ public class ContractGenerator {
 
 
                 System.out.println("WHILE DONE");
-            } else if (s instanceof ForStmt || s instanceof ForeachStmt || s instanceof DoStmt){
-                //TODO: implement
+            } else if (s instanceof ForStmt) {
+                ForStmt fs = (ForStmt) s;
+                Behavior temporary = new Behavior(null);
+                for(Expression e : fs.getInit()){
+                    createContract(e, localVar, temporary);
+                }
+                if(fs.getCompare().isPresent()){
+                    createContract(fs.getCompare().get(), localVar, temporary);
+                }
+                for(Expression e : fs.getUpdate()){
+                    createContract(e, localVar, temporary);
+                }
+                createContract(fs.getBody(), localVar, temporary);
+                for(Behavior leaf : temporary.getLeafs()){
+                    for(SimpleName sn : leaf.getAssignables()){
+                        b.putAssignedValue(sn, null);
+                        System.out.println("Removing: " + sn);
+                    }
+                }
+            } else if (s instanceof DoStmt){
+                DoStmt ds = (DoStmt) s;
+                Statement body = ds.getBody();
+                Behavior temporary = new Behavior(null);
+                createContract(ds.getCondition(), localVar, temporary);
+                createContract(body, localVar, temporary);
+                for(Behavior leaf : temporary.getLeafs()){
+                    for(SimpleName sn : leaf.getAssignables()){
+                        b.putAssignedValue(sn, null);
+                    }
+                }
             } else {
                 System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
             }
