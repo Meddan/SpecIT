@@ -124,19 +124,20 @@ public class ContractGenerator {
         for(FieldDeclaration fd : fields){
             for(VariableDeclarator vd : fd.getVariables()){
                 params.add(vd.getId().getName());
-                if(vd.getInit().isPresent()){
+                SimpleName name = new SimpleName("this." + vd.getId().getName());
+                //Commented code is wrong. We cannot use the initialized values for fields for now.
+                //Perhaps we can in constructors?
+                //if(vd.getInit().isPresent()){
                     //If we initialize a variable we save the name in the behaviors assigned values with the
                     // value of the expression that we get from evaluating the initializer
-                    if(!(vd.getInit().get() instanceof ArrayCreationExpr)){
+                    //if(!(vd.getInit().get() instanceof ArrayCreationExpr)){
                         //b.putAssignedValue(vd.getId().getName(), new NameExpr(vd.getId().getName()));
-                        b.putAssignedValue(vd.getId().getName(), createContract(vd.getInit().get(), params, b));
-                    }
-                } else {
-                    b.putAssignedValue(vd.getId().getName(), new NameExpr(new SimpleName("\\old(" + vd.getId().getName() + ")")));
-                }
+                    //    b.putAssignedValue(name, createContract(vd.getInit().get(), params, b));
+                    //}
+                //} else {
+                b.putAssignedValue(name, new NameExpr(new SimpleName("\\old(" + name + ")")));
             }
         }
-
         createContract(stmtList, params, c.getCurrentBehavior());
         return c;
 
@@ -235,7 +236,6 @@ public class ContractGenerator {
             } else if (s instanceof EmptyStmt) {
                 return;
             } else if (s instanceof WhileStmt){
-                System.out.println("WhileStmt");
                 WhileStmt ws = (WhileStmt) s;
                 Statement body = ws.getBody();
                 Behavior temporary = new Behavior(null);
@@ -244,12 +244,8 @@ public class ContractGenerator {
                 for(Behavior leaf : temporary.getLeafs()){
                     for(SimpleName sn : leaf.getAssignables()){
                         b.putAssignedValue(sn, null);
-                        System.out.println("Removing: " + sn);
                     }
                 }
-
-
-                System.out.println("WHILE DONE");
             } else if (s instanceof ForStmt) {
                 ForStmt fs = (ForStmt) s;
                 Behavior temporary = new Behavior(null);
@@ -266,7 +262,6 @@ public class ContractGenerator {
                 for(Behavior leaf : temporary.getLeafs()){
                     for(SimpleName sn : leaf.getAssignables()){
                         b.putAssignedValue(sn, null);
-                        System.out.println("Removing: " + sn);
                     }
                 }
             } else if (s instanceof DoStmt){
@@ -291,10 +286,19 @@ public class ContractGenerator {
             return e;
         } else if (e instanceof NameExpr){
             NameExpr ne = (NameExpr) e;
-            if(b.getAssignedValues().keySet().contains((ne.getName()))){
-                return b.getAssignedValues().get((ne.getName()));
+            if(b.isLocalVar(ne.getName())){
+                if(b.getAssignedValues().containsKey(ne.getName())){
+                    return b.getAssignedValues().get((ne.getName()));
+                } else {
+                    return ne;
+                }
             } else {
-                return e;
+                SimpleName sn = new SimpleName("this." + ne.getName());
+                if(b.getAssignedValues().containsKey(sn)){
+                    return b.getAssignedValues().get(sn);
+                } else {
+                    return new NameExpr(sn);
+                }
             }
         } else if(e instanceof MethodCallExpr){
             SymbolReference sr = JavaParserFacade.get(combinedTypeSolver).solve((MethodCallExpr) e);
@@ -311,6 +315,7 @@ public class ContractGenerator {
             VariableDeclarationExpr vde = (VariableDeclarationExpr) e;
             for(VariableDeclarator vd : vde.getVariables()){
                 localVar.add(vd.getId().getName());
+                b.addLocalVar(vd.getId().getName());
                 if(vd.getInit().isPresent()){
                     //If we initialize a variable we save the name in the behaviors assigned values with the
                     // value of the expression that we get from evaluating the initializer
@@ -325,12 +330,18 @@ public class ContractGenerator {
             AssignExpr ae = (AssignExpr) e;
 
             if(ae.getTarget() instanceof FieldAccessExpr){
-                b.putAssignedValue(((FieldAccessExpr) ae.getTarget()).getField(), createContract(ae.getValue(), localVar, b));
+                SimpleName name = new SimpleName("this." +((FieldAccessExpr) ae.getTarget()).getField());
+                b.putAssignedValue(name, createContract(ae.getValue(), localVar, b));
                 b.setPure(false);
             } else if (ae.getTarget() instanceof NameExpr){
                 NameExpr ne = (NameExpr) ae.getTarget();
-                b.putAssignedValue(((NameExpr) ae.getTarget()).getName(), createContract(ae.getValue(), localVar, b));
-                b.addPostCon(ae, false);
+                SimpleName name;
+                if(b.isLocalVar(ne.getName())){
+                    name = ne.getName();
+                } else {
+                    name = new SimpleName("this." + ne.getName());
+                }
+                b.putAssignedValue(name, createContract(ae.getValue(), localVar, b));
                 b.setPure(localVar.contains(((NameExpr) ae.getTarget()).getName()));
             } else if(ae.getTarget() instanceof ArrayAccessExpr){
                 ArrayAccessExpr aae = (ArrayAccessExpr) ae.getTarget();
@@ -534,7 +545,7 @@ public class ContractGenerator {
     }
 
     public static void main(String args[]){
-        File projectDir = new File("src/main/java/Examples/SingleExample");
+        File projectDir = new File("src/main/java/Examples");
         testClasses(projectDir);
     }
     public static void testClasses(File projectDir) {

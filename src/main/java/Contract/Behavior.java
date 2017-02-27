@@ -67,8 +67,20 @@ public class Behavior {
     }
 
     private MethodDeclaration methodDeclaration;
+
+    private LinkedList<SimpleName> localVariables = new LinkedList<>();
+    private LinkedList<SimpleName> getLocalVariables(){
+        return localVariables;
+    }
+    public void addLocalVar(SimpleName name){
+        localVariables.add(name);
+    }
+    public boolean isLocalVar(SimpleName name){
+        return localVariables.contains(name);
+    }
+
     /**
-     * Creates a ne behavior. Sets isExcpetional to false by default.
+     * Creates a new behavior. Sets isExcpetional to false by default.
      * Use setExceptional() to change.
      */
     public Behavior(Behavior parent){
@@ -95,6 +107,7 @@ public class Behavior {
         this.isExceptional = original.getIsExceptional();
         this.assignedValues = (HashMap<SimpleName, Expression>) original.getAssignedValues().clone();
         this.methodDeclaration = original.getMethodDeclaration();
+        this.localVariables = (LinkedList<SimpleName>) original.getLocalVariables().clone();
         this.pure = original.isPure();
     }
 
@@ -168,7 +181,7 @@ public class Behavior {
 
         sb.append(createBehaviorHeader());
         sb.append(createPreCons());
-        sb.append(createPostCons());
+        sb.append(createPostCons());;
         sb.append(createSignalsOnly());
         sb.append(createSignal());
         for(SimpleName sn : assignedValues.keySet()){
