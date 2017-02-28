@@ -22,6 +22,9 @@ public class PostCondition {
     }
 
     public String toString(){
+        if(expression == null){
+            return "";
+        }
         if(isReturn){
             return "ensures \\result == " + expression.toString() + ";\n";
         } else {

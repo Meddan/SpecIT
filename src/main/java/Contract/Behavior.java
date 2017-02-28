@@ -181,7 +181,7 @@ public class Behavior {
 
         sb.append(createBehaviorHeader());
         sb.append(createPreCons());
-        sb.append(createPostCons());;
+        sb.append(createPostCons());
         sb.append(createSignalsOnly());
         sb.append(createSignal());
         for(SimpleName sn : assignedValues.keySet()){
@@ -192,8 +192,6 @@ public class Behavior {
         sb.append(createAssignable());
 
         sb.append("ASSIGNED VALUES AT END: " + assignedValues.keySet().size());
-
-
 
         return sb.toString();
     }
