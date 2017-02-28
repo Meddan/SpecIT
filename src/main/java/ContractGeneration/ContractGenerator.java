@@ -157,19 +157,24 @@ public class ContractGenerator {
             AssertStmt as = (AssertStmt) s;
             //An assert-statement can be seen as a precondition if it appears at the start of a function
             //We
-            Expression e = createContract(as.getCheck(), localVar, b);
-            if(startAssert(b.getMethodDeclaration(), as)){
-                b.addPreCon(e);
+            for(Behavior beh : b.getLeafs()) {
+                Expression e = createContract(as.getCheck(), localVar, beh);
+                if (startAssert(beh.getMethodDeclaration(), as)) {
+                    beh.addPreCon(e);
+                }
+                //Add the assertion as a potential postcondition
+                b.addPostCon(e, false);
             }
-            //Add the assertion as a potential postcondition
-            b.addPostCon(e, false);
             //Create contract for the expression in the assertion
 
         } else if (s instanceof ReturnStmt){
             ReturnStmt rs = (ReturnStmt) s;
             if(rs.getExpr().isPresent()){
                 //Create contracts for the return expression and add the return statement to the contract
-                b.addPostCon(createContract(rs.getExpr().get(), localVar, b), true);
+                for(Behavior beh : b.getLeafs()){
+                    Expression exp = createContract(rs.getExpr().get(), localVar, beh);
+                    beh.addPostCon(exp, true);
+                }
             }
             //Path of execution ends and we close all behaviors on this path
             b.setClosed(true);
@@ -184,7 +189,6 @@ public class ContractGenerator {
                 for(PostCondition pc : listOfPostCons){
                     listOfExprs.add(pc.getExpression());
                 }
-
                 b.addException(((ObjectCreationExpr) ts.getExpr()).getType(), listOfExprs);
                 // We create a new object when throwing
                 // TODO : Make more intelligent
@@ -197,7 +201,9 @@ public class ContractGenerator {
             //We are doing further modifications to our code thus we cannot guarantee our postconditions will hold.
             b.clearPostAssert();
             if (s instanceof ExpressionStmt) {
-                createContract(((ExpressionStmt) s).getExpression(), localVar, b);
+                for(Behavior beh : b.getLeafs()){
+                    createContract(((ExpressionStmt) s).getExpression(), localVar, beh);
+                }
             } else if (s instanceof IfStmt) {
                 /*
                  * When evaluating a if-statement we split the current behavior in 2, one that enters the then-block and
@@ -206,26 +212,27 @@ public class ContractGenerator {
                  * behavior is set to the initial one.
                  */
                 IfStmt sif = (IfStmt) s;
-                Expression ifCond = createContract(sif.getCondition(),localVar, b);
-                Behavior a = new Behavior(b);
-                a.addPreCon(ifCond);
-                b.setClosed(true);
-                b.addChild(a);
-                createContract(sif.getThenStmt(), (ArrayList<SimpleName>) localVar.clone(), a);
+                for(Behavior beh : b.getLeafs()) {
+                    Expression ifCond = createContract(sif.getCondition(), localVar, beh);
+                    Behavior a = new Behavior(beh);
+                    a.addPreCon(ifCond);
+                    beh.setClosed(true);
+                    beh.addChild(a);
+                    createContract(sif.getThenStmt(), (ArrayList<SimpleName>) localVar.clone(), a);
 
-                if (sif.getElseStmt().isPresent()) {
-                    Behavior d = new Behavior(b);
-                    b.addChild(d);
-                    //TODO: d.addPreCon(); need to fix double negation
-                    d.addPreCon(new UnaryExpr(ifCond, UnaryExpr.Operator.not));
-                    createContract(sif.getElseStmt().get(), (ArrayList<SimpleName>) localVar.clone(), d);
-                } else {
-                    Behavior e = new Behavior(b);
-                    b.addChild(e);
-                    e.addPreCon(new UnaryExpr(ifCond, UnaryExpr.Operator.not));
-                    //TODO: e.addPreCon(); need to fix double negation
+                    if (sif.getElseStmt().isPresent()) {
+                        Behavior d = new Behavior(beh);
+                        beh.addChild(d);
+                        //TODO: d.addPreCon(); need to fix double negation
+                        d.addPreCon(new UnaryExpr(ifCond, UnaryExpr.Operator.not));
+                        createContract(sif.getElseStmt().get(), (ArrayList<SimpleName>) localVar.clone(), d);
+                    } else {
+                        Behavior e = new Behavior(beh);
+                        beh.addChild(e);
+                        e.addPreCon(new UnaryExpr(ifCond, UnaryExpr.Operator.not));
+                        //TODO: e.addPreCon(); need to fix double negation
+                    }
                 }
-
             } else if (s instanceof BlockStmt) {
                 BlockStmt bs = (BlockStmt) s;
                 createContract(((BlockStmt) s).getStmts(), (ArrayList<SimpleName>) localVar.clone(), b);
@@ -317,45 +324,45 @@ public class ContractGenerator {
                 localVar.add(vd.getId().getName());
                 b.addLocalVar(vd.getId().getName());
                 if(vd.getInit().isPresent()){
+                    Expression initExp = vd.getInit().get();
                     //If we initialize a variable we save the name in the behaviors assigned values with the
                     // value of the expression that we get from evaluating the initializer
-                    if(!(vd.getInit().get() instanceof ArrayCreationExpr)){
+                    if(!(initExp instanceof ArrayCreationExpr)) {
                         //b.putAssignedValue(vd.getId().getName(), new NameExpr(vd.getId().getName()));
-                        b.putAssignedValue(vd.getId().getName(), createContract(vd.getInit().get(), localVar, b));
+                        b.putAssignedValue(vd.getId().getName(), createContract(initExp, localVar, b));
                     }
                 }
             }
             return null;
         } else if (e instanceof AssignExpr){
             AssignExpr ae = (AssignExpr) e;
-
+            SimpleName fieldName;
             if(ae.getTarget() instanceof FieldAccessExpr){
-                SimpleName name = new SimpleName("this." +((FieldAccessExpr) ae.getTarget()).getField());
-                b.putAssignedValue(name, createContract(ae.getValue(), localVar, b));
+                fieldName = new SimpleName("this." +((FieldAccessExpr) ae.getTarget()).getField());
                 b.setPure(false);
             } else if (ae.getTarget() instanceof NameExpr){
                 NameExpr ne = (NameExpr) ae.getTarget();
-                SimpleName name;
                 if(b.isLocalVar(ne.getName())){
-                    name = ne.getName();
+                    fieldName = ne.getName();
                 } else {
-                    name = new SimpleName("this." + ne.getName());
+                    fieldName = new SimpleName("this." + ne.getName());
                 }
-                b.putAssignedValue(name, createContract(ae.getValue(), localVar, b));
                 b.setPure(localVar.contains(((NameExpr) ae.getTarget()).getName()));
             } else if(ae.getTarget() instanceof ArrayAccessExpr){
                 ArrayAccessExpr aae = (ArrayAccessExpr) ae.getTarget();
                 String arrayName = createContract(aae.getName(), localVar, b).toString();
                 String index = createContract(aae.getIndex(), localVar, b).toString();
-                SimpleName name = new SimpleName( arrayName + "[" + index + "]");
-                b.putAssignedValue(name, createContract(ae.getValue(), localVar, b));
+                fieldName = new SimpleName( arrayName + "[" + index + "]");
                 if(aae.getName() instanceof NameExpr){
                     b.setPure(localVar.contains(((NameExpr) aae.getName()).getName()));
                 }
             } else {
                 System.out.println("Assignment target " +  ae.getTarget() + " of " + ae.getTarget().getClass() + " not covered!");
                 b.setPure(false);
+                return null;
             }
+            Expression exp = createContract(ae.getValue(), localVar, b);
+            b.putAssignedValue(fieldName, exp);
             return null;
         } else {
             if (e instanceof BinaryExpr) {
@@ -364,9 +371,11 @@ public class ContractGenerator {
                 Expression right = createContract(be.getRight(), localVar, b);
 
                 if (left != null && right != null) {
-                    be.setLeft(left);
-                    be.setRight(right);
-                    return be;
+                    BinaryExpr newBe = new BinaryExpr();
+                    newBe.setLeft(left);
+                    newBe.setRight(right);
+                    newBe.setOperator(be.getOperator());
+                    return newBe;
                 } else {
                     return null;
                 }
@@ -457,7 +466,7 @@ public class ContractGenerator {
                 //ce.setThenExpr(createContract(ce.getThenExpr(), localVar, b));
                 //ce.setElseExpr(createContract(ce.getElseExpr(), localVar, b));
                 //TODO: A lot of work has to be done in order to properly evaluate conditionals.
-                return null;
+                return e;
             } else if (e instanceof InstanceOfExpr) {
                 if (((InstanceOfExpr) e).getExpr() instanceof MethodCallExpr) {
                     createContract(((InstanceOfExpr) e).getExpr(), localVar, b);
