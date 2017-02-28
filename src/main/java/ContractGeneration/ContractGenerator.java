@@ -461,12 +461,12 @@ public class ContractGenerator {
                 createContract(ce.getExpr(), localVar, b);
                 return e;
             } else if (e instanceof ConditionalExpr) {
-                //ConditionalExpr ce = (ConditionalExpr) e;
-                //ce.setCondition(createContract(ce.getCondition(), localVar, b));
-                //ce.setThenExpr(createContract(ce.getThenExpr(), localVar, b));
-                //ce.setElseExpr(createContract(ce.getElseExpr(), localVar, b));
-                //TODO: A lot of work has to be done in order to properly evaluate conditionals.
-                return e;
+                ConditionalExpr ce = (ConditionalExpr) e;
+                ConditionalExpr newCe = new ConditionalExpr();
+                newCe.setCondition(createContract(ce.getCondition(), localVar, b));
+                newCe.setThenExpr(createContract(ce.getThenExpr(), localVar, b));
+                newCe.setElseExpr(createContract(ce.getElseExpr(), localVar, b));
+                return new EnclosedExpr(newCe);
             } else if (e instanceof InstanceOfExpr) {
                 if (((InstanceOfExpr) e).getExpr() instanceof MethodCallExpr) {
                     createContract(((InstanceOfExpr) e).getExpr(), localVar, b);
