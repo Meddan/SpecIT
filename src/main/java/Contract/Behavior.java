@@ -186,7 +186,7 @@ public class Behavior {
         sb.append(createSignal());
         for(SimpleName sn : assignedValues.keySet()){
             if(assignedValues.get(sn) != null) {
-                sb.append("ensures " + sn + " = " + assignedValues.get(sn) + "\n");
+                sb.append("ensures " + sn + " == " + assignedValues.get(sn) + "\n");
             }
         }
         sb.append(createAssignable());
