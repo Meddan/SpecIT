@@ -42,7 +42,7 @@ public class ContractGenerator {
     //Should be initialized with a class
     private ClassOrInterfaceDeclaration target;
     private ArrayList<FieldDeclaration> fields = new ArrayList<FieldDeclaration>();
-    private HashMap<MethodDeclaration, Contract> contracts = new HashMap<>();
+    private HashMap<CallableDeclaration, Contract> contracts = new HashMap<>();
     private CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
 
     public ContractGenerator(ClassOrInterfaceDeclaration coid, String path, File projectDir){
@@ -60,24 +60,20 @@ public class ContractGenerator {
             }
         }
         //Start generating contracts, method by method
-        for (BodyDeclaration<?> b : target.getMembers()){
-            if(b instanceof MethodDeclaration){
-                contracts.put((MethodDeclaration) b, createContract((MethodDeclaration) b));
-            } else if (b instanceof ConstructorDeclaration){
-                ConstructorDeclaration cd = (ConstructorDeclaration) b;
-                createContract(cd.getBody(), new ArrayList<SimpleName>(), new Behavior(null));
-
+        for (BodyDeclaration<?> bd : target.getMembers()){
+            if(bd instanceof CallableDeclaration){
+                contracts.put((CallableDeclaration) bd,createContract((CallableDeclaration) bd));
             }
         }
-        for(MethodDeclaration md : contracts.keySet()){
+        for(CallableDeclaration cd : contracts.keySet()){
             System.out.println("-----------------");
             System.out.println();
-            System.out.println(md.getName() + "\n" + contracts.get(md));
+            System.out.println(cd.getName() + "\n" + contracts.get(cd));
             System.out.println();
-            System.out.println("Purity status: " + contracts.get(md).isPure());
+            System.out.println("Purity status: " + contracts.get(cd).isPure());
             System.out.println();
             System.out.println("-----------------");
-            md.setComment(new BlockComment(contracts.get(md).toString()));
+            cd.setComment(new BlockComment(contracts.get(cd).toString()));
         }
 
         writeToFile(path, projectDir, coid.toString());
@@ -85,8 +81,17 @@ public class ContractGenerator {
 
     }
 
-    private boolean endAssrt(MethodDeclaration md, Statement s) {
-        NodeList<Statement> stmtList = md.getBody().get().getStatements();
+    private boolean endAssrt(CallableDeclaration cd, Statement s) {
+        NodeList<Statement> stmtList;
+        if(cd instanceof MethodDeclaration){
+            stmtList = ((MethodDeclaration) cd).getBody().get().getStatements();
+        } else if(cd instanceof ConstructorDeclaration){
+            stmtList = ((ConstructorDeclaration) cd).getBody().getStatements();
+        } else {
+            System.out.println("NOT METHOD NOR CONSTRUCTOR DECLARATION");
+            stmtList = null;
+        }
+
         int index = stmtList.indexOf(s);
         if(index < 0){
             System.out.println("Assert statement not in method declaration block");
@@ -102,8 +107,17 @@ public class ContractGenerator {
         return true;
     }
 
-    private boolean startAssert(MethodDeclaration md, Statement s){
-        NodeList<Statement> stmtList = md.getBody().get().getStatements();
+    private boolean startAssert(CallableDeclaration cd, Statement s){
+        NodeList<Statement> stmtList;
+        if(cd instanceof MethodDeclaration){
+            stmtList = ((MethodDeclaration) cd).getBody().get().getStatements();
+        } else if (cd instanceof ConstructorDeclaration) {
+            stmtList = ((ConstructorDeclaration) cd).getBody().getStatements();
+        } else {
+            stmtList = null;
+            System.out.println("NOT METHOD NOR CONSTRUCTOR DECLARATION");
+        }
+
         int index = stmtList.indexOf(s);
         for(int i = 0 ; i < index ; i++){
             if(!(stmtList.get(i) instanceof AssertStmt)){
@@ -113,16 +127,25 @@ public class ContractGenerator {
         return true;
     }
 
-    public Contract createContract(MethodDeclaration md){
+    public Contract createContract(CallableDeclaration cd){
         //Get row for md
         //Get top-level assertions
-        NodeList<Statement> stmtList =  md.getBody().get().getStatements();
+        NodeList<Statement> stmtList;
+        if(cd instanceof MethodDeclaration){
+            stmtList = ((MethodDeclaration) cd).getBody().get().getStatements();
+        } else if (cd instanceof ConstructorDeclaration) {
+            stmtList = ((ConstructorDeclaration) cd).getBody().getStatements();
+        } else {
+            stmtList = null;
+            System.out.println("NOT METHOD NOR CONSTRUCTOR DECLARATION");
+        }
         //TODO:
         ArrayList<SimpleName> params = new ArrayList<>();
-        Contract c = new Contract(md);
+        Contract c = new Contract();
         Behavior b = c.getCurrentBehavior();
-        b.setMethodDeclaration(md);
-        for(Parameter p : md.getParameters()){
+        b.setCallableDeclaration(cd);
+        for(Object o : cd.getParameters()){
+            Parameter p = (Parameter) o;
             params.add(p.getName());
             b.putAssignedValue(p.getName(), new NameExpr(new SimpleName("\\old(" + p.getName() + ")")));
         }
@@ -153,7 +176,7 @@ public class ContractGenerator {
             //We
             for(Behavior beh : b.getLeafs()) {
                 Expression e = createContract(as.getCheck(), localVar, beh);
-                if (startAssert(beh.getMethodDeclaration(), as)) {
+                if (startAssert(beh.getCallableDeclaration(), as)) {
                     beh.addPreCon(e);
                 }
                 //Add the assertion as a potential postcondition
@@ -303,7 +326,7 @@ public class ContractGenerator {
                 }
             }
         } else if(e instanceof MethodCallExpr){
-            System.out.println(b.getMethodDeclaration().getName());
+            System.out.println(b.getCallableDeclaration().getName());
             MethodCallExpr mce = (MethodCallExpr) e;
             System.out.println("getting");
             JavaParserFacade.get(combinedTypeSolver);
@@ -387,6 +410,9 @@ public class ContractGenerator {
                 if (ue.getExpression() instanceof NameExpr) {
                     NameExpr nameExpr = (NameExpr) ue.getExpression();
                     SimpleName name = nameExpr.getName();
+                    if(!b.isLocalVar(name)){
+                        name.setIdentifier("this." + name.getId());
+                    }
                     IntegerLiteralExpr ile = new IntegerLiteralExpr();
                     ile.setValue("1");
                     Expression temp;

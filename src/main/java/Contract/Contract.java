@@ -24,13 +24,10 @@ public class Contract {
      * be the same as currentBehavior
      */
 
-    private MethodDeclaration methodDeclaration;
-
     private Behavior currentBehavior;
     private final Behavior initialBehavior;
 
-    public Contract(MethodDeclaration md){
-        this.methodDeclaration = md;
+    public Contract(){
         currentBehavior = new Behavior(null);
         initialBehavior = currentBehavior;
     }
@@ -43,9 +40,6 @@ public class Contract {
         return pure;
     }
 
-    public MethodDeclaration getMethodDeclaration() {
-        return methodDeclaration;
-    }
 
     public Behavior getCurrentBehavior(){
         return currentBehavior;
