@@ -242,12 +242,12 @@ public class ContractGenerator {
                         beh.addChild(d);
                         //TODO: d.addPreCon(); need to fix double negation
                         //d.addPreCon(ifCond);
-                        d.addPreCon(new UnaryExpr(ifCond, UnaryExpr.Operator.LOGICAL_COMPLEMENT));
+                        d.addPreCon(new UnaryExpr(new EnclosedExpr(ifCond), UnaryExpr.Operator.LOGICAL_COMPLEMENT));
                         createContract(sif.getElseStmt().get(), (ArrayList<SimpleName>) localVar.clone(), d);
                     } else {
                         Behavior e = new Behavior(beh);
                         beh.addChild(e);
-                        e.addPreCon(new UnaryExpr(ifCond, UnaryExpr.Operator.LOGICAL_COMPLEMENT));
+                        e.addPreCon(new UnaryExpr(new EnclosedExpr(ifCond), UnaryExpr.Operator.LOGICAL_COMPLEMENT));
                         //TODO: e.addPreCon(); need to fix double negation
                     }
                 }
