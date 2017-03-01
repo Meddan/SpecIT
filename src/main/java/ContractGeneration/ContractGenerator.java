@@ -24,6 +24,7 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeS
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.github.javaparser.symbolsolver.*;
 import com.google.common.base.Strings;
+import com.github.javaparser.symbolsolver.model.resolution.SymbolReference;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,8 +51,8 @@ public class ContractGenerator {
             return;
         }
         //Create the combinedTypeSolver
-        //combinedTypeSolver.add(new ReflectionTypeSolver());
-        //combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java/Examples")));
+        combinedTypeSolver.add(new ReflectionTypeSolver());
+        combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java/Examples")));
         //Save all class variables of the class
         for (BodyDeclaration<?> b : target.getMembers()){
             if(b instanceof FieldDeclaration){
@@ -302,8 +303,12 @@ public class ContractGenerator {
                 }
             }
         } else if(e instanceof MethodCallExpr){
-
-            /*SymbolReference<MethodDeclaration> sr = JavaParserFacade.get(combinedTypeSolver).solve((MethodCallExpr) e);
+            System.out.println(b.getMethodDeclaration().getName());
+            MethodCallExpr mce = (MethodCallExpr) e;
+            System.out.println("getting");
+            JavaParserFacade.get(combinedTypeSolver);
+            System.out.println("get");
+            SymbolReference sr = JavaParserFacade.get(combinedTypeSolver).solve(mce, false);
             if(sr.getCorrespondingDeclaration() instanceof JavaParserMethodDeclaration){
                 MethodDeclaration md = ((JavaParserMethodDeclaration) sr.getCorrespondingDeclaration()).getWrappedNode();
                 Contract temp = createContract(md);
@@ -313,7 +318,7 @@ public class ContractGenerator {
             } else {
                 //TODO: Handle other method calls
                 System.out.println("Method call expression with declaration: " + sr.getCorrespondingDeclaration() + " is not covered!");
-            }*/
+            }
             return e;
         } else if (e instanceof VariableDeclarationExpr){
             //might have to check if assigning the value of a method call
@@ -552,7 +557,7 @@ public class ContractGenerator {
     }
 
     public static void main(String args[]){
-        File projectDir = new File("src/main/java/Examples/SingleExample");
+        File projectDir = new File("src/main/java/Examples");
         testClasses(projectDir);
     }
     public static void testClasses(File projectDir) {
