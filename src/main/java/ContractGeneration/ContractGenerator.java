@@ -3,6 +3,7 @@ package ContractGeneration;
 import ContractGeneration.Resources;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.body.BodyDeclaration;
@@ -12,17 +13,16 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.*;
-import com.github.javaparser.ast.imports.*;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.visitor.GenericVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserMethodDeclaration;
-import com.github.javaparser.symbolsolver.model.resolution.SymbolReference;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+import com.github.javaparser.symbolsolver.*;
 import com.google.common.base.Strings;
 
 import java.io.File;
@@ -50,8 +50,8 @@ public class ContractGenerator {
             return;
         }
         //Create the combinedTypeSolver
-        combinedTypeSolver.add(new ReflectionTypeSolver());
-        combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java/Examples")));
+        //combinedTypeSolver.add(new ReflectionTypeSolver());
+        //combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java/Examples")));
         //Save all class variables of the class
         for (BodyDeclaration<?> b : target.getMembers()){
             if(b instanceof FieldDeclaration){
@@ -62,6 +62,10 @@ public class ContractGenerator {
         for (BodyDeclaration<?> b : target.getMembers()){
             if(b instanceof MethodDeclaration){
                 contracts.put((MethodDeclaration) b, createContract((MethodDeclaration) b));
+            } else if (b instanceof ConstructorDeclaration){
+                ConstructorDeclaration cd = (ConstructorDeclaration) b;
+                createContract(cd.getBody(), new ArrayList<SimpleName>(), new Behavior(null));
+
             }
         }
         for(MethodDeclaration md : contracts.keySet()){
@@ -81,7 +85,7 @@ public class ContractGenerator {
     }
 
     private boolean endAssrt(MethodDeclaration md, Statement s) {
-        NodeList<Statement> stmtList = md.getBody().get().getStmts();
+        NodeList<Statement> stmtList = md.getBody().get().getStatements();
         int index = stmtList.indexOf(s);
         if(index < 0){
             System.out.println("Assert statement not in method declaration block");
@@ -98,7 +102,7 @@ public class ContractGenerator {
     }
 
     private boolean startAssert(MethodDeclaration md, Statement s){
-        NodeList<Statement> stmtList = md.getBody().get().getStmts();
+        NodeList<Statement> stmtList = md.getBody().get().getStatements();
         int index = stmtList.indexOf(s);
         for(int i = 0 ; i < index ; i++){
             if(!(stmtList.get(i) instanceof AssertStmt)){
@@ -111,7 +115,7 @@ public class ContractGenerator {
     public Contract createContract(MethodDeclaration md){
         //Get row for md
         //Get top-level assertions
-        NodeList<Statement> stmtList =  md.getBody().get().getStmts();
+        NodeList<Statement> stmtList =  md.getBody().get().getStatements();
         //TODO:
         ArrayList<SimpleName> params = new ArrayList<>();
         Contract c = new Contract(md);
@@ -123,24 +127,13 @@ public class ContractGenerator {
         }
         for(FieldDeclaration fd : fields){
             for(VariableDeclarator vd : fd.getVariables()){
-                params.add(vd.getId().getName());
-                SimpleName name = new SimpleName("this." + vd.getId().getName());
-                //Commented code is wrong. We cannot use the initialized values for fields for now.
-                //Perhaps we can in constructors?
-                //if(vd.getInit().isPresent()){
-                    //If we initialize a variable we save the name in the behaviors assigned values with the
-                    // value of the expression that we get from evaluating the initializer
-                    //if(!(vd.getInit().get() instanceof ArrayCreationExpr)){
-                        //b.putAssignedValue(vd.getId().getName(), new NameExpr(vd.getId().getName()));
-                    //    b.putAssignedValue(name, createContract(vd.getInit().get(), params, b));
-                    //}
-                //} else {
+                params.add(vd.getName());
+                SimpleName name = new SimpleName("this." + vd.getName());
                 b.putAssignedValue(name, new NameExpr(new SimpleName("\\old(" + name + ")")));
             }
         }
         createContract(stmtList, params, c.getCurrentBehavior());
         return c;
-
     }
 
     public void createContract(NodeList<Statement> stmtList, ArrayList<SimpleName> localVar, Behavior b){
@@ -169,10 +162,10 @@ public class ContractGenerator {
 
         } else if (s instanceof ReturnStmt){
             ReturnStmt rs = (ReturnStmt) s;
-            if(rs.getExpr().isPresent()){
+            if(rs.getExpression().isPresent()){
                 //Create contracts for the return expression and add the return statement to the contract
                 for(Behavior beh : b.getLeafs()){
-                    Expression exp = createContract(rs.getExpr().get(), localVar, beh);
+                    Expression exp = createContract(rs.getExpression().get(), localVar, beh);
                     beh.addPostCon(exp, true);
                 }
             }
@@ -181,7 +174,7 @@ public class ContractGenerator {
         } else if (s instanceof ThrowStmt) {
             ThrowStmt ts = (ThrowStmt) s;
             b.setExceptional(true);
-            if(ts.getExpr() instanceof ObjectCreationExpr){
+            if(ts.getExpression() instanceof ObjectCreationExpr){
                 // These conditions is what will hold after we throw an exception
                 LinkedList<PostCondition> listOfPostCons = b.getPostCons();
                 LinkedList<Expression> listOfExprs = new LinkedList<>();
@@ -189,7 +182,7 @@ public class ContractGenerator {
                 for(PostCondition pc : listOfPostCons){
                     listOfExprs.add(pc.getExpression());
                 }
-                b.addException(((ObjectCreationExpr) ts.getExpr()).getType(), listOfExprs);
+                b.addException(((ObjectCreationExpr) ts.getExpression()).getType(), listOfExprs);
                 // We create a new object when throwing
                 // TODO : Make more intelligent
             } else {
@@ -224,18 +217,19 @@ public class ContractGenerator {
                         Behavior d = new Behavior(beh);
                         beh.addChild(d);
                         //TODO: d.addPreCon(); need to fix double negation
-                        d.addPreCon(new UnaryExpr(ifCond, UnaryExpr.Operator.not));
+                        //d.addPreCon(ifCond);
+                        d.addPreCon(new UnaryExpr(ifCond, UnaryExpr.Operator.LOGICAL_COMPLEMENT));
                         createContract(sif.getElseStmt().get(), (ArrayList<SimpleName>) localVar.clone(), d);
                     } else {
                         Behavior e = new Behavior(beh);
                         beh.addChild(e);
-                        e.addPreCon(new UnaryExpr(ifCond, UnaryExpr.Operator.not));
+                        e.addPreCon(new UnaryExpr(ifCond, UnaryExpr.Operator.LOGICAL_COMPLEMENT));
                         //TODO: e.addPreCon(); need to fix double negation
                     }
                 }
             } else if (s instanceof BlockStmt) {
                 BlockStmt bs = (BlockStmt) s;
-                createContract(((BlockStmt) s).getStmts(), (ArrayList<SimpleName>) localVar.clone(), b);
+                createContract(((BlockStmt) s).getStatements(), (ArrayList<SimpleName>) localVar.clone(), b);
             } else if (s instanceof BreakStmt) {
                 return;
             } else if (s instanceof ContinueStmt) {
@@ -256,7 +250,7 @@ public class ContractGenerator {
             } else if (s instanceof ForStmt) {
                 ForStmt fs = (ForStmt) s;
                 Behavior temporary = new Behavior(null);
-                for(Expression e : fs.getInit()){
+                for(Expression e : fs.getInitialization()){
                     createContract(e, localVar, temporary);
                 }
                 if(fs.getCompare().isPresent()){
@@ -308,28 +302,32 @@ public class ContractGenerator {
                 }
             }
         } else if(e instanceof MethodCallExpr){
-            SymbolReference sr = JavaParserFacade.get(combinedTypeSolver).solve((MethodCallExpr) e);
+
+            /*SymbolReference<MethodDeclaration> sr = JavaParserFacade.get(combinedTypeSolver).solve((MethodCallExpr) e);
             if(sr.getCorrespondingDeclaration() instanceof JavaParserMethodDeclaration){
                 MethodDeclaration md = ((JavaParserMethodDeclaration) sr.getCorrespondingDeclaration()).getWrappedNode();
-                b.setPure(createContract(md).isPure());
+                Contract temp = createContract(md);
+                //TODO: Should get all field modifications and apply to current contract
+                //Might want to just throw away all previos knowledge like we do with loops.
+                b.setPure(temp.isPure());
             } else {
                 //TODO: Handle other method calls
                 System.out.println("Method call expression with declaration: " + sr.getCorrespondingDeclaration() + " is not covered!");
-            }
+            }*/
             return e;
         } else if (e instanceof VariableDeclarationExpr){
             //might have to check if assigning the value of a method call
             VariableDeclarationExpr vde = (VariableDeclarationExpr) e;
             for(VariableDeclarator vd : vde.getVariables()){
-                localVar.add(vd.getId().getName());
-                b.addLocalVar(vd.getId().getName());
-                if(vd.getInit().isPresent()){
-                    Expression initExp = vd.getInit().get();
+                localVar.add(vd.getName());
+                b.addLocalVar(vd.getName());
+                if(vd.getInitializer().isPresent()){
+                    Expression initExp = vd.getInitializer().get();
                     //If we initialize a variable we save the name in the behaviors assigned values with the
                     // value of the expression that we get from evaluating the initializer
                     if(!(initExp instanceof ArrayCreationExpr)) {
                         //b.putAssignedValue(vd.getId().getName(), new NameExpr(vd.getId().getName()));
-                        b.putAssignedValue(vd.getId().getName(), createContract(initExp, localVar, b));
+                        b.putAssignedValue(vd.getName(), createContract(initExp, localVar, b));
                     }
                 }
             }
@@ -381,8 +379,8 @@ public class ContractGenerator {
                 }
             } else if (e instanceof UnaryExpr) {
                 UnaryExpr ue = (UnaryExpr) e;
-                if (ue.getExpr() instanceof NameExpr) {
-                    NameExpr nameExpr = (NameExpr) ue.getExpr();
+                if (ue.getExpression() instanceof NameExpr) {
+                    NameExpr nameExpr = (NameExpr) ue.getExpression();
                     SimpleName name = nameExpr.getName();
                     IntegerLiteralExpr ile = new IntegerLiteralExpr();
                     ile.setValue("1");
@@ -395,27 +393,27 @@ public class ContractGenerator {
                     BinaryExpr be = new BinaryExpr();
                     be.setLeft(temp);
                     be.setRight(ile);
-                    if (ue.getOperator() == UnaryExpr.Operator.postDecrement) {
-                        be.setOperator(BinaryExpr.Operator.minus);
+                    if (ue.getOperator() == UnaryExpr.Operator.POSTFIX_DECREMENT) {
+                        be.setOperator(BinaryExpr.Operator.MINUS);
                         b.putAssignedValue(name, be);
                         return temp;
-                    } else if (ue.getOperator() == UnaryExpr.Operator.postIncrement) {
-                        be.setOperator(BinaryExpr.Operator.plus);
+                    } else if (ue.getOperator() == UnaryExpr.Operator.POSTFIX_INCREMENT) {
+                        be.setOperator(BinaryExpr.Operator.PLUS);
                         b.putAssignedValue(name, be);
                         return temp;
-                    } else if (ue.getOperator() == UnaryExpr.Operator.preDecrement) {
-                        be.setOperator(BinaryExpr.Operator.minus);
+                    } else if (ue.getOperator() == UnaryExpr.Operator.PREFIX_DECREMENT) {
+                        be.setOperator(BinaryExpr.Operator.MINUS);
                         b.putAssignedValue(name, be);
                         return be;
-                    } else if (ue.getOperator() == UnaryExpr.Operator.preIncrement) {
-                        be.setOperator(BinaryExpr.Operator.plus);
+                    } else if (ue.getOperator() == UnaryExpr.Operator.PREFIX_INCREMENT) {
+                        be.setOperator(BinaryExpr.Operator.PLUS);
                         b.putAssignedValue(name, be);
                         return be;
                     } else {
                         return e;
                     }
                 } else {
-                    return ue.setExpr(createContract(ue.getExpr(), localVar, b));
+                    return ue.setExpression(createContract(ue.getExpression(), localVar, b));
                 }
             } else if (e instanceof EnclosedExpr) {
                 if (((EnclosedExpr) e).getInner().isPresent()) {
@@ -429,7 +427,7 @@ public class ContractGenerator {
                 //TODO: Check if constructor is pure? What will this actually do? Maybe always false?
                 ObjectCreationExpr oce = (ObjectCreationExpr) e;
                 boolean pure = true;
-                for (Expression exp : oce.getArgs()) {
+                for (Expression exp : oce.getArguments()) {
                     createContract(exp, localVar, b);
                 }
                 if (oce.getAnonymousClassBody().isPresent()) {
@@ -458,7 +456,7 @@ public class ContractGenerator {
                 return e;
             } else if (e instanceof CastExpr) {
                 CastExpr ce = (CastExpr) e;
-                createContract(ce.getExpr(), localVar, b);
+                createContract(ce.getExpression(), localVar, b);
                 return e;
             } else if (e instanceof ConditionalExpr) {
                 ConditionalExpr ce = (ConditionalExpr) e;
@@ -468,8 +466,8 @@ public class ContractGenerator {
                 newCe.setElseExpr(createContract(ce.getElseExpr(), localVar, b));
                 return new EnclosedExpr(newCe);
             } else if (e instanceof InstanceOfExpr) {
-                if (((InstanceOfExpr) e).getExpr() instanceof MethodCallExpr) {
-                    createContract(((InstanceOfExpr) e).getExpr(), localVar, b);
+                if (((InstanceOfExpr) e).getExpression() instanceof MethodCallExpr) {
+                    createContract(((InstanceOfExpr) e).getExpression(), localVar, b);
                 }
                 return e;
             } else if (e instanceof LambdaExpr) {
@@ -534,8 +532,8 @@ public class ContractGenerator {
                         super.visit(n, arg);
 
                         // Extract package if it exists
-                        if(n.getPackage().isPresent()){
-                            sb.append(n.getPackage().get().toString());
+                        if(n.getPackageDeclaration().isPresent()){
+                            sb.append(n.getPackageDeclaration().get().toString());
                         }
 
                         // Extract all imports
@@ -554,7 +552,7 @@ public class ContractGenerator {
     }
 
     public static void main(String args[]){
-        File projectDir = new File("src/main/java/Examples");
+        File projectDir = new File("src/main/java/Examples/SingleExample");
         testClasses(projectDir);
     }
     public static void testClasses(File projectDir) {
