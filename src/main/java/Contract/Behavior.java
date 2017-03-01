@@ -185,14 +185,7 @@ public class Behavior {
         sb.append(createPostCons());
         sb.append(createSignalsOnly());
         sb.append(createSignal());
-        for(SimpleName sn : assignedValues.keySet()){
-            if(assignedValues.get(sn) != null) {
-                sb.append("ensures " + sn + " == " + assignedValues.get(sn) + "\n");
-            }
-        }
         sb.append(createAssignable());
-
-        sb.append("ASSIGNED VALUES AT END: " + assignedValues.keySet().size());
 
         return sb.toString();
     }
@@ -228,6 +221,21 @@ public class Behavior {
         for(PreCondition p : preCons){
             sb.append(p.toString());
         }
+
+        return sb.toString();
+    }
+
+    private String createAssignables(){
+        StringBuilder sb = new StringBuilder();
+
+        for(SimpleName sn : assignedValues.keySet()){
+            if(assignedValues.get(sn) != null) {
+                sb.append("ensures " + sn + " == " + assignedValues.get(sn) + ";\n");
+            }
+        }
+        sb.append(createAssignable());
+
+        sb.append("ASSIGNED VALUES AT END: " + assignedValues.keySet().size());
 
         return sb.toString();
     }
