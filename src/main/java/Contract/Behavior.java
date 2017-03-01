@@ -185,7 +185,7 @@ public class Behavior {
         sb.append(createPostCons());
         sb.append(createSignalsOnly());
         sb.append(createSignal());
-        sb.append(createAssignable());
+        sb.append(createAssignables());
 
         return sb.toString();
     }
