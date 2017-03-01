@@ -40,9 +40,9 @@ public class ExceptionCondition {
     public String toString(){
         StringBuilder sb = new StringBuilder();
 
-        sb.append("signal ");
+        sb.append("signals (");
         sb.append(type.toString());
-        sb.append(" (");
+        sb.append(") (");
 
         if(expressions.isEmpty()){
             sb.append("true");
