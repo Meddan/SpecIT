@@ -2,6 +2,7 @@ package Contract;
 
 import ContractGeneration.Resources;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
@@ -58,15 +59,15 @@ public class Behavior {
 
     private HashMap<SimpleName, Expression> assignedValues = new HashMap<>();
 
-    public MethodDeclaration getMethodDeclaration() {
-        return methodDeclaration;
+    public CallableDeclaration getCallableDeclaration() {
+        return callableDeclaration;
     }
 
-    public void setMethodDeclaration(MethodDeclaration methodDeclaration) {
-        this.methodDeclaration = methodDeclaration;
+    public void setCallableDeclaration(CallableDeclaration callableDeclaration) {
+        this.callableDeclaration = callableDeclaration;
     }
 
-    private MethodDeclaration methodDeclaration;
+    private CallableDeclaration callableDeclaration;
 
     private LinkedList<SimpleName> localVariables = new LinkedList<>();
     private LinkedList<SimpleName> getLocalVariables(){
@@ -106,7 +107,7 @@ public class Behavior {
         this.asserts = (LinkedList<AssertStmt>) original.getAsserts().clone();
         this.isExceptional = original.getIsExceptional();
         this.assignedValues = (HashMap<SimpleName, Expression>) original.getAssignedValues().clone();
-        this.methodDeclaration = original.getMethodDeclaration();
+        this.callableDeclaration = original.getCallableDeclaration();
         this.localVariables = (LinkedList<SimpleName>) original.getLocalVariables().clone();
         this.pure = original.isPure();
     }
