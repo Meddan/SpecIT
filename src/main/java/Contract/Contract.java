@@ -1,12 +1,15 @@
 package Contract;
 
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.AssertStmt;
 import com.github.javaparser.ast.type.Type;
 import sun.awt.image.ImageWatched;
 
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
@@ -58,6 +61,7 @@ public class Contract {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        String modifier = checkModifiers(initialBehavior.getCallableDeclaration().getModifiers());
         sb.append("@\n");
         for (Behavior b : getLeafs(initialBehavior)) {
             if (!b.isEmpty()) {
@@ -66,9 +70,9 @@ public class Contract {
             }
         }
         if(sb.lastIndexOf("also\n") != -1) {
-            return sb.substring(0, sb.lastIndexOf("also\n")) + "@";
+            return sb.substring(0, sb.lastIndexOf("also\n")) + modifier + "@";
         } else {
-            return sb.append("@").toString();
+            return sb.append(modifier).append("@").toString();
         }
     }
 
@@ -90,6 +94,19 @@ public class Contract {
         for(Behavior b : getLeafs(currentBehavior)){
             b.clean();
         }
+    }
+
+    private String checkModifiers(EnumSet<Modifier> modifiers){
+        Iterator<Modifier> it = modifiers.iterator();
+        while(it.hasNext()){
+            Modifier m = it.next();
+            if(m == Modifier.PRIVATE || m == Modifier.PROTECTED){
+                // The method is private or protected
+                return "spec_public\n";
+            }
+        }
+
+        return "";
     }
 
 }
