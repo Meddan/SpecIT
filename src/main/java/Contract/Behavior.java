@@ -231,9 +231,12 @@ public class Behavior {
 
     private String createAssignables(){
         StringBuilder sb = new StringBuilder();
-        for(SimpleName sn : assignedValues.keySet()){
-            if(assignedValues.get(sn) != null) {
-                sb.append("ensures " + sn + " == " + assignedValues.get(sn) + ";\n");
+
+        if(!isExceptional) {
+            for (SimpleName sn : assignedValues.keySet()) {
+                if (assignedValues.get(sn) != null) {
+                    sb.append("ensures " + sn + " == " + assignedValues.get(sn) + ";\n");
+                }
             }
         }
         sb.append(createAssignable());
@@ -244,15 +247,18 @@ public class Behavior {
     private String createPostCons(){
         StringBuilder sb = new StringBuilder();
 
-        // Write out postconditions
-        for(PostCondition p : postCons){
-            sb.append(p.toString());
-        }
-        for(AssertStmt as : asserts){
-            sb.append("ensures " + as.getCheck().toString() + ";\n");
+        if(!isExceptional) {
+            // Write out postconditions
+            for (PostCondition p : postCons) {
+                sb.append(p.toString());
+            }
+            for (AssertStmt as : asserts) {
+                sb.append("ensures " + as.getCheck().toString() + ";\n");
+            }
         }
 
         return sb.toString();
+
     }
 
     private String createAssignable(){
