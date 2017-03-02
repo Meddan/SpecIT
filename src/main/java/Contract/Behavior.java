@@ -272,7 +272,10 @@ public class Behavior {
                     sb.append(", ");
                 }
             }
-            if(sb.lastIndexOf(", ") != -1) {
+            if(sb.toString().equals("assignable ")){
+                sb.append("nothing");
+                return sb.toString();
+            } else if(sb.lastIndexOf(", ") != -1) {
                 return sb.substring(0, sb.lastIndexOf(", ")) + ";\n";
             } else {
                 return sb.append(";\n").toString();
