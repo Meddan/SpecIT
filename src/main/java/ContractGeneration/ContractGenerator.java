@@ -68,6 +68,10 @@ public class ContractGenerator {
         for(CallableDeclaration cd : contracts.keySet()){
             System.out.println("-----------------");
             System.out.println();
+            System.out.println("Cleaning");
+            System.out.println();
+            contracts.get(cd).clean();
+            System.out.println();
             System.out.println(cd.getName() + "\n" + contracts.get(cd));
             System.out.println();
             System.out.println("Purity status: " + contracts.get(cd).isPure());
@@ -147,7 +151,8 @@ public class ContractGenerator {
         for(Object o : cd.getParameters()){
             Parameter p = (Parameter) o;
             params.add(p.getName());
-            b.putAssignedValue(p.getName(), new NameExpr(new SimpleName("\\old(" + p.getName() + ")")));
+            b.addLocalVar(p.getName());
+            b.putAssignedValue(p.getName(), new NameExpr(p.getName()));
         }
         for(FieldDeclaration fd : fields){
             for(VariableDeclarator vd : fd.getVariables()){
