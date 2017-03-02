@@ -231,9 +231,7 @@ public class Behavior {
             }
         }
         sb.append(createAssignable());
-
-        sb.append("ASSIGNED VALUES AT END: " + assignedValues.keySet().size());
-
+        
         return sb.toString();
     }
 
