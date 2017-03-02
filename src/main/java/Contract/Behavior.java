@@ -150,6 +150,9 @@ public class Behavior {
         if(!closed){
             exceptions.add(new ExceptionCondition(t, e));
         }
+        for(Behavior b : children){
+            b.addException(t, e);
+        }
     }
 
     public LinkedList<PreCondition> getPreCons(){
@@ -228,7 +231,6 @@ public class Behavior {
 
     private String createAssignables(){
         StringBuilder sb = new StringBuilder();
-
         for(SimpleName sn : assignedValues.keySet()){
             if(assignedValues.get(sn) != null) {
                 sb.append("ensures " + sn + " == " + assignedValues.get(sn) + ";\n");
@@ -259,8 +261,10 @@ public class Behavior {
         if(!assignedValues.keySet().isEmpty()) {
             sb.append("assignable ");
             for (SimpleName s : assignedValues.keySet()) {
-                sb.append(s.toString());
-                sb.append(", ");
+                if(!assignedValues.get(s).equals(new NameExpr(new SimpleName("\\old(" + s.getIdentifier() + ")")))) {
+                    sb.append(s.toString());
+                    sb.append(", ");
+                }
             }
             if(sb.lastIndexOf(", ") != -1) {
                 return sb.substring(0, sb.lastIndexOf(", ")) + ";\n";

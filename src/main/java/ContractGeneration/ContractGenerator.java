@@ -343,9 +343,7 @@ public class ContractGenerator {
         } else if(e instanceof MethodCallExpr){
             System.out.println(b.getCallableDeclaration().getName());
             MethodCallExpr mce = (MethodCallExpr) e;
-            System.out.println("getting");
             JavaParserFacade.get(combinedTypeSolver);
-            System.out.println("get");
             SymbolReference sr = JavaParserFacade.get(combinedTypeSolver).solve(mce, false);
             if(sr.getCorrespondingDeclaration() instanceof JavaParserMethodDeclaration){
                 MethodDeclaration md = ((JavaParserMethodDeclaration) sr.getCorrespondingDeclaration()).getWrappedNode();
