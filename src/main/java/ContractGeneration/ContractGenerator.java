@@ -50,6 +50,12 @@ public class ContractGenerator {
         if(target.isInterface()){
             return;
         }
+
+        // Set all fields as public for specification
+        for(FieldDeclaration fd : coid.getFields()){
+            setFieldAsPublic(fd);
+        }
+
         //Create the combinedTypeSolver
         combinedTypeSolver.add(new ReflectionTypeSolver());
         combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java/Examples")));
@@ -83,6 +89,10 @@ public class ContractGenerator {
         writeToFile(path, projectDir, coid.toString());
 
 
+    }
+
+    private void setFieldAsPublic(FieldDeclaration fd){
+        fd.setComment(new BlockComment("@ spec_public @"));
     }
 
     private boolean endAssrt(CallableDeclaration cd, Statement s) {
