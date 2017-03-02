@@ -86,5 +86,10 @@ public class Contract {
         return initialBehavior.equals(c.initialBehavior) && currentBehavior.equals(c.getCurrentBehavior());
 
     }
+    public void clean(){
+        for(Behavior b : getLeafs(currentBehavior)){
+            b.clean();
+        }
+    }
 
 }

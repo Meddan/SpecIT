@@ -9,10 +9,7 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.AssertStmt;
 import com.github.javaparser.ast.type.Type;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by dover on 2017-02-08.
@@ -379,5 +376,16 @@ public class Behavior {
             }
         }
         return list;
+    }
+
+    public void clean() {
+        HashSet<SimpleName> toRemove = new HashSet<>();
+        HashMap<SimpleName, Expression> newMap = new HashMap<>();
+        for(SimpleName sn : assignedValues.keySet()){
+            if(!sn.getId().contains("this.")){
+                toRemove.add(sn);
+            }
+        }
+        assignedValues.keySet().removeAll(toRemove);
     }
 }
