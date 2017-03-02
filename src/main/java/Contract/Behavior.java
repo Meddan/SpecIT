@@ -113,6 +113,10 @@ public class Behavior {
         if(!this.closed) {
             this.isExceptional = isExceptional;
         }
+        for(Behavior b : children){
+            b.setExceptional(isExceptional);
+        }
+
     }
 
     public void addPreCon(Expression preCon){
