@@ -17,3 +17,6 @@ hs_err_pid*
 
 # Generated contracts
 Generated/*
+
+# OSX
+.DS_Store
