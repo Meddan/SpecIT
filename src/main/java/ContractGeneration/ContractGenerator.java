@@ -58,7 +58,10 @@ public class ContractGenerator {
 
         //Create the combinedTypeSolver
         combinedTypeSolver.add(new ReflectionTypeSolver());
-        combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java/Examples")));
+        combinedTypeSolver.add(new JavaParserTypeSolver(new File("../RCC")));
+        combinedTypeSolver.add(new JavaParserTypeSolver(new File("../RCC/RCC/java")));
+        combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java")));
+        combinedTypeSolver.add(new JavaParserTypeSolver(new File(System.getProperty("java.home"))));
         //Save all class variables of the class
         for (BodyDeclaration<?> b : target.getMembers()){
             if(b instanceof FieldDeclaration){
@@ -72,18 +75,24 @@ public class ContractGenerator {
             }
         }
         for(CallableDeclaration cd : contracts.keySet()){
-            System.out.println("-----------------");
-            System.out.println();
-            System.out.println("Cleaning");
-            System.out.println();
-            contracts.get(cd).clean();
-            System.out.println();
-            System.out.println(cd.getName() + "\n" + contracts.get(cd));
-            System.out.println();
-            System.out.println("Purity status: " + contracts.get(cd).isPure());
-            System.out.println();
-            System.out.println("-----------------");
-            cd.setComment(new BlockComment(contracts.get(cd).toString()));
+            Contract c = contracts.get(cd);
+            if(c != null) {
+                if(false) {
+                    System.out.println("-----------------");
+                    System.out.println();
+                    System.out.println("Cleaning");
+                    System.out.println();
+                    c.clean();
+                    System.out.println();
+                    System.out.println(cd.getName() + "\n" + c);
+                    System.out.println();
+                    System.out.println("Purity status: " + c.isPure());
+                    System.out.println();
+                    System.out.println("-----------------");
+                }
+                    cd.setComment(new BlockComment(c.toString()));
+
+            }
         }
 
         writeToFile(path, projectDir, coid.toString());
@@ -146,6 +155,9 @@ public class ContractGenerator {
         //Get top-level assertions
         NodeList<Statement> stmtList;
         if(cd instanceof MethodDeclaration){
+            if(!((MethodDeclaration) cd).getBody().isPresent()){
+                return null;
+            }
             stmtList = ((MethodDeclaration) cd).getBody().get().getStatements();
         } else if (cd instanceof ConstructorDeclaration) {
             stmtList = ((ConstructorDeclaration) cd).getBody().getStatements();
@@ -327,24 +339,30 @@ public class ContractGenerator {
         } else if (e instanceof NameExpr){
             NameExpr ne = (NameExpr) e;
             if(b.isLocalVar(ne.getName())){
-                if(b.getAssignedValues().containsKey(ne.getName())){
-                    return b.getAssignedValues().get((ne.getName()));
+                if(b.getAssignedValue(ne.getName()) != null){
+                    return b.getAssignedValue(ne.getName());
                 } else {
                     return ne;
                 }
             } else {
                 SimpleName sn = new SimpleName("this." + ne.getName());
-                if(b.getAssignedValues().containsKey(sn)){
-                    return b.getAssignedValues().get(sn);
+                if(b.getAssignedValue(sn) != null){
+                    return b.getAssignedValue(sn);
                 } else {
                     return new NameExpr(sn);
                 }
             }
         } else if(e instanceof MethodCallExpr){
-            System.out.println(b.getCallableDeclaration().getName());
             MethodCallExpr mce = (MethodCallExpr) e;
-            JavaParserFacade.get(combinedTypeSolver);
-            SymbolReference sr = JavaParserFacade.get(combinedTypeSolver).solve(mce, false);
+
+            try{
+                SymbolReference sr = JavaParserFacade.get(combinedTypeSolver).solve(mce, false);
+            } catch (Exception error){
+                System.out.println(mce);
+                System.out.println(error instanceof NullPointerException);
+                throw error;
+            }
+            /*
             if(sr.getCorrespondingDeclaration() instanceof JavaParserMethodDeclaration){
                 MethodDeclaration md = ((JavaParserMethodDeclaration) sr.getCorrespondingDeclaration()).getWrappedNode();
                 Contract temp = createContract(md);
@@ -354,7 +372,7 @@ public class ContractGenerator {
             } else {
                 //TODO: Handle other method calls
                 System.out.println("Method call expression with declaration: " + sr.getCorrespondingDeclaration() + " is not covered!");
-            }
+            }*/
             return e;
         } else if (e instanceof VariableDeclarationExpr){
             //might have to check if assigning the value of a method call
@@ -377,7 +395,7 @@ public class ContractGenerator {
             AssignExpr ae = (AssignExpr) e;
             SimpleName fieldName;
             if(ae.getTarget() instanceof FieldAccessExpr){
-                fieldName = new SimpleName("this." +((FieldAccessExpr) ae.getTarget()).getField());
+                fieldName = new SimpleName("this." +((FieldAccessExpr) ae.getTarget()).getName());
                 b.setPure(false);
             } else if (ae.getTarget() instanceof NameExpr){
                 NameExpr ne = (NameExpr) ae.getTarget();
@@ -390,6 +408,7 @@ public class ContractGenerator {
             } else if(ae.getTarget() instanceof ArrayAccessExpr){
                 ArrayAccessExpr aae = (ArrayAccessExpr) ae.getTarget();
                 String arrayName = createContract(aae.getName(), localVar, b).toString();
+
                 String index = createContract(aae.getIndex(), localVar, b).toString();
                 fieldName = new SimpleName( arrayName + "[" + index + "]");
                 if(aae.getName() instanceof NameExpr){
@@ -429,12 +448,15 @@ public class ContractGenerator {
                     IntegerLiteralExpr ile = new IntegerLiteralExpr();
                     ile.setValue("1");
                     Expression temp;
-                    if (b.getAssignedValues().containsKey(nameExpr.getName())) {
-                        temp = b.getAssignedValues().get(nameExpr.getName());
+                    if(b.getAssignedValue(nameExpr.getName()) != null){
+                        temp = b.getAssignedValue(nameExpr.getName());
                     } else {
                         temp = nameExpr;
                     }
                     BinaryExpr be = new BinaryExpr();
+                    if(temp == null){
+                        return null;
+                    }
                     be.setLeft(temp);
                     be.setRight(ile);
                     if (ue.getOperator() == UnaryExpr.Operator.POSTFIX_DECREMENT) {
@@ -596,7 +618,9 @@ public class ContractGenerator {
     }
 
     public static void main(String args[]){
-        File projectDir = new File("src/main/java/Examples");
+        //File projectDir = new File("../RCC");
+        //File projectDir = new File("src/main/java/Examples/SingleExample");
+        File projectDir = new File("src/main/java/Examples/SingleExample");
         testClasses(projectDir);
     }
     public static void testClasses(File projectDir) {
