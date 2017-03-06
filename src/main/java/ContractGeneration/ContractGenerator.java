@@ -278,6 +278,10 @@ public class ContractGenerator {
                         //TODO: e.addPreCon(); need to fix double negation
                     }
                 }
+            } else if (s instanceof SwitchStmt) {
+
+            } else if (s instanceof SwitchEntryStmt){
+
             } else if (s instanceof BlockStmt) {
                 BlockStmt bs = (BlockStmt) s;
                 createContract(((BlockStmt) s).getStatements(), (ArrayList<SimpleName>) localVar.clone(), b);
