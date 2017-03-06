@@ -56,6 +56,16 @@ public class Behavior {
 
     private HashMap<SimpleName, Expression> assignedValues = new HashMap<>();
 
+    public HashMap<SimpleName, Expression> getAssignedLocals() {
+        return assignedLocals;
+    }
+
+    public void setAssignedLocals(HashMap<SimpleName, Expression> assignedLocals) {
+        this.assignedLocals = assignedLocals;
+    }
+
+    private HashMap<SimpleName, Expression> assignedLocals = new HashMap<>();
+
     public CallableDeclaration getCallableDeclaration() {
         return callableDeclaration;
     }
@@ -107,6 +117,7 @@ public class Behavior {
         this.callableDeclaration = original.getCallableDeclaration();
         this.localVariables = (LinkedList<SimpleName>) original.getLocalVariables().clone();
         this.pure = original.isPure();
+        this.assignedLocals = (HashMap<SimpleName, Expression>) original.getAssignedLocals().clone();
     }
 
     public void setExceptional(boolean isExceptional){
@@ -267,9 +278,11 @@ public class Behavior {
         if(!assignedValues.keySet().isEmpty()) {
             sb.append("assignable ");
             for (SimpleName s : assignedValues.keySet()) {
-                if(!assignedValues.get(s).equals(new NameExpr(new SimpleName("\\old(" + s.getIdentifier() + ")")))) {
-                    sb.append(s.toString());
-                    sb.append(", ");
+                if(getAssignedValues().get(s) != null) {
+                    if (!assignedValues.get(s).equals(new NameExpr(new SimpleName("\\old(" + s.getIdentifier() + ")")))) {
+                        sb.append(s.toString());
+                        sb.append(", ");
+                    }
                 }
             }
             if(sb.toString().equals("assignable ")){
@@ -370,11 +383,22 @@ public class Behavior {
             b.clearPostAssert();
         }
     }
-
+    public Expression getAssignedValue(SimpleName name){
+        if(assignedValues.containsKey(name)){
+            return assignedValues.get(name);
+        } else {
+            return assignedLocals.get(name);
+        }
+    }
     public void putAssignedValue(SimpleName name, Expression e){
         //System.out.println("Adding " + name + " with " + e);
         if(!closed) {
-            assignedValues.put(name, e);
+            if(name.toString().contains("this.")){
+                assignedValues.put(name, e);
+            } else {
+                assignedLocals.put(name, e);
+            }
+
         }
         //System.out.println("Getting " + name + " is " + assignedValues.get(name));
         for(Behavior b : children){
@@ -399,6 +423,12 @@ public class Behavior {
         for(SimpleName sn : assignedValues.keySet()){
             if(!sn.getId().contains("this.")){
                 toRemove.add(sn);
+            }
+            String s = "\\old(" + sn + ")";
+            if(assignedValues.get(sn) != null) {
+                if (assignedValues.get(sn).toString().equals(s)) {
+                    toRemove.add(sn);
+                }
             }
         }
         assignedValues.keySet().removeAll(toRemove);
