@@ -2,6 +2,9 @@ package Contract;
 
 import com.github.javaparser.ast.expr.Expression;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Created by meddan on 10/02/17.
  */
@@ -20,6 +23,16 @@ public class PreCondition {
         this.expression = expression;
     }
     public String toString(){
-        return "requires " + expression.toString() + ";\n";
+        if(expression == null){
+            return "";
+        }
+        String exp = expression.toString();
+        Matcher m = Pattern.compile("\\\\old\\(([a-zA-Z._]+)\\)").matcher(exp);
+        StringBuffer sb = new StringBuffer();
+        while (m.find()){
+            m.appendReplacement(sb,"$1");
+        }
+        m.appendTail(sb);
+        return "requires " + sb.toString() + ";\n";
     }
 }
