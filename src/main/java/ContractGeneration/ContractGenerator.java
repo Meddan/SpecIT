@@ -411,8 +411,11 @@ public class ContractGenerator {
                 b.setPure(b.isLocalVar(ne.getName()));
             } else if(ae.getTarget() instanceof ArrayAccessExpr){
                 ArrayAccessExpr aae = (ArrayAccessExpr) ae.getTarget();
+                NameExpr ne = (NameExpr) aae.getName();
                 String arrayName = createContract(aae.getName(), b).toString();
-
+                if(arrayName.equals("\\old(this." + ne.toString() + ")") && !b.isLocalVar(ne.getName())){
+                    arrayName = "this." + ne.toString();
+                }
                 String index = createContract(aae.getIndex(), b).toString();
                 fieldName = new SimpleName( arrayName + "[" + index + "]");
                 if(aae.getName() instanceof NameExpr){
@@ -623,8 +626,8 @@ public class ContractGenerator {
 
     public static void main(String args[]){
         //File projectDir = new File("../RCC");
-        File projectDir = new File("src/main/java/Examples");
-        //File projectDir = new File("src/main/java/Examples/SingleExample");
+        //File projectDir = new File("src/main/java/Examples");
+        File projectDir = new File("src/main/java/Examples/SingleExample");
         testClasses(projectDir);
     }
     public static void testClasses(File projectDir) {
