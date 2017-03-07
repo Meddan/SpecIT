@@ -35,4 +35,17 @@ public class Switch {
         return n;
     }
 
+    public int fallThrough(int n){
+        switch(n){
+            case 1:
+                n++;
+            case 2:
+                n = n*2;
+                break;
+            case 3:
+                n--;
+        }
+        return n;
+    }
+
 }
