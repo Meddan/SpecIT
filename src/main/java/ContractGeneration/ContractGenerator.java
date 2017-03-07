@@ -90,7 +90,7 @@ public class ContractGenerator {
                     System.out.println();
                     System.out.println("-----------------");
                 }
-                    cd.setComment(new BlockComment(c.toString()));
+                    cd.setComment(new BlockComment(c.extractContract()));
 
             }
         }
