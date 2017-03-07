@@ -276,13 +276,36 @@ public class ContractGenerator {
                 }
             } else if (s instanceof SwitchStmt) {
                 // Loop through all entries, create contract
-            } else if (s instanceof SwitchEntryStmt){
-                Behavior newB = new Behavior(b);
-                b.addChild(newB);
-                // Add precon for case
+                NodeList<SwitchEntryStmt> entries = ((SwitchStmt) s).getEntries();
 
-                // Create contract on  body
+                for(Behavior leaf : b.getLeafs()) {
+                    Expression selector = ((SwitchStmt) s).getSelector();
 
+                    leaf.setClosed(true);
+
+                    for (SwitchEntryStmt ses : entries) {
+                        // Build the condition upon which we enter this case
+                        BinaryExpr cond;
+                        if(ses.getLabel().isPresent()) { // Entry has a label
+                            cond = new BinaryExpr(selector, ses.getLabel().get(), BinaryExpr.Operator.EQUALS);
+                        } else { // No label, it's the default
+                            cond = new BinaryExpr();
+                        }
+                        // Create contract on condition
+                        Expression contractCond = createContract(cond, leaf);
+
+                        // Create new behavior and set as child
+                        Behavior newB = new Behavior(leaf);
+                        leaf.addChild(newB);
+                        // Add precon to behavior
+                        newB.addPreCon(contractCond);
+
+                        // Create contract on body of case
+                        createContract(ses.getStatements(), newB);
+
+                    }
+                }
+                //createContract(entries, b);
             } else if (s instanceof BlockStmt) {
                 BlockStmt bs = (BlockStmt) s;
                 createContract(((BlockStmt) s).getStatements(), b);
