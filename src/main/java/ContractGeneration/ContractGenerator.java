@@ -275,8 +275,13 @@ public class ContractGenerator {
                     }
                 }
             } else if (s instanceof SwitchStmt) {
-
+                // Loop through all entries, create contract
             } else if (s instanceof SwitchEntryStmt){
+                Behavior newB = new Behavior(b);
+                b.addChild(newB);
+                // Add precon for case
+
+                // Create contract on  body
 
             } else if (s instanceof BlockStmt) {
                 BlockStmt bs = (BlockStmt) s;
