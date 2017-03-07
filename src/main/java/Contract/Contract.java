@@ -108,5 +108,9 @@ public class Contract {
 
         return "";
     }
+    public String extractContract(){
+        this.clean();
+        return this.toString();
+    }
 
 }
