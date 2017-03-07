@@ -274,9 +274,8 @@ public class Behavior {
 
     private String createAssignable(){
         StringBuilder sb = new StringBuilder();
-
+        sb.append("assignable ");
         if(!assignedValues.keySet().isEmpty()) {
-            sb.append("assignable ");
             for (SimpleName s : assignedValues.keySet()) {
                 if(getAssignedValues().get(s) != null) {
                     if (!assignedValues.get(s).equals(new NameExpr(new SimpleName("\\old(" + s.getIdentifier() + ")")))) {
@@ -285,15 +284,11 @@ public class Behavior {
                     }
                 }
             }
-            if(sb.toString().equals("assignable ")){
-                sb.append("\\nothing;");
-                return sb.toString();
-            } else if(sb.lastIndexOf(", ") != -1) {
+            if(sb.lastIndexOf(", ") != -1){
                 return sb.substring(0, sb.lastIndexOf(", ")) + ";\n";
-            } else {
-                return sb.append(";\n").toString();
             }
         }
+        sb.append("\\nothing;");
         return sb.toString();
     }
 
