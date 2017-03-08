@@ -14,11 +14,13 @@ import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.GenericVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserMethodDeclaration;
+import com.github.javaparser.symbolsolver.model.typesystem.Type;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
@@ -239,20 +241,23 @@ public class ContractGenerator {
         } else if (s instanceof ThrowStmt) {
             ThrowStmt ts = (ThrowStmt) s;
             b.setExceptional(true);
-            if(ts.getExpression() instanceof ObjectCreationExpr){
-                // These conditions is what will hold after we throw an exception
-                LinkedList<PostCondition> listOfPostCons = b.getPostCons();
-                LinkedList<Expression> listOfExprs = new LinkedList<>();
 
-                for(PostCondition pc : listOfPostCons){
-                    listOfExprs.add(pc.getExpression());
-                }
-                b.addException(((ObjectCreationExpr) ts.getExpression()).getType(), listOfExprs);
+            // These conditions is what will hold after we throw an exception
+            // TODO : Make more intelligent
+            LinkedList<PostCondition> listOfPostCons = b.getPostCons();
+            LinkedList<Expression> listOfExprs = new LinkedList<>();
+            for(PostCondition pc : listOfPostCons){
+                listOfExprs.add(pc.getExpression());
+            }
+
+            if(ts.getExpression() instanceof ObjectCreationExpr){
                 // We create a new object when throwing
-                // TODO : Make more intelligent
+                b.addException(((ObjectCreationExpr) ts.getExpression()).getType(), listOfExprs);
             } else {
                 // We're throwing some already created exception
-                // TODO : Get type and add to contract
+                Type t = JavaParserFacade.get(combinedTypeSolver).getType(ts.getExpression());
+                b.addException(new ClassOrInterfaceType(t.asReferenceType().getQualifiedName()), listOfExprs);
+
             }
             b.setClosed(true);
         } else {
