@@ -79,6 +79,20 @@ public class IfStatements {
         }
     }
 
+    public void didSomeoneSayMoreExceptions(int n){
+        if(n > 0){
+            IllegalArgumentException e;
+            if(n < 10){
+                e = new IllegalArgumentException("Small error");
+            } else {
+                e = new IllegalArgumentException("Big error");
+            }
+            throw e;
+        } else {
+            x = "This is good number" + n;
+        }
+    }
+
     private boolean someHelperMethod(int n){
         return n == 10;
     }
