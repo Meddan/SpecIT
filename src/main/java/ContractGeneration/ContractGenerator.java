@@ -58,8 +58,8 @@ public class ContractGenerator {
 
         //Create the combinedTypeSolver
         combinedTypeSolver.add(new ReflectionTypeSolver());
-        combinedTypeSolver.add(new JavaParserTypeSolver(new File("../RCC")));
-        combinedTypeSolver.add(new JavaParserTypeSolver(new File("../RCC/RCC/java")));
+        //combinedTypeSolver.add(new JavaParserTypeSolver(new File("../RCC")));
+        //combinedTypeSolver.add(new JavaParserTypeSolver(new File("../RCC/RCC/java")));
         combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java")));
         combinedTypeSolver.add(new JavaParserTypeSolver(new File(System.getProperty("java.home"))));
         //Save all class variables of the class
@@ -128,6 +128,24 @@ public class ContractGenerator {
             }
         }
         return true;
+    }
+
+    private BinaryExpr allConditionsComplemented(ArrayList<Expression> allConditions){
+        // If it looks stupid but it works, it aint stupid
+        UnaryExpr ue = new UnaryExpr(new UnaryExpr(new EnclosedExpr(allConditions.get(0)), UnaryExpr.Operator.LOGICAL_COMPLEMENT), UnaryExpr.Operator.PLUS);
+        for(int i = 1; i < allConditions.size(); i++) {
+            if(i == (allConditions.size() - 1)){
+                // We're at the last conditions, so we finish building our BinaryExpr
+                UnaryExpr temp = new UnaryExpr(new EnclosedExpr(allConditions.get(i)), UnaryExpr.Operator.LOGICAL_COMPLEMENT);
+                return new BinaryExpr(ue.getExpression(),temp, BinaryExpr.Operator.AND);
+            } else {
+                // Build the expression that is the negation of all previous case conditions
+                UnaryExpr temp = new UnaryExpr(new EnclosedExpr(allConditions.get(i)), UnaryExpr.Operator.LOGICAL_COMPLEMENT);
+                ue.setExpression(new BinaryExpr(ue.getExpression(), temp, BinaryExpr.Operator.AND));
+            }
+        }
+
+        return null;
     }
 
     private boolean startAssert(CallableDeclaration cd, Statement s){
@@ -278,18 +296,30 @@ public class ContractGenerator {
                 // Loop through all entries, create contract
                 NodeList<SwitchEntryStmt> entries = ((SwitchStmt) s).getEntries();
 
+                // Will be used (negated) for the default case
+                ArrayList<Expression> allConditions = new ArrayList<>();
+
+                // Go though all active behaviors
                 for(Behavior leaf : b.getLeafs()) {
                     Expression selector = ((SwitchStmt) s).getSelector();
 
                     leaf.setClosed(true);
 
+                    // Go through all entries in switchcase and create behaviors for them
                     for (SwitchEntryStmt ses : entries) {
                         // Build the condition upon which we enter this case
-                        BinaryExpr cond;
+                        Expression cond;
                         if(ses.getLabel().isPresent()) { // Entry has a label
                             cond = new BinaryExpr(selector, ses.getLabel().get(), BinaryExpr.Operator.EQUALS);
+                            allConditions.add(cond);
                         } else { // No label, it's the default
+
                             cond = new BinaryExpr();
+                            if(allConditions.size() == 1){
+                                cond = new UnaryExpr(allConditions.get(0), UnaryExpr.Operator.LOGICAL_COMPLEMENT);
+                            } else {
+                                cond = allConditionsComplemented(allConditions);
+                            }
                         }
                         // Create contract on condition
                         Expression contractCond = createContract(cond, leaf);
@@ -305,7 +335,6 @@ public class ContractGenerator {
 
                     }
                 }
-                //createContract(entries, b);
             } else if (s instanceof BlockStmt) {
                 BlockStmt bs = (BlockStmt) s;
                 createContract(((BlockStmt) s).getStatements(), b);
