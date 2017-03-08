@@ -219,11 +219,13 @@ public class ContractGenerator {
             //We
             for(Behavior beh : b.getLeafs()) {
                 Expression e = createContract(as.getCheck(), beh);
-                if (startAssert(beh.getCallableDeclaration(), as)) {
-                    beh.addPreCon(e);
+                if(e != null) {
+                    if (startAssert(beh.getCallableDeclaration(), as)) {
+                        beh.addPreCon(e);
+                    }
+                    //Add the assertion as a potential postcondition
+                    b.addPostCon(e, false);
                 }
-                //Add the assertion as a potential postcondition
-                b.addPostCon(e, false);
             }
             //Create contract for the expression in the assertion
 
@@ -416,26 +418,48 @@ public class ContractGenerator {
             }
         } else if(e instanceof MethodCallExpr){
             MethodCallExpr mce = (MethodCallExpr) e;
-
+            SymbolReference sr;
             try{
-                SymbolReference sr = JavaParserFacade.get(combinedTypeSolver).solve(mce, false);
+                 sr = JavaParserFacade.get(combinedTypeSolver).solve(mce, false);
             } catch (Exception error){
                 System.out.println(mce);
                 System.out.println(error instanceof NullPointerException);
                 throw error;
             }
-            /*
+
             if(sr.getCorrespondingDeclaration() instanceof JavaParserMethodDeclaration){
                 MethodDeclaration md = ((JavaParserMethodDeclaration) sr.getCorrespondingDeclaration()).getWrappedNode();
                 Contract temp = createContract(md);
+                b.setClosed(true);
+                for(Behavior beh : temp.getLeafs()){
+                    Behavior newChild = new Behavior(b);
+
+                    for (PreCondition pc : beh.getPreCons()) {
+                        newChild.addPreCon(pc.getExpression());
+                    }
+                    for (PostCondition pc : beh.getPostCons()){
+                        if(!pc.isReturn()){
+                            newChild.addPostCon(pc.getExpression(), false);
+                        }
+                    }
+                    for (SimpleName sn : beh.getAssignedValues().keySet()){
+                        newChild.putAssignedValue(sn, beh.getAssignedValue(sn));
+                    }
+                    newChild.setExceptional(beh.getIsExceptional());
+                    for(ExceptionCondition ec : beh.getExceptions()){
+                        newChild.addException(ec.getType(), ec.getName());
+                    }
+                    b.addChild(newChild);
+                }
+                b.setPure(false);
                 //TODO: Should get all field modifications and apply to current contract
                 //Might want to just throw away all previos knowledge like we do with loops.
-                b.setPure(temp.isPure());
+
             } else {
                 //TODO: Handle other method calls
                 System.out.println("Method call expression with declaration: " + sr.getCorrespondingDeclaration() + " is not covered!");
-            }*/
-            return e;
+            }
+            return null;
         } else if (e instanceof VariableDeclarationExpr){
             //might have to check if assigning the value of a method call
             VariableDeclarationExpr vde = (VariableDeclarationExpr) e;
@@ -543,7 +567,17 @@ public class ContractGenerator {
                         return e;
                     }
                 } else {
-                    return ue.setExpression(createContract(ue.getExpression(), b));
+                    Expression exp = createContract(ue.getExpression(), b);
+                    try{
+                        ue.setExpression(exp);
+                    } catch (Exception error){
+                        System.out.println("Set UnaryExpression failed:");
+                        System.out.println(ue);
+                        System.out.println("was assigned: ");
+                        System.out.println(exp);
+                        throw error;
+                    }
+                    return ue;
                 }
             } else if (e instanceof EnclosedExpr) {
                 if (((EnclosedExpr) e).getInner().isPresent()) {
