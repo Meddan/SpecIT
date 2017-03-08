@@ -30,7 +30,7 @@ public class Switch {
                 n = n + 3;
                 break;
             default:
-                return -1;
+                n = -1;
         }
         return n;
     }
