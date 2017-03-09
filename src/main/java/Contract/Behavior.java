@@ -150,17 +150,35 @@ public class Behavior {
     }
 
     public void addException(Type t, Expression e){
+        ExceptionCondition toAdd = new ExceptionCondition(t,e);
+
+        for(ExceptionCondition ec : exceptions){
+            // If we have already added this exception
+            if(ec.equals(toAdd)){
+                return; // End method
+            }
+        }
+
         for(Behavior b : children){
             b.addException(t, e);
         }
         if(!closed) {
-            exceptions.add(new ExceptionCondition(t, e));
+            exceptions.add(toAdd);
         }
     }
 
     public void addException(Type t, LinkedList<Expression> e){
+        ExceptionCondition toAdd = new ExceptionCondition(t,e);
+
+        for(ExceptionCondition ec : exceptions){
+            // If we have already added this exception
+            if(ec.equals(toAdd)){
+                return; // End method
+            }
+        }
+
         if(!closed){
-            exceptions.add(new ExceptionCondition(t, e));
+            exceptions.add(toAdd);
         }
         for(Behavior b : children){
             b.addException(t, e);
