@@ -37,4 +37,18 @@ public class PostCondition {
         this.expression = e;
     }
 
+    public boolean equals(Object o){
+        if(o == null){
+            return false;
+        }
+
+        if(getClass() != o.getClass()){
+            return false;
+        }
+
+        PostCondition pc = ((PostCondition) o);
+
+        return expression.equals(pc.getExpression()) && isReturn == pc.isReturn();
+    }
+
 }
