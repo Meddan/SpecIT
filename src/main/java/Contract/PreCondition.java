@@ -35,4 +35,18 @@ public class PreCondition {
         m.appendTail(sb);
         return "requires " + sb.toString() + ";\n";
     }
+
+    public boolean equals(Object o){
+        if(o == null){
+            return false;
+        }
+
+        if(getClass() != o.getClass()){
+            return false;
+        }
+
+        PreCondition pc = ((PreCondition) o);
+
+        return expression.equals(pc.getExpression());
+    }
 }
