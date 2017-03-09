@@ -132,11 +132,20 @@ public class Behavior {
     }
 
     public void addPreCon(Expression preCon){
+        PreCondition toAdd = new PreCondition(preCon);
+
+        for(PreCondition pc : preCons){
+            // If we have already added this condition
+            if(pc.equals(toAdd)){
+                return; // End method
+            }
+        }
+
         for(Behavior b : children){
             b.addPreCon(preCon);
         }
         if(!this.closed) {
-            preCons.add(new PreCondition(preCon));
+            preCons.add(toAdd);
         }
     }
 
@@ -144,7 +153,7 @@ public class Behavior {
         PostCondition toAdd = new PostCondition(postCon,isReturn);
 
         for(PostCondition pc : postCons){
-            // If we have already added this exception
+            // If we have already added this condition
             if(pc.equals(toAdd)){
                 return; // End method
             }
