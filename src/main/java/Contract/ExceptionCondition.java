@@ -60,4 +60,18 @@ public class ExceptionCondition {
         return sb.toString();
 
     }
+
+    public boolean equals(Object o){
+        if(o == null){
+            return false;
+        }
+
+        if(getClass() != o.getClass()){
+            return false;
+        }
+
+        ExceptionCondition ec = ((ExceptionCondition) o);
+
+        return type.equals(ec.getType()) && expressions.equals(ec.getName());
+    }
 }
