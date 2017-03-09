@@ -141,11 +141,20 @@ public class Behavior {
     }
 
     public void addPostCon(Expression postCon, boolean isReturn){
+        PostCondition toAdd = new PostCondition(postCon,isReturn);
+
+        for(PostCondition pc : postCons){
+            // If we have already added this exception
+            if(pc.equals(toAdd)){
+                return; // End method
+            }
+        }
+
         for(Behavior b : children){
             b.addPostCon(postCon, isReturn);
         }
         if(!closed) {
-            postCons.add(new PostCondition(postCon, isReturn));
+            postCons.add(toAdd);
         }
     }
 
