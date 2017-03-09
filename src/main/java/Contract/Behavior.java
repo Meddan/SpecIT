@@ -41,6 +41,7 @@ public class Behavior {
 
     private Behavior parent;
     private boolean closed = false;
+    private boolean diverges = false;
 
     public boolean isPure() {
         return pure;
@@ -200,7 +201,11 @@ public class Behavior {
         sb.append(createPostCons());
         sb.append(createSignalsOnly());
         sb.append(createSignal());
+        if(diverges){
+            sb.append("diverges true;\n");
+        }
         sb.append(createAssignables());
+
 
         return sb.toString();
     }
@@ -227,7 +232,8 @@ public class Behavior {
         return preCons.isEmpty()
                 && postCons.isEmpty()
                 && assignedValues.keySet().isEmpty()
-                && exceptions.isEmpty();
+                && exceptions.isEmpty()
+                && !diverges;
     }
 
     private String createPreCons(){
@@ -427,5 +433,16 @@ public class Behavior {
             }
         }
         assignedValues.keySet().removeAll(toRemove);
+    }
+
+    public void setDiverges(boolean diverges) {
+        this.diverges = diverges;
+        for(Behavior beh : children){
+            beh.setDiverges(diverges);
+        }
+    }
+
+    public boolean isDiverges() {
+        return diverges;
     }
 }
