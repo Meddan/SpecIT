@@ -77,11 +77,8 @@ public class ContractGenerator {
         for (BodyDeclaration<?> bd : target.getMembers()){
             if(bd instanceof CallableDeclaration){
                 CallableDeclaration cd = (CallableDeclaration) bd;
-                System.out.println(cd.getName());
                 try {
                     contracts.put(cd ,createContract((CallableDeclaration) bd));
-                    System.out.println("done with");
-                    System.out.println(contracts.get(cd).getLeafs().getFirst().isDiverges());
                 } catch (TooManyLeafsException e) {
                     contracts.put(cd , null);
                 }
@@ -445,8 +442,6 @@ public class ContractGenerator {
 
             //System.out.println(sr.toString());
             if(activeReferences.contains(sr.getCorrespondingDeclaration().getName())){
-                System.out.println("Already active reference!");
-                System.out.println(sr.getCorrespondingDeclaration().getName());
                 return e;
             }
             activeReferences.add(sr.getCorrespondingDeclaration().getName());
@@ -500,7 +495,6 @@ public class ContractGenerator {
                 ReflectionMethodDeclaration rmd = (ReflectionMethodDeclaration) sr.getCorrespondingDeclaration();
                 b.setPure(false);
                 if(rmd.getQualifiedName().equals("java.lang.System.exit")){
-                    System.out.println("EXIT " + b.getCallableDeclaration().getName());
                     b.setDiverges(true);
                     b.setClosed(true);
                 }
