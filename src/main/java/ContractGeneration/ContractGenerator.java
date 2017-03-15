@@ -711,7 +711,6 @@ public class ContractGenerator {
             Files.walkFileTree(p, new SimpleFileVisitor<Path>(){
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    System.out.println("Is file: " + file.toString());
                     Files.delete(file);
                     return FileVisitResult.CONTINUE;
                 }
@@ -722,7 +721,6 @@ public class ContractGenerator {
                         throw exc;
                     }
                     Files.delete(dir);
-                    System.out.println("Is directory: " + dir.toString());
                     return FileVisitResult.CONTINUE;
                 }
             });
