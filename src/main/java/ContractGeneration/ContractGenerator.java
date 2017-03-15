@@ -80,7 +80,7 @@ public class ContractGenerator {
                 CallableDeclaration cd = (CallableDeclaration) bd;
                 try {
                     contracts.put(cd ,createContract((CallableDeclaration) bd));
-                } catch (TooManyLeafsException | SymbolSolverException | CallingMethodWithoutContractException e) {
+                } catch (TooManyLeafsException | SymbolSolverException | CallingMethodWithoutContractException | UncoveredStatementException e) {
                     contracts.put(cd, null);
                 }
             }
@@ -174,7 +174,7 @@ public class ContractGenerator {
         return true;
     }
 
-    public Contract createContract(CallableDeclaration cd) throws TooManyLeafsException, SymbolSolverException, CallingMethodWithoutContractException {
+    public Contract createContract(CallableDeclaration cd) throws TooManyLeafsException, SymbolSolverException, CallingMethodWithoutContractException, UncoveredStatementException {
         //Get row for md
         //Get top-level assertions
         System.out.println("Working on " + cd.getName());
@@ -213,13 +213,13 @@ public class ContractGenerator {
         return c;
     }
 
-    public void createContract(NodeList<Statement> stmtList, Behavior b) throws TooManyLeafsException, SymbolSolverException, CallingMethodWithoutContractException {
+    public void createContract(NodeList<Statement> stmtList, Behavior b) throws TooManyLeafsException, SymbolSolverException, CallingMethodWithoutContractException, UncoveredStatementException {
         boolean pure = true;
         for(Statement s : stmtList){
             createContract(s, b);
         }
     }
-    public void createContract(Statement s, Behavior b) throws TooManyLeafsException, SymbolSolverException, CallingMethodWithoutContractException {
+    public void createContract(Statement s, Behavior b) throws TooManyLeafsException, SymbolSolverException, CallingMethodWithoutContractException, UncoveredStatementException {
         /* We first identify if the current statement is assert or return in which case we want to make sure our
         assertions (ensures) are handled correctly.
         */
@@ -408,6 +408,12 @@ public class ContractGenerator {
                     }
                 }
                 b.setPure(false);
+            } else if (s instanceof SynchronizedStmt) {
+                SynchronizedStmt ss = (SynchronizedStmt) s;
+                createContract(ss.getExpression(), b);
+                createContract(ss.getBody(), b);
+            } else if(s instanceof TryStmt){
+                throw new UncoveredStatementException();
             } else {
                 System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
             }
@@ -462,8 +468,7 @@ public class ContractGenerator {
                     try {
                         temp = createContract(md);
                         contracts.put(md, temp);
-                    } catch (TooManyLeafsException tmle){
-                        System.out.println("Caught too many leafs in " + md.getName());
+                    } catch (TooManyLeafsException | CallingMethodWithoutContractException | SymbolSolverException | UncoveredStatementException error){
                         contracts.put(md, null);
                         return null;
                     }
@@ -796,9 +801,9 @@ public class ContractGenerator {
     }
 
     public static void main(String args[]){
-        //File projectDir = new File("../RCC");
+        File projectDir = new File("../RCC");
         //File projectDir = new File("src/main/java/Examples");
-        File projectDir = new File("src/main/java/Examples/SingleExample");
+        //File projectDir = new File("src/main/java/Examples/SingleExample");
         try {
             clearDirectory();
         } catch (IOException ioe){
@@ -807,6 +812,7 @@ public class ContractGenerator {
             ioe.printStackTrace();
             System.exit(1);
         }
+
         testClasses(projectDir);
     }
     public static void testClasses(File projectDir) {

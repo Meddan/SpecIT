@@ -30,6 +30,7 @@ public class Resources {
         ignorableExpressions.add(ClassExpr.class);
         ignorableExpressions.add(AnnotationExpr.class);
         ignorableExpressions.add(TypeExpr.class);
+        ignorableExpressions.add(ThisExpr.class);
     }
     private static void addIgnorableReplaceExpressions(){
         ignorableReplaceExpressions.add(ObjectCreationExpr.class);
