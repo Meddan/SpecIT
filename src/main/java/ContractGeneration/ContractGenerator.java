@@ -734,7 +734,7 @@ public class ContractGenerator {
         // Extract imports
         String packageAndImports = extractImports(new File(projectDir + path));
 
-        Path p = Paths.get("Generated" + path);
+        Path p = Paths.get("Generated/" + projectDir.toPath() + path);
 
         // Check that all directories exist
         for(int i = 1; i < p.getNameCount(); i++){
