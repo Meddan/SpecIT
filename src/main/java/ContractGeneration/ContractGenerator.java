@@ -753,7 +753,12 @@ public class ContractGenerator {
 
         // Now we write to file
         try {
-            Files.write(p, Arrays.asList(packageAndImports + toPrint), Charset.forName("UTF-8"));
+            if(Files.exists(p)){
+                // Files already exists, so we do not write package and import information again
+                Files.write(p, Arrays.asList(toPrint), Charset.forName("UTF-8"), StandardOpenOption.APPEND);
+            } else {
+                Files.write(p, Arrays.asList(packageAndImports + toPrint), Charset.forName("UTF-8"));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
