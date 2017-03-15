@@ -77,15 +77,15 @@ public class Behavior {
 
     private CallableDeclaration callableDeclaration;
 
-    private LinkedList<SimpleName> localVariables = new LinkedList<>();
-    private LinkedList<SimpleName> getLocalVariables(){
+    private LinkedList<String> localVariables = new LinkedList<>();
+    private LinkedList<String> getLocalVariables(){
         return localVariables;
     }
     public void addLocalVar(SimpleName name){
-        localVariables.add(name);
+        localVariables.add(name.toString());
     }
     public boolean isLocalVar(SimpleName name){
-        return localVariables.contains(name);
+        return localVariables.contains(name.toString());
     }
 
     /**
@@ -116,7 +116,7 @@ public class Behavior {
         this.isExceptional = original.getIsExceptional();
         this.assignedValues = (HashMap<SimpleName, Expression>) original.getAssignedValues().clone();
         this.callableDeclaration = original.getCallableDeclaration();
-        this.localVariables = (LinkedList<SimpleName>) original.getLocalVariables().clone();
+        this.localVariables = (LinkedList<String>) original.getLocalVariables().clone();
         this.pure = original.isPure();
         this.assignedLocals = (HashMap<SimpleName, Expression>) original.getAssignedLocals().clone();
     }
