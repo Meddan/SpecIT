@@ -34,9 +34,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
 import Contract.*;
@@ -705,6 +704,31 @@ public class ContractGenerator {
         }
     }
 
+    private static void clearDirectory() throws IOException{
+        Path p = Paths.get("Generated");
+        System.out.println(Files.exists(p));
+        if(Files.exists(p)){
+            Files.walkFileTree(p, new SimpleFileVisitor<Path>(){
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    System.out.println("Is file: " + file.toString());
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    if(exc != null){
+                        throw exc;
+                    }
+                    Files.delete(dir);
+                    System.out.println("Is directory: " + dir.toString());
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        }
+    }
+
     private void writeToFile(String path, File projectDir, String toPrint){
 
         // TODO : Generate package signature
@@ -772,6 +796,14 @@ public class ContractGenerator {
         //File projectDir = new File("../RCC");
         //File projectDir = new File("src/main/java/Examples");
         File projectDir = new File("src/main/java/Examples/SingleExample");
+        try {
+            clearDirectory();
+        } catch (IOException ioe){
+            System.out.println("Could not delete directory with generated files.");
+            System.out.println("Consider manually deleting and rerunning.");
+            ioe.printStackTrace();
+            System.exit(1);
+        }
         testClasses(projectDir);
     }
     public static void testClasses(File projectDir) {
