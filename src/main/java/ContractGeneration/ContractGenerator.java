@@ -414,6 +414,9 @@ public class ContractGenerator {
                 createContract(ss.getBody(), b);
             } else if(s instanceof TryStmt){
                 throw new UncoveredStatementException();
+            } else if (s instanceof LabeledStmt){
+                LabeledStmt ls = (LabeledStmt) s;
+                createContract(ls.getStatement(), b);
             } else {
                 System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
             }
