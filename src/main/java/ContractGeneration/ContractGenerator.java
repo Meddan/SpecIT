@@ -42,7 +42,6 @@ import java.util.*;
 import Contract.*;
 
 public class ContractGenerator {
-
     //Should be initialized with a class
     private ClassOrInterfaceDeclaration target;
     private ArrayList<FieldDeclaration> fields = new ArrayList<FieldDeclaration>();
@@ -63,10 +62,13 @@ public class ContractGenerator {
 
         //Create the combinedTypeSolver
         combinedTypeSolver.add(new ReflectionTypeSolver());
-        //combinedTypeSolver.add(new JavaParserTypeSolver(new File("../RCC")));
-        //combinedTypeSolver.add(new JavaParserTypeSolver(new File("../RCC/RCC/java")));
+        combinedTypeSolver.add(new JavaParserTypeSolver(new File("../RCC")));
+        combinedTypeSolver.add(new JavaParserTypeSolver(new File("../RCC/RCC/java")));
         combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java")));
-        combinedTypeSolver.add(new JavaParserTypeSolver(new File(System.getProperty("java.home"))));
+        //combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java/Examples")));
+        //combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java/Examples/SingleExample/CryptoLib")));
+        //combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main")));
+        //combinedTypeSolver.add(new JavaParserTypeSolver(new File(System.getProperty("java.home"))));
         //Save all class variables of the class
         for (BodyDeclaration<?> b : target.getMembers()){
             if(b instanceof FieldDeclaration){
@@ -79,8 +81,8 @@ public class ContractGenerator {
                 CallableDeclaration cd = (CallableDeclaration) bd;
                 try {
                     contracts.put(cd ,createContract((CallableDeclaration) bd));
-                } catch (TooManyLeafsException e) {
-                    contracts.put(cd , null);
+                } catch (TooManyLeafsException | SymbolSolverException | CallingMethodWithoutContractException e) {
+                    contracts.put(cd, null);
                 }
             }
         }
@@ -96,16 +98,12 @@ public class ContractGenerator {
                     System.out.println();
                     System.out.println("-----------------");
                 }
-                System.out.println(cd.getName() + " has " + c.getLeafs().size() + " leafs");
                 cd.setComment(new BlockComment(c.extractContract()));
 
             }
         }
 
         writeToFile(path, projectDir, coid.toString());
-        System.out.println("DONE");
-        System.out.println(contracts.keySet().size());
-        System.out.println("#Active references: " + activeReferences.size());
 
     }
 
@@ -177,9 +175,14 @@ public class ContractGenerator {
         return true;
     }
 
-    public Contract createContract(CallableDeclaration cd) throws TooManyLeafsException {
+    public Contract createContract(CallableDeclaration cd) throws TooManyLeafsException, SymbolSolverException, CallingMethodWithoutContractException {
         //Get row for md
         //Get top-level assertions
+        System.out.println("Working on " + cd.getName());
+        if(contracts.containsKey(cd)){
+            System.out.println("Already done " + cd.getName() + " returning.");
+            return contracts.get(cd);
+        }
         NodeList<Statement> stmtList;
         if(cd instanceof MethodDeclaration){
             if(!((MethodDeclaration) cd).getBody().isPresent()){
@@ -207,16 +210,17 @@ public class ContractGenerator {
             }
         }
         createContract(stmtList, c.getCurrentBehavior());
+        System.out.println("Done working with " + cd.getName());
         return c;
     }
 
-    public void createContract(NodeList<Statement> stmtList, Behavior b) throws TooManyLeafsException {
+    public void createContract(NodeList<Statement> stmtList, Behavior b) throws TooManyLeafsException, SymbolSolverException, CallingMethodWithoutContractException {
         boolean pure = true;
         for(Statement s : stmtList){
             createContract(s, b);
         }
     }
-    public void createContract(Statement s, Behavior b) throws TooManyLeafsException {
+    public void createContract(Statement s, Behavior b) throws TooManyLeafsException, SymbolSolverException, CallingMethodWithoutContractException {
         /* We first identify if the current statement is assert or return in which case we want to make sure our
         assertions (ensures) are handled correctly.
         */
@@ -373,6 +377,7 @@ public class ContractGenerator {
                         b.putAssignedValue(sn, null);
                     }
                 }
+                b.setPure(false);
             } else if (s instanceof ForStmt) {
                 ForStmt fs = (ForStmt) s;
                 Behavior temporary = new Behavior(null);
@@ -391,6 +396,7 @@ public class ContractGenerator {
                         b.putAssignedValue(sn, null);
                     }
                 }
+                b.setPure(false);
             } else if (s instanceof DoStmt){
                 DoStmt ds = (DoStmt) s;
                 Statement body = ds.getBody();
@@ -402,13 +408,14 @@ public class ContractGenerator {
                         b.putAssignedValue(sn, null);
                     }
                 }
+                b.setPure(false);
             } else {
                 System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
             }
         }
     }
 
-    private Expression createContract(Expression e, Behavior b){
+    private Expression createContract(Expression e, Behavior b) throws SymbolSolverException, CallingMethodWithoutContractException {
         if(Resources.ignorableExpression(e)){
             return e;
         } else if (e instanceof NameExpr){
@@ -432,15 +439,16 @@ public class ContractGenerator {
             //System.out.println("MCE "+  mce);
             SymbolReference sr;
             try{
-                 sr = JavaParserFacade.get(combinedTypeSolver).solve(mce, false);
+                //System.out.println("arg " + mce.getArguments().get(0));
+                //System.out.println("type of arg: ");
+                //System.out.println(JavaParserFacade.get(combinedTypeSolver).getType(mce.getArguments().get(0)));
+                sr = JavaParserFacade.get(combinedTypeSolver).solve(mce, false);
             } catch (Exception error){
-                System.out.println(mce);
-                System.out.println(error instanceof NullPointerException);
-                throw error;
+                System.out.println();
+                System.out.println("Cannot solve " + mce);
+                throw new SymbolSolverException();
             }
 
-
-            //System.out.println(sr.toString());
             if(activeReferences.contains(sr.getCorrespondingDeclaration().getName())){
                 return e;
             }
@@ -462,6 +470,9 @@ public class ContractGenerator {
                     }
                 }
                 b.setClosed(true);
+                if(temp == null){
+                    throw new CallingMethodWithoutContractException();
+                }
                 for(Behavior beh : temp.getLeafs()){
                     Behavior newChild = new Behavior(b);
                     for (PreCondition pc : beh.getPreCons()) {
@@ -510,6 +521,9 @@ public class ContractGenerator {
         } else if (e instanceof VariableDeclarationExpr){
             //might have to check if assigning the value of a method call
             VariableDeclarationExpr vde = (VariableDeclarationExpr) e;
+            //System.out.println("TYPE? " + vde.getVariables().get(0).getInitializer().get().toString());
+            //System.out.println(JavaParserFacade.get(combinedTypeSolver).getType(vde.getVariables().get(0)));
+
             for(VariableDeclarator vd : vde.getVariables()){
                 b.addLocalVar(vd.getName());
                 if(vd.getInitializer().isPresent()){
@@ -539,11 +553,14 @@ public class ContractGenerator {
                 b.setPure(b.isLocalVar(ne.getName()));
             } else if(ae.getTarget() instanceof ArrayAccessExpr){
                 ArrayAccessExpr aae = (ArrayAccessExpr) ae.getTarget();
-                NameExpr ne = (NameExpr) aae.getName();
                 String arrayName = createContract(aae.getName(), b).toString();
-                if(arrayName.equals("\\old(this." + ne.toString() + ")") && !b.isLocalVar(ne.getName())){
-                    arrayName = "this." + ne.toString();
+                if(aae.getName() instanceof NameExpr) {
+                    NameExpr ne = (NameExpr) aae.getName();
+                    if(arrayName.equals("\\old(this." + ne.toString() + ")") && !b.isLocalVar(ne.getName())){
+                        arrayName = "this." + ne.toString();
+                    }
                 }
+
                 String index = createContract(aae.getIndex(), b).toString();
                 fieldName = new SimpleName( arrayName + "[" + index + "]");
                 if(aae.getName() instanceof NameExpr){
