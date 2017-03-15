@@ -46,7 +46,9 @@ public class PreCondition {
         }
 
         PreCondition pc = ((PreCondition) o);
-
+        if(expression == null){
+            return pc.getExpression() == null;
+        }
         return expression.equals(pc.getExpression());
     }
 }
