@@ -4,6 +4,7 @@ import ContractGeneration.Resources;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.body.BodyDeclaration;
@@ -17,6 +18,7 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.GenericVisitor;
+import com.github.javaparser.ast.visitor.Visitable;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
@@ -456,7 +458,12 @@ public class ContractGenerator {
                     return ne;
                 }
             } else {
-                SimpleName sn = new SimpleName("this." + ne.getName());
+                SimpleName sn;
+                if(!ne.getName().toString().contains("this.")) {
+                    sn = new SimpleName("this." + ne.getName());
+                } else {
+                    sn = ne.getName();
+                }
                 if(b.getAssignedValue(sn) != null){
                     return b.getAssignedValue(sn);
                 } else {
@@ -508,11 +515,14 @@ public class ContractGenerator {
                     }
                     for (PostCondition pc : beh.getPostCons()){
                         if(!pc.isReturn()){
-                            newChild.addPostCon(pc.getExpression(), false);
+                            newChild.addPostCon(createContract(pc.getExpression(), b), false);
                         }
                     }
                     for (SimpleName sn : beh.getAssignedValues().keySet()){
-                        newChild.putAssignedValue(sn, beh.getAssignedValue(sn));
+                        RemoveOldVisitor rov = new RemoveOldVisitor();
+                        Expression exp = beh.getAssignedValue(sn);
+                        rov.visit(exp, null);
+                        newChild.putAssignedValue(sn, createContract(exp, b));
                     }
                     newChild.setExceptional(beh.getIsExceptional());
                     for(ExceptionCondition ec : beh.getExceptions()){
@@ -825,9 +835,9 @@ public class ContractGenerator {
     }
 
     public static void main(String args[]){
-        File projectDir = new File("../RCC");
+        //File projectDir = new File("../RCC");
         //File projectDir = new File("src/main/java/Examples");
-        //File projectDir = new File("src/main/java/Examples/SingleExample");
+        File projectDir = new File("src/main/java/Examples/SingleExample");
         try {
             clearDirectory();
         } catch (IOException ioe){
