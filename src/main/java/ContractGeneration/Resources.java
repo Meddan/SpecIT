@@ -3,6 +3,8 @@ package ContractGeneration;
 import com.github.javaparser.ast.expr.*;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by meddan on 16/02/17.
@@ -56,4 +58,14 @@ public class Resources {
         }
         return ignorableReplaceExpressions.contains(e.getClass());
     }
+    public static String removeOld(String name){
+        Matcher m = Pattern.compile("\\\\old\\(([a-zA-Z._]+)\\)").matcher(name);
+        StringBuffer sb = new StringBuffer();
+        while (m.find()){
+            m.appendReplacement(sb,"$1");
+        }
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
 }
