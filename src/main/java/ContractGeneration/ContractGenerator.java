@@ -8,6 +8,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.BlockComment;
@@ -19,9 +20,10 @@ import com.github.javaparser.ast.visitor.GenericVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
+import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserConstructorDeclaration;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserMethodDeclaration;
+import com.github.javaparser.symbolsolver.model.declarations.*;
 import com.github.javaparser.symbolsolver.model.typesystem.Type;
-import com.github.javaparser.symbolsolver.model.declarations.TypeParameterDeclaration;
 import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionMethodDeclaration;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
@@ -417,8 +419,27 @@ public class ContractGenerator {
             } else if (s instanceof LabeledStmt){
                 LabeledStmt ls = (LabeledStmt) s;
                 createContract(ls.getStatement(), b);
+            } else if (s instanceof ExplicitConstructorInvocationStmt) {
+                ExplicitConstructorInvocationStmt ecis = (ExplicitConstructorInvocationStmt) s;
+                //JavaParserConstructorDeclaration jvpcd;
+                /*
+                SymbolReference<> sr;
+                try {
+                    sr = JavaParserFacade.get(combinedTypeSolver).solve(ecis);
+                } catch (Exception error) {
+                    System.out.println("Could not solver reference of super!");
+                    throw new SymbolSolverException();
+                }
+                if(sr.getCorrespondingDeclaration() instanceof JavaParserConstructorDeclaration){
+                    JavaParserConstructorDeclaration jpcd = (JavaParserConstructorDeclaration) sr.getCorrespondingDeclaration();
+                    System.out.println("thisname" +  jpcd.getName());
+                    createContract(sr.getCorrespondingDeclaration(), new Behavior(null));
+                }*/
+                throw new UncoveredStatementException();
+
             } else {
                 System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
+                throw new UncoveredStatementException();
             }
         }
     }
