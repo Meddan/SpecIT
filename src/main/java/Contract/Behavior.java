@@ -53,6 +53,8 @@ public class Behavior {
 
     private boolean pure = true;
 
+    private boolean impureMethods = false;
+
     private LinkedList<Behavior> children = new LinkedList<Behavior>();
 
     private HashMap<SimpleName, Expression> assignedValues = new HashMap<>();
@@ -119,6 +121,7 @@ public class Behavior {
         this.localVariables = (LinkedList<String>) original.getLocalVariables().clone();
         this.pure = original.isPure();
         this.assignedLocals = (HashMap<SimpleName, Expression>) original.getAssignedLocals().clone();
+        this.impureMethods = original.impureMethods;
     }
 
     public void setExceptional(boolean isExceptional){
@@ -231,8 +234,10 @@ public class Behavior {
     
     public String toString(){
         StringBuilder sb = new StringBuilder();
-
         sb.append(createBehaviorHeader());
+        if(impureMethods) {
+            sb.append("//might contain impure method calls\n");
+        }
         sb.append(createPreCons());
         sb.append(createPostCons());
         sb.append(createSignalsOnly());
@@ -480,5 +485,12 @@ public class Behavior {
 
     public boolean isDiverges() {
         return diverges;
+    }
+
+    public void setImpureMethods() {
+        this.impureMethods = true;
+        for(Behavior b : children){
+            b.setImpureMethods();
+        }
     }
 }
