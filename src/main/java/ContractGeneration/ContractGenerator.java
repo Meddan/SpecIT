@@ -472,8 +472,12 @@ public class ContractGenerator {
             }
         } else if(e instanceof MethodCallExpr){
             MethodCallExpr mce = (MethodCallExpr) e;
+            MethodCallExpr newMCE = mce.clone();
             //System.out.println("MCE "+  mce);
             SymbolReference sr;
+            for(Expression exp : mce.getArguments()){
+                newMCE.getArguments().replace(exp, createContract(exp, b));
+            }
             try{
                 //System.out.println("arg " + mce.getArguments().get(0));
                 //System.out.println("type of arg: ");
@@ -533,11 +537,10 @@ public class ContractGenerator {
                 b.setPure(temp.isPure());
                 activeReferences.remove(sr.getCorrespondingDeclaration().getName());
                 if(temp.isPure()){
-                    return e;
-                } else {
-                    return null;
+                    newMCE.setComment(new BlockComment("possibly impure method call"));
                 }
-                //TODO: Should get all field modifications and apply to current contract
+                return newMCE;
+                //TODO: Should add comment stating method call might be unpure.
                 //Might want to just throw away all previos knowledge like we do with loops.
 
             } else if (sr.getCorrespondingDeclaration() instanceof ReflectionMethodDeclaration){
