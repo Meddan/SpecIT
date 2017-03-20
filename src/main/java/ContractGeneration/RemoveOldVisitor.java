@@ -66,7 +66,8 @@ public class RemoveOldVisitor extends ModifierVisitor<Void> {
             return visit((LambdaExpr) e, args);
         }
         if( e instanceof LiteralExpr){
-            return visit((LiteralExpr) e, args);
+            System.out.println(e);
+            return null;
         }
         if( e instanceof MethodCallExpr){
             return visit((MethodCallExpr) e, args);
