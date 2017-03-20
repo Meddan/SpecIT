@@ -447,6 +447,9 @@ public class ContractGenerator {
     }
 
     private Expression createContract(Expression e, Behavior b) throws SymbolSolverException, CallingMethodWithoutContractException {
+        if(e == null){
+            return null;
+        }
         if(Resources.ignorableExpression(e)){
             return e;
         } else if (e instanceof NameExpr){
@@ -536,13 +539,10 @@ public class ContractGenerator {
                 }
                 b.setPure(temp.isPure());
                 activeReferences.remove(sr.getCorrespondingDeclaration().getName());
-                if(temp.isPure()){
-                    newMCE.setComment(new BlockComment("possibly impure method call"));
+                if(!temp.isPure()){
+                    //TODO: Should add comment stating method call might be unpure.
                 }
                 return newMCE;
-                //TODO: Should add comment stating method call might be unpure.
-                //Might want to just throw away all previos knowledge like we do with loops.
-
             } else if (sr.getCorrespondingDeclaration() instanceof ReflectionMethodDeclaration){
                 ReflectionMethodDeclaration rmd = (ReflectionMethodDeclaration) sr.getCorrespondingDeclaration();
                 b.setPure(false);
