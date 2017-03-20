@@ -541,6 +541,7 @@ public class ContractGenerator {
                 activeReferences.remove(sr.getCorrespondingDeclaration().getName());
                 if(!temp.isPure()){
                     //TODO: Should add comment stating method call might be unpure.
+                    b.setImpureMethods();
                 }
                 return newMCE;
             } else if (sr.getCorrespondingDeclaration() instanceof ReflectionMethodDeclaration){
