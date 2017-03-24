@@ -266,6 +266,14 @@ public class ContractGenerator {
                 listOfExprs.add(pc.getExpression());
             }
 
+            HashMap<SimpleName, Expression> assigs = b.getAssignedValues();
+
+            for(SimpleName k : assigs.keySet()){
+                if(assigs.get(k) != null){
+                    listOfExprs.add(new BinaryExpr(new NameExpr(k), assigs.get(k), BinaryExpr.Operator.EQUALS));
+                }
+            }
+
             if(ts.getExpression() instanceof ObjectCreationExpr){
                 // We create a new object when throwing
                 b.addException(((ObjectCreationExpr) ts.getExpression()).getType(), listOfExprs);
