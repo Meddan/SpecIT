@@ -5,5 +5,15 @@ package Statistics;
  */
 public class MethodStatistics {
 
-    
+    public void addPreCon(){
+
+    }
+
+    public void addPostCon(){
+
+    }
+
+    public void addBehavior(){
+        
+    }
 }
