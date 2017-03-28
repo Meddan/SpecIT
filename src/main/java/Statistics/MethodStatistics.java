@@ -7,23 +7,23 @@ import java.util.ArrayList;
  */
 public class MethodStatistics {
 
-    private ArrayList<Integer> postCons;
-    private ArrayList<Integer> preCons;
+    private ArrayList<Integer> amountOfpostCons;
+    private ArrayList<Integer> amountOfpreCons;
 
     private int behaviors;
 
     public MethodStatistics(){
-        postCons = new ArrayList<>();
-        preCons = new ArrayList<>();
+        amountOfpostCons = new ArrayList<>();
+        amountOfpreCons = new ArrayList<>();
         behaviors = -1;
     }
 
-    public void addPreCon(){
-
+    public void setAmountOfPreCons(int n){
+        amountOfpreCons.add(behaviors, new Integer(n));
     }
 
-    public void addPostCon(){
-        
+    public void setAmountOfPostCons(int n){
+        amountOfpostCons.add(behaviors, new Integer(n));
     }
 
     public void addBehavior(){
