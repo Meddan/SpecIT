@@ -22,11 +22,23 @@ public class MethodStatistics {
         amountOfpreCons.add(behaviors, new Integer(n));
     }
 
+    public ArrayList<Integer> getAmountOfpostCons(){
+        return amountOfpostCons;
+    }
+
     public void setAmountOfPostCons(int n){
         amountOfpostCons.add(behaviors, new Integer(n));
     }
 
+    public ArrayList<Integer> getAmountOfpreCons(){
+        return amountOfpreCons;
+    }
+
     public void addBehavior(){
         behaviors++;
+    }
+
+    public int getAmountOfBehaviors(){
+        return behaviors + 1;
     }
 }
