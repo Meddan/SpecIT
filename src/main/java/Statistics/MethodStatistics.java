@@ -23,10 +23,10 @@ public class MethodStatistics {
     }
 
     public void addPostCon(){
-
+        
     }
 
     public void addBehavior(){
-
+        behaviors++;
     }
 }
