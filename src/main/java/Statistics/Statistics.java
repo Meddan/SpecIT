@@ -1,8 +1,11 @@
 package Statistics;
 
 import Contract.*;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.SimpleName;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
@@ -35,10 +38,23 @@ public class Statistics {
     }
 
     private static void setPostCons(MethodStatistics ms, Behavior b){
+        int amountOfPostCons = 0;
 
+        amountOfPostCons += b.getPostCons().size();
+
+        HashMap<SimpleName, Expression> hm = b.getAssignedValues();
+        if(!b.getIsExceptional()) {
+            for (SimpleName sm : hm.keySet()){
+                if(hm.get(sm) != null){
+                    amountOfPostCons++;
+                }
+            }
+        }
+
+        ms.setAmountOfPostCons(amountOfPostCons);
     }
 
     private static void setPreCons(MethodStatistics ms, Behavior b){
-
+        ms.setAmountOfPreCons(b.getPreCons().size());
     }
 }
