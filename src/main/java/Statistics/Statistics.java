@@ -1,8 +1,9 @@
 package Statistics;
 
-import Contract.Contract;
+import Contract.*;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Created by dover on 2017-03-28.
@@ -22,6 +23,22 @@ public class Statistics {
      * @param c The contract from which to extract statistics
      */
     public static void gatherStatistics(Contract c){
+        LinkedList<Behavior> leafs =  c.getLeafs();
+
+        MethodStatistics ms = new MethodStatistics();
+
+        for(Behavior b : leafs){
+            ms.addBehavior();
+            setPostCons(ms, b);
+            setPreCons(ms, b);
+        }
+    }
+
+    private static void setPostCons(MethodStatistics ms, Behavior b){
+
+    }
+
+    private static void setPreCons(MethodStatistics ms, Behavior b){
 
     }
 }
