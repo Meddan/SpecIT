@@ -80,7 +80,7 @@ public class Behavior {
     private CallableDeclaration callableDeclaration;
 
     private LinkedList<String> localVariables = new LinkedList<>();
-    private LinkedList<String> getLocalVariables(){
+    public LinkedList<String> getLocalVariables(){
         return localVariables;
     }
     public void addLocalVar(SimpleName name){
