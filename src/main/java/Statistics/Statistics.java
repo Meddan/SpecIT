@@ -13,7 +13,7 @@ public class Statistics {
     private static int exceptionsThrown = 0;
 
     public static void exceptionThrown(){
-
+        exceptionsThrown++;
     }
 
     /**
