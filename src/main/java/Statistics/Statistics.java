@@ -1,19 +1,21 @@
 package Statistics;
 
+import Contract.Contract;
+
+import java.util.ArrayList;
+
 /**
  * Created by dover on 2017-03-28.
  */
 public class Statistics {
 
-    public static void addPreCon(){
+    private static ArrayList<MethodStatistics> methodStats = new ArrayList<>();
+
+    public static void exceptionThrown(){
 
     }
 
-    public static void addPostCon(){
-
-    }
-
-    public static void addBehavior(){
+    public static void gatherStatistics(Contract c){
 
     }
 }
