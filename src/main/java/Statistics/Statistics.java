@@ -5,5 +5,15 @@ package Statistics;
  */
 public class Statistics {
 
-    
+    public static void addPreCon(){
+
+    }
+
+    public static void addPostCon(){
+
+    }
+
+    public static void addBehavior(){
+
+    }
 }
