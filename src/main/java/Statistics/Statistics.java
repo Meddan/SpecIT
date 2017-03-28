@@ -15,6 +15,11 @@ public class Statistics {
 
     }
 
+    /**
+     * Given a contract, will extract all available information and
+     * statistics from it.
+     * @param c The contract from which to extract statistics
+     */
     public static void gatherStatistics(Contract c){
 
     }
