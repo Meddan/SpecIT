@@ -12,6 +12,12 @@ public class MethodStatistics {
 
     private int behaviors;
 
+    public MethodStatistics(){
+        postCons = new ArrayList<>();
+        preCons = new ArrayList<>();
+        behaviors = -1;
+    }
+
     public void addPreCon(){
 
     }
