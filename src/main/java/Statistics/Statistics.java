@@ -10,6 +10,7 @@ import java.util.ArrayList;
 public class Statistics {
 
     private static ArrayList<MethodStatistics> methodStats = new ArrayList<>();
+    private static int exceptionsThrown = 0;
 
     public static void exceptionThrown(){
 
