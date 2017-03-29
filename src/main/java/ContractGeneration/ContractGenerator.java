@@ -1,6 +1,7 @@
 package ContractGeneration;
 
 import ContractGeneration.Resources;
+import Statistics.Statistics;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -860,6 +861,7 @@ public class ContractGenerator {
         }
 
         testClasses(projectDir);
+        System.out.println(Statistics.getStatistics());
     }
     public static void testClasses(File projectDir) {
         new DirExplorer((level, path, file) -> path.endsWith(".java"), (level, path, file) -> {
