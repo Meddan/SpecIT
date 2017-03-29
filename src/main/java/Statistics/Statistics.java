@@ -35,14 +35,20 @@ public class Statistics {
             setPostCons(ms, b);
             setPreCons(ms, b);
         }
+
+        methodStats.add(ms);
     }
 
     /**
      * Calculates all interesting and relevant stats and presents them
      * in a nice and easy to read way (lul).
      */
-    public static void getStatistics(){
+    public static String getStatistics(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("Exceptions thrown: " + exceptionsThrown + "\n");
+        sb.append("Methods processed: " + methodStats.size() + "\n");
 
+        return sb.toString();
     }
 
     private static void setPostCons(MethodStatistics ms, Behavior b){
