@@ -1,5 +1,6 @@
 package Contract;
 
+import Statistics.Statistics;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.*;
@@ -110,6 +111,7 @@ public class Contract {
     }
     public String extractContract(){
         this.clean();
+        Statistics.gatherStatistics(this);
         return this.toString();
     }
 
