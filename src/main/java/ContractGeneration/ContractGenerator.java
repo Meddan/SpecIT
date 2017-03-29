@@ -87,6 +87,7 @@ public class ContractGenerator {
                     contracts.put(cd ,createContract((CallableDeclaration) bd));
                 } catch (TooManyLeafsException | SymbolSolverException | CallingMethodWithoutContractException | UncoveredStatementException e) {
                     contracts.put(cd, null);
+                    Statistics.exceptionThrown();
                 }
             }
         }
@@ -517,6 +518,7 @@ public class ContractGenerator {
                         contracts.put(md, temp);
                     } catch (TooManyLeafsException | CallingMethodWithoutContractException | SymbolSolverException | UncoveredStatementException error){
                         contracts.put(md, null);
+                        Statistics.exceptionThrown();
                         return null;
                     }
                 }
