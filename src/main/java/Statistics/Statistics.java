@@ -37,6 +37,14 @@ public class Statistics {
         }
     }
 
+    /**
+     * Calculates all interesting and relevant stats and presents them
+     * in a nice and easy to read way (lul).
+     */
+    public static void getStatistics(){
+
+    }
+
     private static void setPostCons(MethodStatistics ms, Behavior b){
         int amountOfPostCons = 0;
 
