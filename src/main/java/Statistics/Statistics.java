@@ -45,8 +45,41 @@ public class Statistics {
      */
     public static String getStatistics(){
         StringBuilder sb = new StringBuilder();
+
+        int totalPostCons = 0;
+        int totalPreCons = 0;
+        int totalBehaviors = 0;
+
+        for(MethodStatistics ms : methodStats){
+            totalBehaviors += ms.getAmountOfBehaviors();
+
+            ArrayList<Integer> postCons = ms.getAmountOfpostCons();
+            ArrayList<Integer> preCons = ms.getAmountOfpreCons();
+
+            for(int i = 0; i < ms.getAmountOfBehaviors(); i++){
+                Integer post = postCons.get(i);
+                Integer pre = preCons.get(i);
+
+                if(post != null){
+                    totalPostCons += post.intValue();
+                }
+
+                if(pre != null){
+                    totalPreCons += pre.intValue();
+                }
+            }
+        }
+
         sb.append("Exceptions thrown: " + exceptionsThrown + "\n");
         sb.append("Methods processed: " + methodStats.size() + "\n");
+        sb.append("Total behaviors: " + totalBehaviors + "\n");
+        sb.append("Total postconditions: " + totalPostCons + "\n");
+        sb.append("Total preconditions: " + totalPreCons + "\n");
+        sb.append("Average preconditions per method: " + (double) totalPreCons/methodStats.size() + "\n");
+        sb.append("Average postconditions per method: " + (double) totalPostCons/methodStats.size() + "\n");
+        sb.append("Average behaviors per method: " + (double) totalBehaviors/methodStats.size() + "\n");
+        sb.append("Average preconditions per behavior: " + (double) totalPostCons/totalBehaviors + "\n");
+        sb.append("Average postconditions per behavior: " + (double) totalPreCons/totalBehaviors + "\n");
 
         return sb.toString();
     }
