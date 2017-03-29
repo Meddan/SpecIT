@@ -70,6 +70,7 @@ public class Statistics {
             }
         }
 
+        sb.append("========= STATS GATHERED =========\n");
         sb.append("Exceptions thrown: " + exceptionsThrown + "\n");
         sb.append("Methods processed: " + methodStats.size() + "\n");
         sb.append("Total behaviors: " + totalBehaviors + "\n");
@@ -80,6 +81,7 @@ public class Statistics {
         sb.append("Average behaviors per method: " + (double) totalBehaviors/methodStats.size() + "\n");
         sb.append("Average preconditions per behavior: " + (double) totalPostCons/totalBehaviors + "\n");
         sb.append("Average postconditions per behavior: " + (double) totalPreCons/totalBehaviors + "\n");
+        sb.append("==================================\n");
 
         return sb.toString();
     }
