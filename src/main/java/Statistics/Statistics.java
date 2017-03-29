@@ -76,11 +76,11 @@ public class Statistics {
         sb.append("Total behaviors: " + totalBehaviors + "\n");
         sb.append("Total postconditions: " + totalPostCons + "\n");
         sb.append("Total preconditions: " + totalPreCons + "\n");
-        sb.append("Average preconditions per method: " + (double) totalPreCons/methodStats.size() + "\n");
-        sb.append("Average postconditions per method: " + (double) totalPostCons/methodStats.size() + "\n");
-        sb.append("Average behaviors per method: " + (double) totalBehaviors/methodStats.size() + "\n");
-        sb.append("Average preconditions per behavior: " + (double) totalPostCons/totalBehaviors + "\n");
-        sb.append("Average postconditions per behavior: " + (double) totalPreCons/totalBehaviors + "\n");
+        sb.append(String.format("Average preconditions per method: %.3f \n", (double) totalPreCons/methodStats.size()));
+        sb.append(String.format("Average postconditions per method: %.3f \n", (double) totalPostCons/methodStats.size()));
+        sb.append(String.format("Average behaviors per method: %.3f \n", (double) totalBehaviors/methodStats.size()));
+        sb.append(String.format("Average preconditions per behavior: %.3f \n", (double) totalPostCons/totalBehaviors));
+        sb.append(String.format("Average postconditions per behavior: %.3f \n", (double) totalPreCons/totalBehaviors));
         sb.append("==================================\n");
 
         return sb.toString();
