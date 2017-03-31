@@ -78,6 +78,7 @@ public class Behavior {
     }
 
     private CallableDeclaration callableDeclaration;
+    private Optional<Exception> failing;
 
     private LinkedList<String> localVariables = new LinkedList<>();
     public LinkedList<String> getLocalVariables(){
@@ -122,6 +123,7 @@ public class Behavior {
         this.pure = original.isPure();
         this.assignedLocals = (HashMap<SimpleName, Expression>) original.getAssignedLocals().clone();
         this.impureMethods = original.impureMethods;
+        this.failing = original.failing;
     }
 
     public void setExceptional(boolean isExceptional){
@@ -492,5 +494,13 @@ public class Behavior {
         for(Behavior b : children){
             b.setImpureMethods();
         }
+    }
+
+    public Optional<Exception> getFailing() {
+        return failing;
+    }
+
+    public void setFailing(Optional<Exception> failing) {
+        this.failing = failing;
     }
 }
