@@ -66,6 +66,9 @@ public class Contract {
         sb.append("@\n");
         for (Behavior b : getLeafs(initialBehavior)) {
             if (!b.isEmpty()) {
+                if(b.getFailing().isPresent()){
+                    sb.append("Failing behavior : " + b.getFailing().get().getClass() + "\n");
+                }
                 sb.append(b.toString());
                 sb.append("\nalso\n\n");
             }
