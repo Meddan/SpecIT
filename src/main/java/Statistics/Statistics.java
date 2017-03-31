@@ -3,6 +3,8 @@ package Statistics;
 import Contract.*;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.SimpleName;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +17,12 @@ public class Statistics {
 
     private static ArrayList<MethodStatistics> methodStats = new ArrayList<>();
     private static int exceptionsThrown = 0;
+
+    private static DescriptiveStatistics prePerMethod = new DescriptiveStatistics();
+    private static DescriptiveStatistics postPerMethod = new DescriptiveStatistics();
+    private static DescriptiveStatistics prePerBehavior = new DescriptiveStatistics();
+    private static DescriptiveStatistics postPerBehavior = new DescriptiveStatistics();
+    private static DescriptiveStatistics behPerMethod = new DescriptiveStatistics();
 
     public static void exceptionThrown(){
         exceptionsThrown++;
@@ -52,22 +60,32 @@ public class Statistics {
 
         for(MethodStatistics ms : methodStats){
             totalBehaviors += ms.getAmountOfBehaviors();
+            behPerMethod.addValue(ms.getAmountOfBehaviors());
 
             ArrayList<Integer> postCons = ms.getAmountOfpostCons();
             ArrayList<Integer> preCons = ms.getAmountOfpreCons();
 
+            int methPostCons = 0;
+            int methPreCons = 0;
             for(int i = 0; i < ms.getAmountOfBehaviors(); i++){
                 Integer post = postCons.get(i);
                 Integer pre = preCons.get(i);
 
                 if(post != null){
-                    totalPostCons += post.intValue();
+                    methPostCons += post;
+                    postPerBehavior.addValue(post.doubleValue());
                 }
 
                 if(pre != null){
-                    totalPreCons += pre.intValue();
+                    methPreCons += pre;
+                    prePerBehavior.addValue(pre.doubleValue());
                 }
             }
+
+            totalPostCons += methPostCons;
+            totalPreCons += methPreCons;
+            prePerMethod.addValue(methPreCons);
+            postPerMethod.addValue(methPostCons);
         }
 
         sb.append("========= STATS GATHERED =========\n");
@@ -76,14 +94,19 @@ public class Statistics {
         sb.append("Total behaviors: " + totalBehaviors + "\n");
         sb.append("Total postconditions: " + totalPostCons + "\n");
         sb.append("Total preconditions: " + totalPreCons + "\n");
-        sb.append(String.format("Average preconditions per method: %.3f \n", (double) totalPreCons/methodStats.size()));
-        sb.append(String.format("Average postconditions per method: %.3f \n", (double) totalPostCons/methodStats.size()));
-        sb.append(String.format("Average behaviors per method: %.3f \n", (double) totalBehaviors/methodStats.size()));
-        sb.append(String.format("Average preconditions per behavior: %.3f \n", (double) totalPostCons/totalBehaviors));
-        sb.append(String.format("Average postconditions per behavior: %.3f \n", (double) totalPreCons/totalBehaviors));
+        sb.append(String.format("Preconditions per method: \n%s \n", formatStats(prePerMethod)));
+        sb.append(String.format("Postconditions per method: \n%s \n", formatStats(postPerMethod)));
+        sb.append(String.format("Behaviors per method: \n%s \n", formatStats(behPerMethod)));
+        sb.append(String.format("Preconditions per behavior: \n%s \n", formatStats(prePerBehavior)));
+        sb.append(String.format("Postconditions per behavior: \n%s \n", formatStats(postPerBehavior)));
         sb.append("==================================\n");
 
         return sb.toString();
+    }
+
+    private static String formatStats(DescriptiveStatistics ds){
+        return String.format("Mean: %.3f Min: %.3f Median: %.3f Max: %.3f Standard Deviation: %.3f",
+                ds.getMean(), ds.getMin(), ds.getPercentile(50), ds.getMax(), ds.getStandardDeviation());
     }
 
     private static void setPostCons(MethodStatistics ms, Behavior b){
