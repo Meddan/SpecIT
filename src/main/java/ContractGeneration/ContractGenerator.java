@@ -3,10 +3,7 @@ package ContractGeneration;
 import ContractGeneration.Resources;
 import Statistics.Statistics;
 import com.github.javaparser.JavaParser;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.ImportDeclaration;
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.*;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -52,13 +49,11 @@ public class ContractGenerator {
     private HashMap<CallableDeclaration, Contract> contracts = new HashMap<>();
     private CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
     private LinkedList<String> activeReferences = new LinkedList<>();
-
     public ContractGenerator(ClassOrInterfaceDeclaration coid, String path, File projectDir){
         this.target = coid;
         if(target.isInterface()){
             return;
         }
-
         // Set all fields as public for specification
         for(FieldDeclaration fd : coid.getFields()){
             setFieldAsPublic(fd);
@@ -68,7 +63,11 @@ public class ContractGenerator {
         combinedTypeSolver.add(new ReflectionTypeSolver());
         combinedTypeSolver.add(new JavaParserTypeSolver(new File("../RCC")));
         combinedTypeSolver.add(new JavaParserTypeSolver(new File("../RCC/RCC/java")));
-        combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java")));
+        combinedTypeSolver.add(new JavaParserTypeSolver(new File("../Votail0.0.1b")));
+        //combinedTypeSolver.add(new JavaParserTypeSolver(new File("../RCC/RCC/java/rccwizard")));
+        //combinedTypeSolver.add(new JavaParserTypeSolver(new File("../RCC/RCC/java/escwizard")));
+        //combinedTypeSolver.add(new JavaParserTypeSolver(new File("../RCC/RCC/java/rcc")));
+        //combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java")));
         //combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java/Examples")));
         //combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main/java/Examples/SingleExample/CryptoLib")));
         //combinedTypeSolver.add(new JavaParserTypeSolver(new File("src/main")));
@@ -183,9 +182,7 @@ public class ContractGenerator {
     public Contract createContract(CallableDeclaration cd) throws TooManyLeafsException, SymbolSolverException, CallingMethodWithoutContractException, UncoveredStatementException {
         //Get row for md
         //Get top-level assertions
-        System.out.println("Working on " + cd.getName());
         if(contracts.containsKey(cd)){
-            System.out.println("Already done " + cd.getName() + " returning.");
             return contracts.get(cd);
         }
         NodeList<Statement> stmtList;
@@ -215,7 +212,6 @@ public class ContractGenerator {
             }
         }
         createContract(stmtList, c.getCurrentBehavior());
-        System.out.println("Done working with " + cd.getName());
         return c;
     }
 
@@ -229,6 +225,7 @@ public class ContractGenerator {
         /* We first identify if the current statement is assert or return in which case we want to make sure our
         assertions (ensures) are handled correctly.
         */
+        //System.out.println("Statement s of " + s.getClass());
         if (s instanceof AssertStmt){
             AssertStmt as = (AssertStmt) s;
             //An assert-statement can be seen as a precondition if it appears at the start of a function
@@ -457,6 +454,7 @@ public class ContractGenerator {
     }
 
     private Expression createContract(Expression e, Behavior b) throws SymbolSolverException, CallingMethodWithoutContractException {
+        //System.out.println("Expression " + e + " of " + e.getClass());
         if(e == null){
             return null;
         }
@@ -485,6 +483,14 @@ public class ContractGenerator {
             }
         } else if(e instanceof MethodCallExpr){
             MethodCallExpr mce = (MethodCallExpr) e;
+            if(mce.getScope().isPresent()){
+                //System.out.println("SCOPE");
+                BinaryExpr be = new BinaryExpr();
+                be.setOperator(BinaryExpr.Operator.NOT_EQUALS);
+                be.setLeft(mce.getScope().get());
+                be.setRight(new NullLiteralExpr());
+                b.addPostCon(be, false);
+            }
             MethodCallExpr newMCE = mce.clone();
             //System.out.println("MCE "+  mce);
             SymbolReference sr;
@@ -496,9 +502,13 @@ public class ContractGenerator {
                 //System.out.println("type of arg: ");
                 //System.out.println(JavaParserFacade.get(combinedTypeSolver).getType(mce.getArguments().get(0)));
                 sr = JavaParserFacade.get(combinedTypeSolver).solve(mce, false);
-            } catch (Exception error){
-                System.out.println();
-                System.out.println("Cannot solve " + mce);
+            } catch (Exception | StackOverflowError error){
+                //System.out.println();
+                //System.out.println("Cannot solve " + mce);
+                if(error instanceof StackOverflowError){
+                    System.out.println("StackOverflow when doing " + e);
+                    System.out.println("in " + b.getCallableDeclaration().getName());
+                }
                 throw new SymbolSolverException();
             }
 
@@ -625,7 +635,11 @@ public class ContractGenerator {
                 return null;
             }
             Expression exp = createContract(ae.getValue(), b);
-            b.putAssignedValue(fieldName, exp);
+            if(exp == null){
+                b.putAssignedValue(fieldName, new NameExpr(fieldName));
+            } else {
+                b.putAssignedValue(fieldName, exp);
+            }
             return null;
         } else if (e instanceof BinaryExpr) {
             BinaryExpr be = (BinaryExpr) e;
@@ -697,34 +711,53 @@ public class ContractGenerator {
         } else if (e instanceof ObjectCreationExpr) {
             //TODO: Check if constructor is pure? What will this actually do? Maybe always false?
             ObjectCreationExpr oce = (ObjectCreationExpr) e;
+            ObjectCreationExpr newOce = oce.clone();
             boolean pure = true;
+            NodeList<Expression> newArguments = new NodeList<>();
             for (Expression exp : oce.getArguments()) {
-                createContract(exp, b);
+                newArguments.add(createContract(exp, b));
             }
+            newOce.setArguments(newArguments);
             if (oce.getAnonymousClassBody().isPresent()) {
                 //TODO: Evaluate body
                 b.setPure(false);
 
             }
             b.setPure(false);
-            return e;
+            return newOce;
         } else if (e instanceof ArrayCreationExpr) {
             ArrayCreationExpr ace = (ArrayCreationExpr) e;
+            ArrayCreationExpr newAce = ace.clone();
+            NodeList<ArrayCreationLevel> newLevels = new NodeList<>();
+            for(ArrayCreationLevel acl : ace.getLevels()){
+                ArrayCreationLevel newAcl = acl.clone();
+                if(acl.getDimension().isPresent()){
+                    newAcl.setDimension(createContract(acl.getDimension().get(), b));
+                }
+                newLevels.add(newAcl);
+            }
+            newAce.setLevels(newLevels);
             if (ace.getInitializer().isPresent()) {
-                createContract(ace.getInitializer().get(), b);
+                newAce.setInitializer((ArrayInitializerExpr) createContract(ace.getInitializer().get(), b));
             }
-            return e;
+            //This returns null we cannot put
+            // \ensures a == new int[1];
+            // in a contract
+            return null;
         } else if (e instanceof ArrayInitializerExpr) {
-
             ArrayInitializerExpr aie = (ArrayInitializerExpr) e;
+            ArrayInitializerExpr newAie = aie.clone();
+            NodeList<Expression> newValues = new NodeList<>();
             for (Expression exp : aie.getValues()) {
-                createContract(exp, b);
+                newValues.add(createContract(exp, b));
             }
-            return e;
+            newAie.setValues(newValues);
+            return newAie;
         } else if (e instanceof ArrayAccessExpr) {
             ArrayAccessExpr aae = (ArrayAccessExpr) e;
-            createContract(aae.getIndex(), b);
-            return e;
+            ArrayAccessExpr newAae = aae.clone();
+            newAae.setIndex(createContract(aae.getIndex(), b));
+            return newAae;
         } else if (e instanceof CastExpr) {
             CastExpr ce = (CastExpr) e;
             createContract(ce.getExpression(), b);
@@ -853,6 +886,7 @@ public class ContractGenerator {
         //File projectDir = new File("../RCC");
         //File projectDir = new File("src/main/java/Examples");
         File projectDir = new File("src/main/java/Examples/SingleExample");
+        //File projectDir = new File("../Votail0.0.1b");
         try {
             clearDirectory();
         } catch (IOException ioe){
