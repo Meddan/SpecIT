@@ -102,6 +102,7 @@ public class Behavior {
             this.level = parent.getLevel()+1;
             extractInformation(parent);
         } else {
+            this.failing = Optional.empty();
             this.level = 0;
         }
     }
@@ -295,7 +296,9 @@ public class Behavior {
         if(!isExceptional) {
             for (SimpleName sn : assignedValues.keySet()) {
                 if (assignedValues.get(sn) != null) {
-                    sb.append("ensures " + sn + " == " + assignedValues.get(sn) + ";\n");
+                    if(!assignedValues.get(sn).toString().equals(sn.toString())){
+                        sb.append("ensures " + sn + " == " + assignedValues.get(sn) + ";\n");
+                    }
                 }
             }
         }
@@ -306,7 +309,6 @@ public class Behavior {
 
     private String createPostCons(){
         StringBuilder sb = new StringBuilder();
-
         if(!isExceptional) {
             // Write out postconditions
             for (PostCondition p : postCons) {
@@ -435,7 +437,6 @@ public class Behavior {
         }
     }
     public void putAssignedValue(SimpleName name, Expression e){
-        //System.out.println("Adding " + name + " with " + e);
         if(!closed) {
             if(name.toString().contains("this.")){
                 assignedValues.put(name, e);
