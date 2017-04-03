@@ -62,6 +62,7 @@ public class Contract {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        sb.append("Generated\n");
         String modifier = checkModifiers(initialBehavior.getCallableDeclaration().getModifiers());
         sb.append("@\n");
         for (Behavior b : getLeafs(initialBehavior)) {
