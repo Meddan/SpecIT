@@ -607,8 +607,12 @@ public class ContractGenerator {
                     BinaryExpr be = new BinaryExpr(scope, new NullLiteralExpr(), BinaryExpr.Operator.NOT_EQUALS);
                     b.addPreCon(be);
                 }
+                if(scope instanceof FieldAccessExpr){
+                    createContract(scope, b);
+                }
             }
-            return e;
+            NameExpr ne = new NameExpr(fae.toString());
+            return createContract(ne, b);
         } else if (e instanceof AssignExpr){
             AssignExpr ae = (AssignExpr) e;
             SimpleName fieldName;
