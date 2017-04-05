@@ -61,7 +61,7 @@ public class ContractGenerator {
         }
 
         //Create the combinedTypeSolver
-        combinedTypeSolver.add(new ReflectionTypeSolver());
+        combinedTypeSolver.add(new ReflectionTypeSolver(false));
         combinedTypeSolver.add(new JavaParserTypeSolver(projectDir));
         //Save all class variables of the class
         for (BodyDeclaration<?> b : target.getMembers()){
@@ -492,10 +492,12 @@ public class ContractGenerator {
                 //newMCE.getArguments().replace(exp, createContract(exp, b));
             }
             newMCE.setArguments(newArgs);
+
             try{
                 //System.out.println("arg " + mce.getArguments().get(0));
                 //System.out.println("type of arg: ");
                 //System.out.println(JavaParserFacade.get(combinedTypeSolver).getType(mce.getArguments().get(0)));
+
                 sr = JavaParserFacade.get(combinedTypeSolver).solve(mce, false);
             } catch (Exception | StackOverflowError error){
                 //System.out.println();
