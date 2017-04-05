@@ -62,9 +62,9 @@ public class Contract {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Generated\n");
         String modifier = checkModifiers(initialBehavior.getCallableDeclaration().getModifiers());
         sb.append("@\n");
+        sb.append("//Generated\n");
         for (Behavior b : getLeafs(initialBehavior)) {
             if (!b.isEmpty()) {
                 if(b.getFailing().isPresent()){
