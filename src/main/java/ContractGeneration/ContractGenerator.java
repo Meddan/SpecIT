@@ -93,6 +93,9 @@ public class ContractGenerator {
                     System.out.println();
                     System.out.println("-----------------");
                 }
+                if(cd.getComment().isPresent()){
+                    c.setOldComment(cd.getComment().get());
+                }
                 cd.setComment(new BlockComment(c.extractContract()));
 
             }
