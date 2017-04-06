@@ -21,7 +21,6 @@ public class Resources {
     }
 
     private static void addIgnorableExpressions() {
-        ignorableExpressions.add(FieldAccessExpr.class);
         ignorableExpressions.add(IntegerLiteralExpr.class);
         ignorableExpressions.add(DoubleLiteralExpr.class);
         ignorableExpressions.add(LongLiteralExpr.class);
