@@ -3,6 +3,7 @@ package Contract;
 import Statistics.Statistics;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.AssertStmt;
 import com.github.javaparser.ast.type.Type;
@@ -30,6 +31,7 @@ public class Contract {
 
     private Behavior currentBehavior;
     private final Behavior initialBehavior;
+    private Comment oldComment;
 
     public Contract(){
         currentBehavior = new Behavior(null);
@@ -51,6 +53,9 @@ public class Contract {
     public void setCurrentBehavior(Behavior b){
         this.currentBehavior = b;
     }
+    public void setOldComment(Comment c){
+        this.oldComment = c;
+    }
 
     public LinkedList<Behavior> getLeafs(){
         return getLeafs(initialBehavior);
@@ -64,6 +69,7 @@ public class Contract {
         StringBuilder sb = new StringBuilder();
         String modifier = checkModifiers(initialBehavior.getCallableDeclaration().getModifiers());
         sb.append("@\n");
+        sb.append(formatOldComment());
         sb.append("//Generated\n");
         for (Behavior b : getLeafs(initialBehavior)) {
             if (!b.isEmpty()) {
@@ -99,6 +105,26 @@ public class Contract {
         for(Behavior b : getLeafs(currentBehavior)){
             b.clean();
         }
+    }
+
+    private String formatOldComment(){
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("// Old comment can be seen below\n");
+
+        if(oldComment != null){
+            String[] commentLines = oldComment.getContent().split("\\r?\\n");
+
+            for(int i = 0; i < commentLines.length; i++){
+                sb.append("//" + commentLines[i] + "\n");
+            }
+            sb.append("\n");
+            return sb.toString();
+
+        } else {
+            return "";
+        }
+
     }
 
     private String checkModifiers(EnumSet<Modifier> modifiers){
