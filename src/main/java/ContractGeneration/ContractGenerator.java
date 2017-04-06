@@ -172,7 +172,19 @@ public class ContractGenerator {
         }
         return true;
     }
-
+    private SimpleName getFirstScope(FieldAccessExpr fae){
+        if(fae.getScope().isPresent()){
+            Expression scope = fae.getScope().get();
+            if(scope instanceof ThisExpr){
+                return new SimpleName(fae.toString());
+            } else if (scope instanceof FieldAccessExpr){
+                return getFirstScope((FieldAccessExpr) scope);
+            } else if (scope instanceof NameExpr) {
+                return ((NameExpr) scope).getName();
+            }
+        }
+        return null;
+    }
     public Contract createContract(CallableDeclaration cd) throws TooManyLeafsException, SymbolSolverException, CallingMethodWithoutContractException, UncoveredStatementException {
         //Get row for md
         //Get top-level assertions
@@ -595,7 +607,7 @@ public class ContractGenerator {
                     Expression initExp = vd.getInitializer().get();
                     //If we initialize a variable we save the name in the behaviors assigned values with the
                     // value of the expression that we get from evaluating the initializer
-                    if (!(initExp instanceof ArrayCreationExpr)) {
+                    if (!(initExp instanceof ArrayCreationExpr) && !(initExp instanceof ObjectCreationExpr)) {
                         //b.putAssignedValue(vd.getId().getName(), new NameExpr(vd.getId().getName()));
                         b.putAssignedValue(vd.getName(), createContract(initExp, b));
                     }
@@ -606,6 +618,11 @@ public class ContractGenerator {
             FieldAccessExpr fae = (FieldAccessExpr) e;
             if(fae.getScope().isPresent()){
                 Expression scope = fae.getScope().get();
+                SimpleName firstScope = getFirstScope(fae);
+                if(b.isLocalVar(firstScope)){
+                    System.out.println("b.get " + b.getAssignedValue(firstScope));
+                    return b.getAssignedValue(firstScope);
+                }
                 if(!(scope instanceof ThisExpr)){
                     BinaryExpr be = new BinaryExpr(scope, new NullLiteralExpr(), BinaryExpr.Operator.NOT_EQUALS);
                     b.addPreCon(be);
@@ -738,14 +755,8 @@ public class ContractGenerator {
                     newArguments.add(newE);
                 }
             }
-            newOce.setArguments(newArguments);
-            if (oce.getAnonymousClassBody().isPresent()) {
-                //TODO: Evaluate body
-                b.setPure(false);
-
-            }
             b.setPure(false);
-            return newOce;
+            return null;
         } else if (e instanceof ArrayCreationExpr) {
             ArrayCreationExpr ace = (ArrayCreationExpr) e;
             ArrayCreationExpr newAce = ace.clone();
@@ -778,7 +789,8 @@ public class ContractGenerator {
             ArrayAccessExpr aae = (ArrayAccessExpr) e;
             ArrayAccessExpr newAae = aae.clone();
             newAae.setIndex(createContract(aae.getIndex(), b));
-            return newAae;
+            SimpleName newAaeName = new SimpleName(newAae.toString());
+            return b.getAssignedValue(newAaeName);
         } else if (e instanceof CastExpr) {
             CastExpr ce = (CastExpr) e;
             createContract(ce.getExpression(), b);
