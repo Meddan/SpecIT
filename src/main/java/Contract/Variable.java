@@ -31,4 +31,13 @@ public class Variable {
         }
         return false;
     }
+    public String toString(){
+        if(scope == Scope.field){
+            return "this." + name;
+        } else if (scope == Scope.staticfield) {
+            return className + name;
+        } else {
+            return name;
+        }
+    }
 }
