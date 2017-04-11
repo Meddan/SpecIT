@@ -21,7 +21,9 @@ import com.github.javaparser.ast.visitor.VoidVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserConstructorDeclaration;
+import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserFieldDeclaration;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserMethodDeclaration;
+import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserSymbolDeclaration;
 import com.github.javaparser.symbolsolver.model.declarations.*;
 import com.github.javaparser.symbolsolver.model.typesystem.Type;
 import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionMethodDeclaration;
@@ -172,18 +174,66 @@ public class ContractGenerator {
         }
         return true;
     }
-    private SimpleName getFirstScope(FieldAccessExpr fae){
+    private Expression getFirstScope(FieldAccessExpr fae){
         if(fae.getScope().isPresent()){
             Expression scope = fae.getScope().get();
             if(scope instanceof ThisExpr){
-                return new SimpleName(fae.toString());
+                return scope;
             } else if (scope instanceof FieldAccessExpr){
                 return getFirstScope((FieldAccessExpr) scope);
             } else if (scope instanceof NameExpr) {
-                return ((NameExpr) scope).getName();
+                return scope;
             }
         }
         return null;
+    }
+    private String getClassName(Node n){
+        String s = JavaParserFacade.get(combinedTypeSolver).getTypeOfThisIn(n).asReferenceType().getQualifiedName();
+        if(s.contains(".")){
+            String[] a = s.split("\\.");
+            return a[a.length-1];
+        } else {
+            return s;
+        }
+    }
+    private Variable getVariableFromExpression(Expression e){
+        String clazz = getClassName(e);
+        if(e instanceof NameExpr){
+            NameExpr ne = (NameExpr) e;
+            String name = ne.getName().toString();
+            Declaration d = JavaParserFacade.get(combinedTypeSolver).solve(ne).getCorrespondingDeclaration();
+            if(d instanceof JavaParserFieldDeclaration){
+                JavaParserFieldDeclaration jpfd = (JavaParserFieldDeclaration) d;
+                if(jpfd.getWrappedNode().getModifiers().contains(Modifier.STATIC)){
+                    return new Variable(Variable.Scope.staticfield, name, clazz);
+                } else {
+                    return new Variable(Variable.Scope.field, name, clazz);
+                }
+            } else if (d instanceof JavaParserSymbolDeclaration){
+                return new Variable(Variable.Scope.local, name, clazz);
+            }
+
+        } if (e instanceof FieldAccessExpr){
+            FieldAccessExpr fae = (FieldAccessExpr) e;
+            String name = fae.getName().toString();
+            Expression scope = getFirstScope(fae);
+            try {
+                Declaration d = JavaParserFacade.get(combinedTypeSolver).solve(fae.getScope().get()).getCorrespondingDeclaration();
+                if (d instanceof JavaParserFieldDeclaration) {
+                    JavaParserFieldDeclaration jpfd = (JavaParserFieldDeclaration) d;
+                    if (jpfd.getWrappedNode().getModifiers().contains(Modifier.STATIC)) {
+                        return new Variable(Variable.Scope.staticfield, name, clazz);
+                    } else {
+                        return new Variable(Variable.Scope.field, name, clazz);
+                    }
+                } else if (d instanceof JavaParserSymbolDeclaration) {
+                    return new Variable(Variable.Scope.local, name, clazz);
+                }
+            } catch (UnsupportedOperationException uoe){
+                return new Variable(Variable.Scope.staticfield, name, clazz);
+            }
+        }
+        throw new IllegalArgumentException();
     }
     public Contract createContract(CallableDeclaration cd) throws TooManyLeafsException, SymbolSolverException, CallingMethodWithoutContractException, UncoveredStatementException {
         //Get row for md
@@ -208,13 +258,19 @@ public class ContractGenerator {
         b.setCallableDeclaration(cd);
         for(Object o : cd.getParameters()){
             Parameter p = (Parameter) o;
-            b.addLocalVar(p.getName());
-            b.putAssignedValue(p.getName(), new NameExpr(p.getName()));
+            Variable v = new Variable(Variable.Scope.local, p.getName().toString(), getClassName(p));
+            b.putAssignedValue(v, new NameExpr(p.getName()));
         }
         for(FieldDeclaration fd : fields){
+            Variable.Scope scope;
+            if(fd.getModifiers().contains(Modifier.STATIC)){
+                scope = Variable.Scope.staticfield;
+            } else {
+                scope = Variable.Scope.field;
+            }
             for(VariableDeclarator vd : fd.getVariables()){
-                SimpleName name = new SimpleName("this." + vd.getName());
-                b.putAssignedValue(name, new NameExpr(new SimpleName("\\old(" + name + ")")));
+                Variable v = new Variable(scope, vd.getName().toString(), getClassName(vd));
+                b.addField(v);
             }
         }
         createContract(stmtList, c.getCurrentBehavior());
@@ -271,11 +327,12 @@ public class ContractGenerator {
                 listOfExprs.add(pc.getExpression());
             }
 
-            HashMap<SimpleName, Expression> assigs = b.getAssignedValues();
+            HashMap<Variable, VariableValue> assigns = b.getAssignedValues();
 
-            for(SimpleName k : assigs.keySet()){
-                if(assigs.get(k) != null){
-                    listOfExprs.add(new BinaryExpr(new NameExpr(k), assigs.get(k), BinaryExpr.Operator.EQUALS));
+            for(Variable v : assigns.keySet()){
+                VariableValue value = assigns.get(v);
+                if(value.getStatus()== VariableValue.Status.known){
+                    listOfExprs.add(new BinaryExpr(new NameExpr(v.getName()), value.getValue(), BinaryExpr.Operator.EQUALS));
                 }
             }
 
@@ -389,8 +446,8 @@ public class ContractGenerator {
                 createContract(ws.getCondition(), temporary);
                 createContract(body, temporary);
                 for(Behavior leaf : temporary.getLeafs()){
-                    for(SimpleName sn : leaf.getAssignables()){
-                        b.putAssignedValue(sn, null);
+                    for(Variable v: leaf.getAssignables()){
+                        b.putAssignedValue(v, null);
                     }
                 }
                 b.setPure(false);
@@ -408,8 +465,8 @@ public class ContractGenerator {
                 }
                 createContract(fs.getBody(), temporary);
                 for(Behavior leaf : temporary.getLeafs()){
-                    for(SimpleName sn : leaf.getAssignables()){
-                        b.putAssignedValue(sn, null);
+                    for(Variable v: leaf.getAssignables()){
+                        b.putAssignedValue(v, null);
                     }
                 }
                 b.setPure(false);
@@ -420,8 +477,8 @@ public class ContractGenerator {
                 createContract(ds.getCondition(), temporary);
                 createContract(body, temporary);
                 for(Behavior leaf : temporary.getLeafs()){
-                    for(SimpleName sn : leaf.getAssignables()){
-                        b.putAssignedValue(sn, null);
+                    for(Variable v : leaf.getAssignables()){
+                        b.putAssignedValue(v, null);
                     }
                 }
                 b.setPure(false);
@@ -467,30 +524,10 @@ public class ContractGenerator {
         if(Resources.ignorableExpression(e)){
             return e;
         } else if (e instanceof NameExpr){
-            NameExpr ne = (NameExpr) e;
-            if(b.isLocalVar(ne.getName())){
-                if(b.getAssignedValue(ne.getName()) != null){
-                    return b.getAssignedValue(ne.getName());
-                } else {
-                    return ne;
-                }
-            } else {
-                SimpleName sn;
-                if(!ne.getName().toString().contains("this.")) {
-                    sn = new SimpleName("this." + ne.getName());
-                } else {
-                    sn = ne.getName();
-                }
-                if(b.getAssignedValue(sn) != null){
-                    return b.getAssignedValue(sn);
-                } else {
-                    return new NameExpr(sn);
-                }
-            }
+            Variable v = getVariableFromExpression(e);
+            return b.getAssignedValue(v);
         } else if(e instanceof MethodCallExpr){
             MethodCallExpr mce = (MethodCallExpr) e;
-            System.out.println("MCE " + mce);
-
             if(mce.getScope().isPresent()){
                 BinaryExpr be = new BinaryExpr();
                 be.setOperator(BinaryExpr.Operator.NOT_EQUALS);
@@ -499,7 +536,6 @@ public class ContractGenerator {
                 b.addPreCon(be);
             }
             MethodCallExpr newMCE = mce.clone();
-            //System.out.println("MCE "+  mce);
             SymbolReference sr;
             NodeList<Expression> newArgs = new NodeList<>();
             for(Expression exp : mce.getArguments()){
@@ -507,29 +543,20 @@ public class ContractGenerator {
                 //newMCE.getArguments().replace(exp, createContract(exp, b));
             }
             newMCE.setArguments(newArgs);
-
             try{
-                //System.out.println("arg " + mce.getArguments().get(0));
-                //System.out.println("type of arg: ");
-                //System.out.println(JavaParserFacade.get(combinedTypeSolver).getType(mce.getArguments().get(0)));
-
                 sr = JavaParserFacade.get(combinedTypeSolver).solve(mce, false);
             } catch (Exception | StackOverflowError error){
-                //System.out.println();
                 System.out.println("Cannot solve " + mce);
-                //error.printStackTrace();
                 if(error instanceof StackOverflowError){
                     System.out.println("StackOverflow when doing " + e);
                     System.out.println("in " + b.getCallableDeclaration().getName());
                 }
                 throw new SymbolSolverException();
             }
-
             if(activeReferences.contains(sr.getCorrespondingDeclaration().getName())){
                 return e;
             }
             activeReferences.add(sr.getCorrespondingDeclaration().getName());
-
             if(sr.getCorrespondingDeclaration() instanceof JavaParserMethodDeclaration){
                 MethodDeclaration md = ((JavaParserMethodDeclaration) sr.getCorrespondingDeclaration()).getWrappedNode();
                 Contract temp;
@@ -559,11 +586,11 @@ public class ContractGenerator {
                             newChild.addPostCon(createContract(pc.getExpression(), b), false);
                         }
                     }
-                    for (SimpleName sn : beh.getAssignedValues().keySet()){
+                    for (Variable v : beh.getAssignedValues().keySet()){
                         RemoveOldVisitor rov = new RemoveOldVisitor();
-                        Expression exp = beh.getAssignedValue(sn);
+                        Expression exp = beh.getAssignedValue(v);
                         rov.visit(exp, null);
-                        newChild.putAssignedValue(sn, createContract(exp, b));
+                        newChild.putAssignedValue(v, createContract(exp, b));
                     }
                     newChild.setExceptional(beh.getIsExceptional());
                     for(ExceptionCondition ec : beh.getExceptions()){
@@ -600,27 +627,27 @@ public class ContractGenerator {
             VariableDeclarationExpr vde = (VariableDeclarationExpr) e;
             //System.out.println("TYPE? " + vde.getVariables().get(0).getInitializer().get().toString());
             //System.out.println(JavaParserFacade.get(combinedTypeSolver).getType(vde.getVariables().get(0)));
+            Variable.Scope scope = Variable.Scope.local;
 
             for (VariableDeclarator vd : vde.getVariables()) {
-                b.addLocalVar(vd.getName());
                 if (vd.getInitializer().isPresent()) {
+                    Variable v = new Variable(scope, vd.getName().toString(), getClassName(vd));
                     Expression initExp = vd.getInitializer().get();
                     //If we initialize a variable we save the name in the behaviors assigned values with the
                     // value of the expression that we get from evaluating the initializer
                     if (!(initExp instanceof ArrayCreationExpr) && !(initExp instanceof ObjectCreationExpr)) {
                         //b.putAssignedValue(vd.getId().getName(), new NameExpr(vd.getId().getName()));
-                        b.putAssignedValue(vd.getName(), createContract(initExp, b));
+                        b.putAssignedValue(v, createContract(initExp, b));
                     }
                 }
             }
             return null;
         } else if (e instanceof FieldAccessExpr){
             FieldAccessExpr fae = (FieldAccessExpr) e;
-            if(fae.getScope().isPresent()){
+            /*if(fae.getScope().isPresent()){
                 Expression scope = fae.getScope().get();
                 SimpleName firstScope = getFirstScope(fae);
                 if(b.isLocalVar(firstScope)){
-                    System.out.println("b.get " + b.getAssignedValue(firstScope));
                     return b.getAssignedValue(firstScope);
                 }
                 if(!(scope instanceof ThisExpr)){
@@ -632,47 +659,32 @@ public class ContractGenerator {
                 }
             }
             NameExpr ne = new NameExpr(fae.toString());
-            return createContract(ne, b);
+            return createContract(ne, b);*/
+            return e;
         } else if (e instanceof AssignExpr){
             AssignExpr ae = (AssignExpr) e;
-            SimpleName fieldName;
+            Variable v;
             if(ae.getTarget() instanceof FieldAccessExpr){
-                fieldName = new SimpleName("this." +((FieldAccessExpr) ae.getTarget()).getName());
+                v = getVariableFromExpression(ae.getTarget());
                 b.setPure(false);
             } else if (ae.getTarget() instanceof NameExpr){
                 NameExpr ne = (NameExpr) ae.getTarget();
-                if(b.isLocalVar(ne.getName())){
-                    fieldName = ne.getName();
-                } else {
-                    fieldName = new SimpleName("this." + ne.getName());
-                }
+                v = getVariableFromExpression(ae.getTarget());
                 b.setPure(b.isLocalVar(ne.getName()));
             } else if(ae.getTarget() instanceof ArrayAccessExpr){
                 ArrayAccessExpr aae = (ArrayAccessExpr) ae.getTarget();
-                String arrayName = createContract(aae.getName(), b).toString();
-                if(aae.getName() instanceof NameExpr) {
-                    NameExpr ne = (NameExpr) aae.getName();
-                    if(arrayName.equals("\\old(this." + ne.toString() + ")") && !b.isLocalVar(ne.getName())){
-                        arrayName = "this." + ne.toString();
-                    }
-                }
-
+                NameExpr ne = (NameExpr) aae.getName();
+                v = getVariableFromExpression(ne);
                 String index = createContract(aae.getIndex(), b).toString();
-                fieldName = new SimpleName( arrayName + "[" + index + "]");
-                if(aae.getName() instanceof NameExpr){
-                    b.setPure(b.isLocalVar(((NameExpr) aae.getName()).getName()));
-                }
+                v = new Variable(v.getScope(), v.getName() + "[" + index + "]", v.getClassName());
+                b.setPure(b.isLocalVar(ne.getName()));
             } else {
                 System.out.println("Assignment target " +  ae.getTarget() + " of " + ae.getTarget().getClass() + " not covered!");
                 b.setPure(false);
                 return null;
             }
             Expression exp = createContract(ae.getValue(), b);
-            if(exp == null){
-                b.putAssignedValue(fieldName, new NameExpr(fieldName));
-            } else {
-                b.putAssignedValue(fieldName, exp);
-            }
+            b.putAssignedValue(v, exp);
             return null;
         } else if (e instanceof BinaryExpr) {
             BinaryExpr be = (BinaryExpr) e;
@@ -693,38 +705,34 @@ public class ContractGenerator {
             if (ue.getExpression() instanceof NameExpr) {
                 NameExpr nameExpr = (NameExpr) ue.getExpression();
                 SimpleName name = nameExpr.getName();
+                Variable v = getVariableFromExpression(nameExpr);
                 if(!b.isLocalVar(name)){
                     name.setIdentifier("this." + name.getId());
                 }
                 IntegerLiteralExpr ile = new IntegerLiteralExpr();
                 ile.setValue("1");
-                Expression temp;
-                if(b.getAssignedValue(nameExpr.getName()) != null){
-                    temp = b.getAssignedValue(nameExpr.getName());
-                } else {
-                    temp = nameExpr;
-                }
-                BinaryExpr be = new BinaryExpr();
+                Expression temp = b.getAssignedValue(v);
                 if(temp == null){
                     return null;
                 }
+                BinaryExpr be = new BinaryExpr();
                 be.setLeft(temp);
                 be.setRight(ile);
                 if (ue.getOperator() == UnaryExpr.Operator.POSTFIX_DECREMENT) {
                     be.setOperator(BinaryExpr.Operator.MINUS);
-                    b.putAssignedValue(name, be);
+                    b.putAssignedValue(v, be);
                     return temp;
                 } else if (ue.getOperator() == UnaryExpr.Operator.POSTFIX_INCREMENT) {
                     be.setOperator(BinaryExpr.Operator.PLUS);
-                    b.putAssignedValue(name, be);
+                    b.putAssignedValue(v, be);
                     return temp;
                 } else if (ue.getOperator() == UnaryExpr.Operator.PREFIX_DECREMENT) {
                     be.setOperator(BinaryExpr.Operator.MINUS);
-                    b.putAssignedValue(name, be);
+                    b.putAssignedValue(v, be);
                     return be;
                 } else if (ue.getOperator() == UnaryExpr.Operator.PREFIX_INCREMENT) {
                     be.setOperator(BinaryExpr.Operator.PLUS);
-                    b.putAssignedValue(name, be);
+                    b.putAssignedValue(v, be);
                     return be;
                 } else {
                     return e;
@@ -787,10 +795,10 @@ public class ContractGenerator {
             return newAie;
         } else if (e instanceof ArrayAccessExpr) {
             ArrayAccessExpr aae = (ArrayAccessExpr) e;
-            ArrayAccessExpr newAae = aae.clone();
-            newAae.setIndex(createContract(aae.getIndex(), b));
-            SimpleName newAaeName = new SimpleName(newAae.toString());
-            return b.getAssignedValue(newAaeName);
+            String newIndex = createContract(aae.getIndex(), b).toString();
+            Variable v = getVariableFromExpression(aae.getName());
+            v = new Variable(v.getScope(), v.getName() + newIndex, v.getClassName());
+            return b.getAssignedValue(v);
         } else if (e instanceof CastExpr) {
             CastExpr ce = (CastExpr) e;
             createContract(ce.getExpression(), b);

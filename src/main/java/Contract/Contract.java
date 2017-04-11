@@ -101,11 +101,6 @@ public class Contract {
         return initialBehavior.equals(c.initialBehavior) && currentBehavior.equals(c.getCurrentBehavior());
 
     }
-    public void clean(){
-        for(Behavior b : getLeafs(currentBehavior)){
-            b.clean();
-        }
-    }
 
     private String formatOldComment(){
         StringBuilder sb = new StringBuilder();
@@ -140,7 +135,6 @@ public class Contract {
         return "";
     }
     public String extractContract(){
-        this.clean();
         Statistics.gatherStatistics(this);
         return this.toString();
     }

@@ -57,17 +57,7 @@ public class Behavior {
 
     private LinkedList<Behavior> children = new LinkedList<Behavior>();
 
-    private HashMap<SimpleName, Expression> assignedValues = new HashMap<>();
-
-    public HashMap<SimpleName, Expression> getAssignedLocals() {
-        return assignedLocals;
-    }
-
-    public void setAssignedLocals(HashMap<SimpleName, Expression> assignedLocals) {
-        this.assignedLocals = assignedLocals;
-    }
-
-    private HashMap<SimpleName, Expression> assignedLocals = new HashMap<>();
+    private HashMap<Variable, VariableValue> assignedValues = new HashMap<>();
 
     public CallableDeclaration getCallableDeclaration() {
         return callableDeclaration;
@@ -79,16 +69,14 @@ public class Behavior {
 
     private CallableDeclaration callableDeclaration;
     private Optional<Exception> failing;
-
-    private LinkedList<String> localVariables = new LinkedList<>();
-    public LinkedList<String> getLocalVariables(){
-        return localVariables;
-    }
-    public void addLocalVar(SimpleName name){
-        localVariables.add(name.toString());
-    }
     public boolean isLocalVar(SimpleName name){
-        return localVariables.contains(name.toString());
+        String s = name.toString();
+        for(Variable v : assignedValues.keySet()){
+            if(v.getName().equals(s) && v.getScope()==Variable.Scope.local){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -118,11 +106,9 @@ public class Behavior {
         this.exceptions = (LinkedList<ExceptionCondition>) original.getExceptions().clone();
         this.asserts = (LinkedList<AssertStmt>) original.getAsserts().clone();
         this.isExceptional = original.getIsExceptional();
-        this.assignedValues = (HashMap<SimpleName, Expression>) original.getAssignedValues().clone();
+        this.assignedValues = (HashMap<Variable, VariableValue>) original.assignedValues.clone();
         this.callableDeclaration = original.getCallableDeclaration();
-        this.localVariables = (LinkedList<String>) original.getLocalVariables().clone();
         this.pure = original.isPure();
-        this.assignedLocals = (HashMap<SimpleName, Expression>) original.getAssignedLocals().clone();
         this.impureMethods = original.impureMethods;
         this.failing = original.failing;
     }
@@ -136,7 +122,9 @@ public class Behavior {
         }
 
     }
-
+    public HashMap<Variable, VariableValue> getAssignedValues() {
+        return assignedValues;
+    }
     public void addPreCon(Expression preCon){
         PreCondition toAdd = new PreCondition(preCon);
 
@@ -217,7 +205,7 @@ public class Behavior {
         return postCons;
     }
 
-    public Set<SimpleName> getAssignables(){
+    public Set<Variable> getAssignables(){
         return assignedValues.keySet();
     }
 
@@ -268,7 +256,7 @@ public class Behavior {
         return isExceptional == b.getIsExceptional()
                 && preCons.equals(b.getPreCons())
                 && postCons.equals(b.getPostCons())
-                && assignedValues.equals(b.getAssignedValues())
+                && assignedValues.equals(b.assignedValues)
                 && exceptions.equals(b.getExceptions());
     }
 
@@ -294,11 +282,10 @@ public class Behavior {
         StringBuilder sb = new StringBuilder();
 
         if(!isExceptional) {
-            for (SimpleName sn : assignedValues.keySet()) {
-                if (assignedValues.get(sn) != null) {
-                    if(!assignedValues.get(sn).toString().equals(sn.toString())){
-                        sb.append("ensures " + sn + " == " + assignedValues.get(sn) + ";\n");
-                    }
+            for (Variable v : assignedValues.keySet()) {
+                VariableValue value = assignedValues.get(v);
+                if(value.getStatus() == VariableValue.Status.known){
+                    sb.append("ensures " + v.toString() + " == " + value.getValue().toString() + "\n");
                 }
             }
         }
@@ -323,19 +310,17 @@ public class Behavior {
 
     }
 
-    private String createAssignable(){
+    private String createAssignable() {
         StringBuilder sb = new StringBuilder();
         sb.append("assignable ");
-        if(!assignedValues.keySet().isEmpty()) {
-            for (SimpleName s : assignedValues.keySet()) {
-                if(getAssignedValues().get(s) != null) {
-                    if (!assignedValues.get(s).equals(new NameExpr(new SimpleName("\\old(" + s.getIdentifier() + ")")))) {
-                        sb.append(s.toString());
-                        sb.append(", ");
-                    }
+        if (!assignedValues.keySet().isEmpty()) {
+            for (Variable v : assignedValues.keySet()) {
+                if (assignedValues.get(v).getStatus() != VariableValue.Status.known) {
+                    sb.append(v.toString());
+                    sb.append(", ");
                 }
             }
-            if(sb.lastIndexOf(", ") != -1){
+            if (sb.lastIndexOf(", ") != -1) {
                 return sb.substring(0, sb.lastIndexOf(", ")) + ";\n";
             }
         }
@@ -417,10 +402,6 @@ public class Behavior {
         return asserts;
     }
 
-    public HashMap<SimpleName, Expression> getAssignedValues() {
-        return assignedValues;
-    }
-
     public void clearPostAssert() {
         if(!closed){
             this.postCons.clear();
@@ -429,25 +410,29 @@ public class Behavior {
             b.clearPostAssert();
         }
     }
-    public Expression getAssignedValue(SimpleName name){
-        if(assignedValues.containsKey(name)){
-            return assignedValues.get(name);
+    public Expression getAssignedValue(Variable v){
+        VariableValue value = assignedValues.get(v);
+        if(value.getStatus() == VariableValue.Status.known){
+            return value.getValue();
+        } else if (value.getStatus() == VariableValue.Status.old){
+            return new NameExpr(v.toString());
         } else {
-            return assignedLocals.get(name);
+            return null;
         }
     }
-    public void putAssignedValue(SimpleName name, Expression e){
+    public void addField(Variable v){
+        assignedValues.put(v, new VariableValue(VariableValue.Status.old));
+    }
+    public void putAssignedValue(Variable v, Expression e){
         if(!closed) {
-            if(name.toString().contains("this.")){
-                assignedValues.put(name, e);
+            if(e == null){
+                assignedValues.put(v, new VariableValue(VariableValue.Status.unknown));
             } else {
-                assignedLocals.put(name, e);
+                assignedValues.put(v, new VariableValue(e));
             }
-
         }
-        //System.out.println("Getting " + name + " is " + assignedValues.get(name));
         for(Behavior b : children){
-            b.putAssignedValue(name, e);
+            b.putAssignedValue(v, e);
         }
     }
     public LinkedList<Behavior> getLeafs(){
@@ -460,23 +445,6 @@ public class Behavior {
             }
         }
         return list;
-    }
-
-    public void clean() {
-        HashSet<SimpleName> toRemove = new HashSet<>();
-        HashMap<SimpleName, Expression> newMap = new HashMap<>();
-        for(SimpleName sn : assignedValues.keySet()){
-            if(!sn.getId().contains("this.")){
-                toRemove.add(sn);
-            }
-            String s = "\\old(" + sn + ")";
-            if(assignedValues.get(sn) != null) {
-                if (assignedValues.get(sn).toString().equals(s)) {
-                    toRemove.add(sn);
-                }
-            }
-        }
-        assignedValues.keySet().removeAll(toRemove);
     }
 
     public void setDiverges(boolean diverges) {

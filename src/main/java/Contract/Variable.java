@@ -13,7 +13,7 @@ public class Variable {
     private Scope scope;
     private String name;
     private String className;
-    private Scope getScope(){
+    public Scope getScope(){
         return this.scope;
     }
     public Variable(Scope s, String name, String clazz){
@@ -35,7 +35,7 @@ public class Variable {
         if(scope == Scope.field){
             return "this." + name;
         } else if (scope == Scope.staticfield) {
-            return className + name;
+            return className + "." + name;
         } else {
             return name;
         }

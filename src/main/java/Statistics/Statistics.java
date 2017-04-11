@@ -114,10 +114,10 @@ public class Statistics {
 
         amountOfPostCons += b.getPostCons().size();
 
-        HashMap<SimpleName, Expression> hm = b.getAssignedValues();
+        HashMap<Variable, VariableValue> hm = b.getAssignedValues();
         if(!b.getIsExceptional()) {
-            for (SimpleName sm : hm.keySet()){
-                if(hm.get(sm) != null){
+            for (Variable v : hm.keySet()){
+                if(b.getAssignedValue(v) != null){
                     amountOfPostCons++;
                 }
             }
