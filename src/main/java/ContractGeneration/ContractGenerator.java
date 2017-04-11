@@ -220,7 +220,7 @@ public class ContractGenerator {
                     if (jpfd.getWrappedNode().getModifiers().contains(Modifier.STATIC)) {
                         return new Variable(Variable.Scope.staticfield, name, clazz);
                     } else {
-                        return new Variable(Variable.Scope.field, name, clazz);
+                        return new Variable(Variable.Scope.field, scope.toString() + "." + name, clazz);
                     }
                 } else if (d instanceof JavaParserSymbolDeclaration) {
                     return new Variable(Variable.Scope.local, name, clazz);
