@@ -40,4 +40,8 @@ public class Variable {
             return name;
         }
     }
+
+    public int hashCode(){
+        return scope.hashCode()*5 + className.hashCode()*7 + name.hashCode()*13;
+    }
 }
