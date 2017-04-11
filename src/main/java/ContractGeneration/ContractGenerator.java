@@ -20,10 +20,7 @@ import com.github.javaparser.ast.visitor.Visitable;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
-import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserConstructorDeclaration;
-import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserFieldDeclaration;
-import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserMethodDeclaration;
-import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserSymbolDeclaration;
+import com.github.javaparser.symbolsolver.javaparsermodel.declarations.*;
 import com.github.javaparser.symbolsolver.model.declarations.*;
 import com.github.javaparser.symbolsolver.model.typesystem.Type;
 import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionMethodDeclaration;
@@ -209,11 +206,10 @@ public class ContractGenerator {
                 } else {
                     return new Variable(Variable.Scope.field, name, clazz);
                 }
-            } else if (d instanceof JavaParserSymbolDeclaration){
+            } else if (d instanceof JavaParserSymbolDeclaration || d instanceof JavaParserParameterDeclaration){
                 return new Variable(Variable.Scope.local, name, clazz);
             }
-
-        } if (e instanceof FieldAccessExpr){
+        } else if (e instanceof FieldAccessExpr){
             FieldAccessExpr fae = (FieldAccessExpr) e;
             String name = fae.getName().toString();
             Expression scope = getFirstScope(fae);
