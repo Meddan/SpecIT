@@ -28,4 +28,7 @@ public class VariableValue {
             this.status = s;
         }
     }
+    public String toString(){
+        return "" + this.status + " " + value;
+    }
 }
