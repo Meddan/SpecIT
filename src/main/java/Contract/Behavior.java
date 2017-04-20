@@ -317,7 +317,7 @@ public class Behavior {
         sb.append("assignable ");
         if (!assignedValues.keySet().isEmpty()) {
             for (Variable v : assignedValues.keySet()) {
-                if (assignedValues.get(v).getStatus() != VariableValue.Status.old) {
+                if (assignedValues.get(v).getStatus() != VariableValue.Status.old && v.getScope() != Variable.Scope.parameter) {
                     sb.append(v.toString());
                     sb.append(", ");
                 }
