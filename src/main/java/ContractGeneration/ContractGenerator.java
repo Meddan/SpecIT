@@ -370,6 +370,11 @@ public class ContractGenerator {
                 }
                 for(Behavior beh : b.getLeafs()) {
                     Expression ifCond = createContract(sif.getCondition(), beh);
+                    if(ifCond == null){
+                        Optional<Exception> opte = Optional.of(new SymbolSolverException());
+                        beh.setFailing(opte);
+                        continue;
+                    }
                     Behavior a = new Behavior(beh);
                     a.addPreCon(ifCond);
                     beh.setClosed(true);
