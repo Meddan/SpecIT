@@ -262,7 +262,7 @@ public class ContractGenerator {
             Variable v = new Variable(Variable.Scope.parameter, p.getName().toString(), getClassName(p));
             NameExpr ne = new NameExpr(p.getName());
             savedParam.put(ne, v);
-            b.putAssignedValue(v, ne);
+            b.putParameter(v);
         }
         for(FieldDeclaration fd : fields){
             Variable.Scope scope;
