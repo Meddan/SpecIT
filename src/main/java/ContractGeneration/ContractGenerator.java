@@ -259,7 +259,7 @@ public class ContractGenerator {
         b.setCallableDeclaration(cd);
         for(Object o : cd.getParameters()){
             Parameter p = (Parameter) o;
-            Variable v = new Variable(Variable.Scope.local, p.getName().toString(), getClassName(p));
+            Variable v = new Variable(Variable.Scope.parameter, p.getName().toString(), getClassName(p));
             NameExpr ne = new NameExpr(p.getName());
             savedParam.put(ne, v);
             b.putAssignedValue(v, ne);
