@@ -587,11 +587,12 @@ public class ContractGenerator {
                     }
                     for (Variable v : beh.getAssignedValues().keySet()){
                         //TODO: Fix pls
-                        /*Expression exp = beh.getAssignedValue(v);
-                        System.out.println(beh.getAssignedValues().get(v).toString());
-                        System.out.println(v + " " + exp);
-                        newChild.putAssignedValue(v, createContract(exp, b));*/
-                        //newChild.putAssignedValue(v, exp);
+                        VariableValue value = beh.getAssignedValue(v);
+                        if (value.getStatus() == VariableValue.Status.unknown){
+                            newChild.putAssignedValue(v, null);
+                        } else {
+                            newChild.putAssignedValue(v, createContract(value.getValue(), b));
+                        }
                     }
                     newChild.setExceptional(beh.getIsExceptional());
                     for(ExceptionCondition ec : beh.getExceptions()){
