@@ -5,7 +5,7 @@ public class Variable {
         return name;
     }
     public enum Scope {
-        local, field, staticfield;
+        local, field, staticfield, parameter;
     }
     public String getClassName() {
         return className;
