@@ -59,6 +59,8 @@ public class Behavior {
 
     private HashMap<Variable, VariableValue> assignedValues = new HashMap<>();
 
+    private HashSet<Variable> changed = new HashSet<Variable>();
+
     public CallableDeclaration getCallableDeclaration() {
         return callableDeclaration;
     }
@@ -410,15 +412,8 @@ public class Behavior {
             b.clearPostAssert();
         }
     }
-    public Expression getAssignedValue(Variable v){
-        VariableValue value = assignedValues.get(v);
-        if(value.getStatus() == VariableValue.Status.known){
-            return value.getValue();
-        } else if (value.getStatus() == VariableValue.Status.old){
-            return new NameExpr(v.toString());
-        } else {
-            return null;
-        }
+    public VariableValue getAssignedValue(Variable v){
+        return assignedValues.get(v);
     }
     public void addField(Variable v){
         assignedValues.put(v, new VariableValue(VariableValue.Status.old));
@@ -430,6 +425,7 @@ public class Behavior {
             } else {
                 assignedValues.put(v, new VariableValue(e));
             }
+            changed.add(v);
         }
         for(Behavior b : children){
             b.putAssignedValue(v, e);
@@ -471,5 +467,13 @@ public class Behavior {
 
     public void setFailing(Optional<Exception> failing) {
         this.failing = failing;
+    }
+    public Set<Variable> getChanged(){
+        Set<Variable> allChanged = new HashSet<Variable>();
+        for(Behavior child : children) {
+            allChanged.addAll(child.getChanged());
+        }
+        allChanged.addAll(changed);
+        return allChanged;
     }
 }
