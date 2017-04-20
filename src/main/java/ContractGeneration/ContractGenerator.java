@@ -49,6 +49,7 @@ public class ContractGenerator {
     private HashMap<CallableDeclaration, Contract> contracts = new HashMap<>();
     private CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
     private LinkedList<String> activeReferences = new LinkedList<>();
+    private HashMap<Expression, Variable> savedParam = new HashMap<Expression, Variable>();
     public ContractGenerator(ClassOrInterfaceDeclaration coid, String path, File projectDir){
         this.target = coid;
         if(target.isInterface()){
@@ -107,7 +108,6 @@ public class ContractGenerator {
     private void setFieldAsPublic(FieldDeclaration fd){
         fd.setComment(new BlockComment("@ spec_public @"));
     }
-
     private boolean endAssrt(CallableDeclaration cd, Statement s) {
         NodeList<Statement> stmtList;
         if(cd instanceof MethodDeclaration){
@@ -185,7 +185,12 @@ public class ContractGenerator {
         return null;
     }
     private String getClassName(Node n){
-        String s = JavaParserFacade.get(combinedTypeSolver).getTypeOfThisIn(n).asReferenceType().getQualifiedName();
+        String s;
+        try {
+            s = JavaParserFacade.get(combinedTypeSolver).getTypeOfThisIn(n).asReferenceType().getQualifiedName();
+        } catch (NullPointerException npe){
+            s = savedParam.get(n).getClassName();
+        }
         if(s.contains(".")){
             String[] a = s.split("\\.");
             return a[a.length-1];
@@ -255,7 +260,9 @@ public class ContractGenerator {
         for(Object o : cd.getParameters()){
             Parameter p = (Parameter) o;
             Variable v = new Variable(Variable.Scope.local, p.getName().toString(), getClassName(p));
-            b.putAssignedValue(v, new NameExpr(p.getName()));
+            NameExpr ne = new NameExpr(p.getName());
+            savedParam.put(ne, v);
+            b.putAssignedValue(v, ne);
         }
         for(FieldDeclaration fd : fields){
             Variable.Scope scope;
@@ -441,10 +448,8 @@ public class ContractGenerator {
                 Behavior temporary = new Behavior(null);
                 createContract(ws.getCondition(), temporary);
                 createContract(body, temporary);
-                for(Behavior leaf : temporary.getLeafs()){
-                    for(Variable v: leaf.getAssignables()){
-                        b.putAssignedValue(v, null);
-                    }
+                for(Variable v : temporary.getChanged()){
+                    b.putAssignedValue(v, null);
                 }
                 b.setPure(false);
             } else if (s instanceof ForStmt) {
@@ -460,10 +465,8 @@ public class ContractGenerator {
                     createContract(e, temporary);
                 }
                 createContract(fs.getBody(), temporary);
-                for(Behavior leaf : temporary.getLeafs()){
-                    for(Variable v: leaf.getAssignables()){
-                        b.putAssignedValue(v, null);
-                    }
+                for(Variable v : temporary.getChanged()){
+                    b.putAssignedValue(v, null);
                 }
                 b.setPure(false);
             } else if (s instanceof DoStmt){
@@ -472,10 +475,8 @@ public class ContractGenerator {
                 Behavior temporary = new Behavior(null);
                 createContract(ds.getCondition(), temporary);
                 createContract(body, temporary);
-                for(Behavior leaf : temporary.getLeafs()){
-                    for(Variable v : leaf.getAssignables()){
-                        b.putAssignedValue(v, null);
-                    }
+                for(Variable v : temporary.getChanged()){
+                    b.putAssignedValue(v, null);
                 }
                 b.setPure(false);
             } else if (s instanceof SynchronizedStmt) {
@@ -513,7 +514,6 @@ public class ContractGenerator {
     }
 
     private Expression createContract(Expression e, Behavior b) throws SymbolSolverException, CallingMethodWithoutContractException {
-        //System.out.println("Expression " + e + " of " + e.getClass());
         if(e == null){
             return null;
         }
@@ -521,7 +521,11 @@ public class ContractGenerator {
             return e;
         } else if (e instanceof NameExpr){
             Variable v = getVariableFromExpression(e);
-            return b.getAssignedValue(v);
+            VariableValue value = b.getAssignedValue(v);
+            if (value.getStatus() == VariableValue.Status.known) {
+                return value.getValue();
+            }
+            return e;
         } else if(e instanceof MethodCallExpr){
             MethodCallExpr mce = (MethodCallExpr) e;
             if(mce.getScope().isPresent()){
@@ -535,8 +539,7 @@ public class ContractGenerator {
             SymbolReference sr;
             NodeList<Expression> newArgs = new NodeList<>();
             for(Expression exp : mce.getArguments()){
-                newArgs.add(createContract(exp.clone(), b));
-                //newMCE.getArguments().replace(exp, createContract(exp, b));
+                newArgs.add(createContract(exp, b));
             }
             newMCE.setArguments(newArgs);
             try{
@@ -583,10 +586,12 @@ public class ContractGenerator {
                         }
                     }
                     for (Variable v : beh.getAssignedValues().keySet()){
-                        RemoveOldVisitor rov = new RemoveOldVisitor();
-                        Expression exp = beh.getAssignedValue(v);
-                        rov.visit(exp, null);
-                        newChild.putAssignedValue(v, createContract(exp, b));
+                        //TODO: Fix pls
+                        /*Expression exp = beh.getAssignedValue(v);
+                        System.out.println(beh.getAssignedValues().get(v).toString());
+                        System.out.println(v + " " + exp);
+                        newChild.putAssignedValue(v, createContract(exp, b));*/
+                        //newChild.putAssignedValue(v, exp);
                     }
                     newChild.setExceptional(beh.getIsExceptional());
                     for(ExceptionCondition ec : beh.getExceptions()){
@@ -609,7 +614,6 @@ public class ContractGenerator {
                     b.setClosed(true);
                 }
                 activeReferences.remove(sr.getCorrespondingDeclaration().getName());
-                System.out.println("RETURNING NULL");
                 return null;
             } else {
                 //TODO: Handle other method calls
@@ -689,8 +693,8 @@ public class ContractGenerator {
 
             if (left != null && right != null) {
                 BinaryExpr newBe = new BinaryExpr();
-                newBe.setLeft(left);
-                newBe.setRight(right);
+                newBe.setLeft(left.clone());
+                newBe.setRight(right.clone());
                 newBe.setOperator(be.getOperator());
                 return newBe;
             } else {
@@ -700,16 +704,17 @@ public class ContractGenerator {
             UnaryExpr ue = (UnaryExpr) e;
             if (ue.getExpression() instanceof NameExpr) {
                 NameExpr nameExpr = (NameExpr) ue.getExpression();
-                SimpleName name = nameExpr.getName();
                 Variable v = getVariableFromExpression(nameExpr);
-                if(!b.isLocalVar(name)){
-                    name.setIdentifier("this." + name.getId());
-                }
                 IntegerLiteralExpr ile = new IntegerLiteralExpr();
                 ile.setValue("1");
-                Expression temp = b.getAssignedValue(v);
-                if(temp == null){
+                VariableValue value = b.getAssignedValue(v);
+                Expression temp;
+                if(value.getStatus() == VariableValue.Status.unknown){
                     return null;
+                } else if (value.getStatus() == VariableValue.Status.known){
+                    temp = value.getValue();
+                } else {
+                    temp = nameExpr;
                 }
                 BinaryExpr be = new BinaryExpr();
                 be.setLeft(temp);
@@ -792,9 +797,14 @@ public class ContractGenerator {
         } else if (e instanceof ArrayAccessExpr) {
             ArrayAccessExpr aae = (ArrayAccessExpr) e;
             String newIndex = createContract(aae.getIndex(), b).toString();
-            Variable v = getVariableFromExpression(aae.getName());
-            v = new Variable(v.getScope(), v.getName() + newIndex, v.getClassName());
-            return b.getAssignedValue(v);
+            try {
+                Variable v = getVariableFromExpression(aae.getName());
+                v = new Variable(v.getScope(), v.getName() + newIndex, v.getClassName());
+                return b.getAssignedValue(v).getValue();
+            } catch (IllegalArgumentException iae){
+                createContract(aae.getName(), b);
+                return e;
+            }
         } else if (e instanceof CastExpr) {
             CastExpr ce = (CastExpr) e;
             createContract(ce.getExpression(), b);
