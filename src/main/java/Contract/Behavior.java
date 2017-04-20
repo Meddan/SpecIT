@@ -436,6 +436,18 @@ public class Behavior {
             b.putAssignedValue(v, e);
         }
     }
+
+    public void putParameter(Variable v){
+        if(!closed){
+            assignedValues.put(v, new VariableValue(VariableValue.Status.old));
+        }
+
+
+        for(Behavior b : children){
+            b.putParameter(v);
+        }
+    }
+
     public LinkedList<Behavior> getLeafs(){
         LinkedList<Behavior> list = new LinkedList<>();
         if(this.children.isEmpty()){
