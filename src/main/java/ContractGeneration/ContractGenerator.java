@@ -445,7 +445,7 @@ public class ContractGenerator {
             } else if (s instanceof WhileStmt){
                 WhileStmt ws = (WhileStmt) s;
                 Statement body = ws.getBody();
-                Behavior temporary = new Behavior(null);
+                Behavior temporary = new Behavior(b);
                 createContract(ws.getCondition(), temporary);
                 createContract(body, temporary);
                 for(Variable v : temporary.getChanged()){
@@ -454,7 +454,7 @@ public class ContractGenerator {
                 b.setPure(false);
             } else if (s instanceof ForStmt) {
                 ForStmt fs = (ForStmt) s;
-                Behavior temporary = new Behavior(null);
+                Behavior temporary = new Behavior(b);
                 for(Expression e : fs.getInitialization()){
                     createContract(e, temporary);
                 }
@@ -472,7 +472,7 @@ public class ContractGenerator {
             } else if (s instanceof DoStmt){
                 DoStmt ds = (DoStmt) s;
                 Statement body = ds.getBody();
-                Behavior temporary = new Behavior(null);
+                Behavior temporary = new Behavior(b);
                 createContract(ds.getCondition(), temporary);
                 createContract(body, temporary);
                 for(Variable v : temporary.getChanged()){
