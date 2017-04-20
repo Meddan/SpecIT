@@ -413,7 +413,12 @@ public class Behavior {
         }
     }
     public VariableValue getAssignedValue(Variable v){
-        return assignedValues.get(v);
+        if(assignedValues.get(v) != null){
+            return assignedValues.get(v);
+        } else {
+            return new VariableValue(VariableValue.Status.unknown);
+        }
+
     }
     public void addField(Variable v){
         assignedValues.put(v, new VariableValue(VariableValue.Status.old));
