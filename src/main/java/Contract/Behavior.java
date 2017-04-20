@@ -287,7 +287,7 @@ public class Behavior {
             for (Variable v : assignedValues.keySet()) {
                 VariableValue value = assignedValues.get(v);
                 if(value.getStatus() == VariableValue.Status.known){
-                    sb.append("ensures " + v.toString() + " == " + value.getValue().toString() + "\n");
+                    sb.append("ensures " + v.toString() + " == " + value.getValue().toString() + ";\n");
                 }
             }
         }
