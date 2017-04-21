@@ -73,11 +73,11 @@ public class ContractGenerator {
         for (BodyDeclaration<?> bd : target.getMembers()){
             if(bd instanceof CallableDeclaration){
                 CallableDeclaration cd = (CallableDeclaration) bd;
-                try {
-                    contracts.put(cd ,createContract((CallableDeclaration) bd));
-                } catch (TooManyLeafsException | SymbolSolverException | CallingMethodWithoutContractException | UncoveredStatementException e) {
+                Contract temp = createContract((CallableDeclaration) bd);
+                if(temp != null){
+                    contracts.put(cd ,temp);
+                } else {
                     contracts.put(cd, null);
-                    Statistics.exceptionThrown();
                 }
             }
         }
@@ -97,7 +97,6 @@ public class ContractGenerator {
                     c.setOldComment(cd.getComment().get());
                 }
                 cd.setComment(new BlockComment(c.extractContract()));
-
             }
         }
 
@@ -236,7 +235,7 @@ public class ContractGenerator {
         }
         throw new IllegalArgumentException();
     }
-    public Contract createContract(CallableDeclaration cd) throws TooManyLeafsException, SymbolSolverException, CallingMethodWithoutContractException, UncoveredStatementException {
+    public Contract createContract(CallableDeclaration cd) {
         //Get row for md
         //Get top-level assertions
         if(contracts.containsKey(cd)){
@@ -280,16 +279,22 @@ public class ContractGenerator {
         return c;
     }
 
-    public void createContract(NodeList<Statement> stmtList, Behavior b) throws TooManyLeafsException, SymbolSolverException, CallingMethodWithoutContractException, UncoveredStatementException {
+    public void createContract(NodeList<Statement> stmtList, Behavior b) {
+        if(b.isFailing()){
+            return;
+        }
         boolean pure = true;
         for(Statement s : stmtList){
             createContract(s, b);
         }
     }
-    public void createContract(Statement s, Behavior b) throws TooManyLeafsException, SymbolSolverException, CallingMethodWithoutContractException, UncoveredStatementException {
+    public void createContract(Statement s, Behavior b) {
         /* We first identify if the current statement is assert or return in which case we want to make sure our
         assertions (ensures) are handled correctly.
         */
+        if(b.isFailing()){
+            return;
+        }
         //System.out.println("Statement s of " + s.getClass());
         if (s instanceof AssertStmt){
             AssertStmt as = (AssertStmt) s;
@@ -366,7 +371,8 @@ public class ContractGenerator {
                 IfStmt sif = (IfStmt) s;
                 if(b.getLeafs().size() > 10){
                     System.out.println("Too many leafs in: " + b.getCallableDeclaration().getName());
-                    throw new TooManyLeafsException();
+                    b.setFailing(Optional.of(new TooManyLeafsException()));
+                    return;
                 }
                 for(Behavior beh : b.getLeafs()) {
                     Expression ifCond = createContract(sif.getCondition(), beh);
@@ -489,7 +495,7 @@ public class ContractGenerator {
                 createContract(ss.getExpression(), b);
                 createContract(ss.getBody(), b);
             } else if(s instanceof TryStmt){
-                throw new UncoveredStatementException();
+                b.setFailing(Optional.of(new UncoveredStatementException()));
             } else if (s instanceof LabeledStmt){
                 LabeledStmt ls = (LabeledStmt) s;
                 createContract(ls.getStatement(), b);
@@ -509,16 +515,19 @@ public class ContractGenerator {
                     System.out.println("thisname" +  jpcd.getName());
                     createContract(sr.getCorrespondingDeclaration(), new Behavior(null));
                 }*/
-                throw new UncoveredStatementException();
+                b.setFailing(Optional.of(new UncoveredStatementException()));
 
             } else {
                 System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
-                throw new UncoveredStatementException();
+                b.setFailing(Optional.of(new UncoveredStatementException()));
             }
         }
     }
 
-    private Expression createContract(Expression e, Behavior b) throws SymbolSolverException, CallingMethodWithoutContractException {
+    private Expression createContract(Expression e, Behavior b) {
+        if(b.isFailing()){
+            return e;
+        }
         if(e == null){
             return null;
         }
@@ -544,7 +553,12 @@ public class ContractGenerator {
             SymbolReference sr;
             NodeList<Expression> newArgs = new NodeList<>();
             for(Expression exp : mce.getArguments()){
-                newArgs.add(createContract(exp, b));
+                Expression newExp = createContract(exp, b);
+                if(newExp == null) {
+                    b.setFailing(Optional.of(new UnresolvedParameterException()));
+                    return null;
+                }
+                newArgs.add(newExp);
             }
             newMCE.setArguments(newArgs);
             try{
@@ -555,7 +569,8 @@ public class ContractGenerator {
                     System.out.println("StackOverflow when doing " + e);
                     System.out.println("in " + b.getCallableDeclaration().getName());
                 }
-                throw new SymbolSolverException();
+                b.setFailing(Optional.of(new SymbolSolverException()));
+                return null;
             }
             if(activeReferences.contains(sr.getCorrespondingDeclaration().getName())){
                 return e;
@@ -567,18 +582,13 @@ public class ContractGenerator {
                 if(contracts.containsKey(md)){
                     temp = contracts.get(md);
                 } else {
-                    try {
-                        temp = createContract(md);
-                        contracts.put(md, temp);
-                    } catch (TooManyLeafsException | CallingMethodWithoutContractException | SymbolSolverException | UncoveredStatementException error){
-                        contracts.put(md, null);
-                        Statistics.exceptionThrown();
-                        return null;
-                    }
+                    temp = createContract(md);
                 }
                 b.setClosed(true);
                 if(temp == null){
-                    throw new CallingMethodWithoutContractException();
+                    contracts.put(md, null);
+                    b.setFailing(Optional.of(new CallingMethodWithoutContractException()));
+                    return null;
                 }
                 for(Behavior beh : temp.getLeafs()){
                     Behavior newChild = new Behavior(b);

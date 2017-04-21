@@ -1,10 +1,7 @@
 package Statistics;
 
 import Contract.*;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.SimpleName;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +13,7 @@ import java.util.LinkedList;
 public class Statistics {
 
     private static ArrayList<MethodStatistics> methodStats = new ArrayList<>();
-    private static int exceptionsThrown = 0;
+    private static int failingBehaviors = 0;
 
     private static DescriptiveStatistics prePerMethod = new DescriptiveStatistics();
     private static DescriptiveStatistics postPerMethod = new DescriptiveStatistics();
@@ -24,8 +21,8 @@ public class Statistics {
     private static DescriptiveStatistics postPerBehavior = new DescriptiveStatistics();
     private static DescriptiveStatistics behPerMethod = new DescriptiveStatistics();
 
-    public static void exceptionThrown(){
-        exceptionsThrown++;
+    public static void failingBehavior(){
+        failingBehaviors++;
     }
 
     /**
@@ -39,9 +36,13 @@ public class Statistics {
         MethodStatistics ms = new MethodStatistics();
 
         for(Behavior b : leafs){
-            ms.addBehavior();
-            setPostCons(ms, b);
-            setPreCons(ms, b);
+            if(!b.isFailing()) {
+                ms.addBehavior();
+                setPostCons(ms, b);
+                setPreCons(ms, b);
+            } else {
+                failingBehavior();
+            }
         }
 
         methodStats.add(ms);
@@ -89,9 +90,9 @@ public class Statistics {
         }
 
         sb.append("========= STATS GATHERED =========\n");
-        sb.append("Exceptions thrown: " + exceptionsThrown + "\n");
         sb.append("Methods processed: " + methodStats.size() + "\n");
-        sb.append("Total behaviors: " + totalBehaviors + "\n");
+        sb.append("Successful behaviors: " + totalBehaviors + "\n");
+        sb.append("Failing behaviors: " + failingBehaviors + "\n");
         sb.append("Total postconditions: " + totalPostCons + "\n");
         sb.append("Total preconditions: " + totalPreCons + "\n");
         sb.append(String.format("Preconditions per method: \n%s \n", formatStats(prePerMethod)));
