@@ -285,9 +285,11 @@ public class Behavior {
 
         if(!isExceptional) {
             for (Variable v : assignedValues.keySet()) {
-                VariableValue value = assignedValues.get(v);
-                if(value.getStatus() == VariableValue.Status.known){
-                    sb.append("ensures " + v.toString() + " == " + value.getValue().toString() + ";\n");
+                if(v.getScope() != Variable.Scope.local) {
+                    VariableValue value = assignedValues.get(v);
+                    if (value.getStatus() == VariableValue.Status.known) {
+                        sb.append("ensures " + v.toString() + " == " + value.getValue().toString() + ";\n");
+                    }
                 }
             }
         }
@@ -317,7 +319,8 @@ public class Behavior {
         sb.append("assignable ");
         if (!assignedValues.keySet().isEmpty()) {
             for (Variable v : assignedValues.keySet()) {
-                if (assignedValues.get(v).getStatus() != VariableValue.Status.old && v.getScope() != Variable.Scope.parameter) {
+                if (assignedValues.get(v).getStatus() != VariableValue.Status.old && v.getScope() != Variable.Scope.parameter
+                        && v.getScope() != Variable.Scope.local) {
                     sb.append(v.toString());
                     sb.append(", ");
                 }
@@ -481,7 +484,9 @@ public class Behavior {
     public Optional<Exception> getFailing() {
         return failing;
     }
-
+    public boolean isFailing(){
+        return failing.isPresent();
+    }
     public void setFailing(Optional<Exception> failing) {
         this.failing = failing;
     }
