@@ -424,7 +424,7 @@ public class ContractGenerator {
                         // Build the condition upon which we enter this case
                         Expression cond;
                         if(ses.getLabel().isPresent()) { // Entry has a label
-                            cond = new BinaryExpr(selector, ses.getLabel().get(), BinaryExpr.Operator.EQUALS);
+                            cond = new BinaryExpr(selector.clone(), ses.getLabel().get().clone(), BinaryExpr.Operator.EQUALS);
                             allConditions.add(cond);
                         } else { // No label, it's the default
 
@@ -436,13 +436,13 @@ public class ContractGenerator {
                             }
                         }
                         // Create contract on condition
-                        Expression contractCond = createContract(cond, leaf);
+                        // Expression contractCond = createContract(cond, leaf);
 
                         // Create new behavior and set as child
                         Behavior newB = new Behavior(leaf);
                         leaf.addChild(newB);
                         // Add precon to behavior
-                        newB.addPreCon(contractCond);
+                        newB.addPreCon(cond);
 
                         // Create contract on body of case
                         createContract(ses.getStatements(), newB);
