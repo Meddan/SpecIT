@@ -217,6 +217,11 @@ public class ContractGenerator {
             FieldAccessExpr fae = (FieldAccessExpr) e;
             String name = fae.getName().toString();
             Expression scope = getFirstScope(fae);
+
+            if(scope instanceof ThisExpr){
+                return new Variable(Variable.Scope.field, name, clazz);
+            }
+
             try {
                 Declaration d = JavaParserFacade.get(combinedTypeSolver).solve(fae.getScope().get()).getCorrespondingDeclaration();
                 if (d instanceof JavaParserFieldDeclaration) {
@@ -947,9 +952,9 @@ public class ContractGenerator {
 
     public static void main(String args[]){
         //File projectDir = new File("../RCC");
-        //File projectDir = new File("src/main/java/Examples");
-        File projectDir = new File("src/main/java/Examples/SingleExample");
-        //File projectDir = new File("../Votail0.0.1b");
+        File projectDir = new File("src/main/java/Examples");
+        //File projectDir = new File("src/main/java/Examples/SingleExample");
+        //File projectDir = new File("./Votail0.0.1b");
         //File projectDir = new File("../Test");
         try {
             clearDirectory();
