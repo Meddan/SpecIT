@@ -489,6 +489,9 @@ public class ContractGenerator {
                     b.putAssignedValue(v, null);
                 }
                 b.setPure(false);
+                if(temporary.isFailing()){
+                    b.setFailing(temporary.getFailing());
+                }
             } else if (s instanceof ForStmt) {
                 ForStmt fs = (ForStmt) s;
                 Behavior temporary = new Behavior(b);
@@ -519,6 +522,9 @@ public class ContractGenerator {
                     b.putAssignedValue(v, null);
                 }
                 b.setPure(false);
+                if(temporary.isFailing()){
+                    b.setFailing(temporary.getFailing());
+                }
             } else if (s instanceof SynchronizedStmt) {
                 SynchronizedStmt ss = (SynchronizedStmt) s;
                 createContract(ss.getExpression(), b);
