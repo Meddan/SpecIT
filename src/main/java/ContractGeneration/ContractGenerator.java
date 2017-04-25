@@ -413,7 +413,6 @@ public class ContractGenerator {
                     beh.setClosed(true);
                     beh.addChild(a);
                     createContract(sif.getThenStmt(), a);
-
                     if (sif.getElseStmt().isPresent()) {
                         Behavior d = new Behavior(beh);
                         beh.addChild(d);
@@ -507,6 +506,9 @@ public class ContractGenerator {
                     b.putAssignedValue(v, null);
                 }
                 b.setPure(false);
+                if(temporary.isFailing()){
+                    b.setFailing(temporary.getFailing());
+                }
             } else if (s instanceof DoStmt){
                 DoStmt ds = (DoStmt) s;
                 Statement body = ds.getBody();
@@ -767,6 +769,7 @@ public class ContractGenerator {
                 VariableValue value = b.getAssignedValue(v);
                 Expression temp;
                 if(value.getStatus() == VariableValue.Status.unknown){
+                    b.setVariableAsChanged(v);
                     return null;
                 } else if (value.getStatus() == VariableValue.Status.known){
                     temp = value.getValue();
@@ -998,9 +1001,9 @@ public class ContractGenerator {
 
     public static void main(String args[]){
         //File projectDir = new File("../RCC");
-        //File projectDir = new File("src/main/java/Examples");
+        File projectDir = new File("src/main/java/Examples");
         //File projectDir = new File("src/main/java/Examples/SingleExample");
-        File projectDir = new File("./Votail0.0.1b");
+        //File projectDir = new File("./Votail0.0.1b");
         //File projectDir = new File("Votail0.0.1b/src");
         //File projectDir = new File("../Test");
         try {
