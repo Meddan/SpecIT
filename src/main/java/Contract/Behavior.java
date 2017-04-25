@@ -427,6 +427,9 @@ public class Behavior {
         assignedValues.put(v, new VariableValue(VariableValue.Status.old));
     }
     public void putAssignedValue(Variable v, Expression e){
+        if(v == null){
+            return;
+        }
         if(!closed) {
             if(e == null){
                 assignedValues.put(v, new VariableValue(VariableValue.Status.unknown));
