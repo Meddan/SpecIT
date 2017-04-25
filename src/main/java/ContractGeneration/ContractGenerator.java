@@ -575,6 +575,11 @@ public class ContractGenerator {
             newMCE.setArguments(newArgs);
             try{
                 sr = JavaParserFacade.get(combinedTypeSolver).solve(mce, false);
+
+                if(!sr.isSolved()){
+                    b.setFailing(new SymbolSolverException("Method call"));
+                    return newMCE;
+                }
             } catch (Exception | StackOverflowError error){
                 //System.out.println("Cannot solve " + mce + " " + mce.getRange() + " " + error.getClass());
                 if(error instanceof StackOverflowError){
@@ -990,6 +995,8 @@ public class ContractGenerator {
         //File projectDir = new File("src/main/java/Examples");
         //File projectDir = new File("src/main/java/Examples/SingleExample");
         File projectDir = new File("./Votail0.0.1b");
+        //File projectDir = new File("./junit4-master");
+        //File projectDir = new File("./junit4-master");
         //File projectDir = new File("Votail0.0.1b/src");
         //File projectDir = new File("../Test");
         try {
