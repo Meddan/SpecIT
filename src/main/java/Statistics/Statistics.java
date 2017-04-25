@@ -15,10 +15,11 @@ import java.util.LinkedList;
 public class Statistics {
 
     private static ArrayList<MethodStatistics> methodStats = new ArrayList<>();
+    private static int successBehaviors = 0;
     private static int failingBehaviors = 0;
     private static int methodFailure = 0;
     private static int otherFailure = 0;
-    private static int uncoveredStatement;
+    private static int uncoveredStatement = 0;
 
     private static DescriptiveStatistics prePerMethod = new DescriptiveStatistics();
     private static DescriptiveStatistics postPerMethod = new DescriptiveStatistics();
@@ -27,7 +28,9 @@ public class Statistics {
     private static DescriptiveStatistics behPerMethod = new DescriptiveStatistics();
 
 
-
+    private static void successfulBehavior(){
+        successBehaviors++;
+    }
     private static void failingBehavior(){
         failingBehaviors++;
     }
@@ -53,6 +56,7 @@ public class Statistics {
 
         for(Behavior b : leafs){
             if(!b.isFailing()) {
+                successfulBehavior();
                 ms.addBehavior();
                 setPostCons(ms, b);
                 setPreCons(ms, b);
@@ -119,7 +123,8 @@ public class Statistics {
 
         sb.append("========= STATS GATHERED =========\n");
         sb.append("Methods processed: " + methodStats.size() + "\n");
-        sb.append("Successful behaviors: " + (totalBehaviors - failingBehaviors) + "\n");
+        sb.append("Total behaviors: " + (successBehaviors + failingBehaviors) + "\n");
+        sb.append("Successful behaviors: " + successBehaviors + "\n");
         sb.append("Failing behaviors: " + failingBehaviors + "\n");
         sb.append("\tSymbol solver Failures: " + (methodFailure + otherFailure) + "\n");
         sb.append("\t\tMethod Failures: " + methodFailure + "\n");
