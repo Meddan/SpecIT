@@ -47,7 +47,9 @@ public class PostCondition {
         }
 
         PostCondition pc = ((PostCondition) o);
-
+        if(expression == null){
+            return false;
+        }
         return expression.equals(pc.getExpression()) && isReturn == pc.isReturn();
     }
 
