@@ -443,6 +443,10 @@ public class Behavior {
         }
     }
 
+    public void setVariableAsChanged(Variable v){
+        changed.add(v);
+    }
+
     public void putParameter(Variable v){
         if(!closed){
             assignedValues.put(v, new VariableValue(VariableValue.Status.old));
