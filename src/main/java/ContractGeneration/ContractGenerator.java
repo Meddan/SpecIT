@@ -375,8 +375,21 @@ public class ContractGenerator {
                 b.addException(((ObjectCreationExpr) ts.getExpression()).getType(), listOfExprs);
             } else {
                 // We're throwing some already created exception
-                Type t = JavaParserFacade.get(combinedTypeSolver).getType(ts.getExpression());
-                b.addException(new ClassOrInterfaceType(t.asReferenceType().getQualifiedName()), listOfExprs);
+                Type t;
+                try {
+                    t = JavaParserFacade.get(combinedTypeSolver).getType(ts.getExpression());
+                } catch (Exception e){
+                    System.out.println("Crash on throw");
+                    return;
+                }
+
+                if(t.isReferenceType()) {
+                    b.addException(new ClassOrInterfaceType(t.asReferenceType().getQualifiedName()), listOfExprs);
+                } else if (t.isTypeVariable()){
+                    b.addException(new ClassOrInterfaceType(t.asTypeVariable().qualifiedName()), listOfExprs);
+                } else {
+                    System.out.println("Unexpected type, panic");
+                }
 
             }
             b.setClosed(true);
@@ -874,9 +887,18 @@ public class ContractGenerator {
         } else if (e instanceof ConditionalExpr) {
             ConditionalExpr ce = (ConditionalExpr) e;
             ConditionalExpr newCe = new ConditionalExpr();
-            newCe.setCondition(createContract(ce.getCondition(), b));
-            newCe.setThenExpr(createContract(ce.getThenExpr(), b));
-            newCe.setElseExpr(createContract(ce.getElseExpr(), b));
+
+            Expression conditionExpr = createContract(ce.getCondition(), b);
+            Expression thenExpr = createContract(ce.getThenExpr(), b);
+            Expression elseExpr = createContract(ce.getElseExpr(), b);
+
+            if(conditionExpr == null || thenExpr == null || elseExpr == null){
+                return null;
+            }
+
+            newCe.setCondition(conditionExpr);
+            newCe.setThenExpr(thenExpr);
+            newCe.setElseExpr(elseExpr);
             return new EnclosedExpr(newCe);
         } else if (e instanceof InstanceOfExpr) {
             if (((InstanceOfExpr) e).getExpression() instanceof MethodCallExpr) {
@@ -995,7 +1017,7 @@ public class ContractGenerator {
         //File projectDir = new File("src/main/java/Examples");
         //File projectDir = new File("src/main/java/Examples/SingleExample");
         File projectDir = new File("./Votail0.0.1b");
-        //File projectDir = new File("./junit4-master");
+        //File projectDir = new File("./junit5-master");
         //File projectDir = new File("./junit4-master");
         //File projectDir = new File("Votail0.0.1b/src");
         //File projectDir = new File("../Test");
