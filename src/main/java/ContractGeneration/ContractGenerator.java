@@ -259,7 +259,6 @@ public class ContractGenerator {
         } catch (Exception use){
             return null;
         }
-        System.out.println(e + " " + e.getClass() + " " + e.getRange());
         throw new IllegalArgumentException();
     }
     public Contract createContract(CallableDeclaration cd) {
@@ -568,7 +567,6 @@ public class ContractGenerator {
                 if(newExp == null) {
                     if(!b.isFailing()) {
                         b.setFailing(new UnresolvedParameterException());
-                        System.out.println(exp + " " + exp.getRange());
                     }
                     return null;
                 }
@@ -989,9 +987,9 @@ public class ContractGenerator {
 
     public static void main(String args[]){
         //File projectDir = new File("../RCC");
-        File projectDir = new File("src/main/java/Examples");
+        //File projectDir = new File("src/main/java/Examples");
         //File projectDir = new File("src/main/java/Examples/SingleExample");
-        //File projectDir = new File("./Votail0.0.1b");
+        File projectDir = new File("./Votail0.0.1b");
         //File projectDir = new File("Votail0.0.1b/src");
         //File projectDir = new File("../Test");
         try {

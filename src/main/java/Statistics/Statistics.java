@@ -3,6 +3,7 @@ package Statistics;
 import Contract.*;
 import ContractGeneration.SymbolSolverException;
 import ContractGeneration.UncoveredStatementException;
+import ContractGeneration.UnresolvedParameterException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class Statistics {
     private static int methodFailure = 0;
     private static int otherFailure = 0;
     private static int uncoveredStatement = 0;
+    private static int unresolvedParameter = 0;
 
     private static DescriptiveStatistics prePerMethod = new DescriptiveStatistics();
     private static DescriptiveStatistics postPerMethod = new DescriptiveStatistics();
@@ -43,6 +45,9 @@ public class Statistics {
     private static void uncoveredStatementFail() {
         uncoveredStatement++;
     }
+    private static void unresolvedParameterFail(){
+        unresolvedParameter++;
+    }
 
     /**
      * Given a contract, will extract all available information and
@@ -65,14 +70,14 @@ public class Statistics {
                 if(b.getFailing().get() instanceof SymbolSolverException){
                     if(((SymbolSolverException) b.getFailing().get()).message.equals("Method call")){
                         methodFail();
-                    } else {
-                        System.out.println(b.getFailing().get());
-                        otherFail();
                     }
                 } else if (b.getFailing().get() instanceof UncoveredStatementException){
                     uncoveredStatementFail();
+                } else if (b.getFailing().get() instanceof UnresolvedParameterException){
+                    unresolvedParameterFail();
                 } else {
                     System.out.println(b.getFailing().get());
+                    otherFail();
                 }
             }
         }
@@ -130,6 +135,7 @@ public class Statistics {
         sb.append("\t\tMethod Failures: " + methodFailure + "\n");
         sb.append("\t\tOther Failures: " + otherFailure + "\n");
         sb.append("\tUncovered Statement Failures: " + uncoveredStatement + "\n");
+        sb.append("\tUnresolved Parameter Failures: " + unresolvedParameter + "\n");
         sb.append("Total postconditions: " + totalPostCons + "\n");
         sb.append("Total preconditions: " + totalPreCons + "\n");
         sb.append(String.format("Preconditions per method: \n%s \n", formatStats(prePerMethod)));
