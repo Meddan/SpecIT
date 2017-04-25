@@ -485,7 +485,7 @@ public class ContractGenerator {
                 }
                 b.setPure(false);
                 if(temporary.isFailing()){
-                    b.setFailing(temporary.getFailing());
+                    b.setFailing(temporary.getFailing().get());
                 }
             } else if (s instanceof ForStmt) {
                 ForStmt fs = (ForStmt) s;
@@ -505,7 +505,7 @@ public class ContractGenerator {
                 }
                 b.setPure(false);
                 if(temporary.isFailing()){
-                    b.setFailing(temporary.getFailing());
+                    b.setFailing(temporary.getFailing().get());
                 }
             } else if (s instanceof DoStmt){
                 DoStmt ds = (DoStmt) s;
@@ -518,7 +518,7 @@ public class ContractGenerator {
                 }
                 b.setPure(false);
                 if(temporary.isFailing()){
-                    b.setFailing(temporary.getFailing());
+                    b.setFailing(temporary.getFailing().get());
                 }
             } else if (s instanceof SynchronizedStmt) {
                 SynchronizedStmt ss = (SynchronizedStmt) s;
