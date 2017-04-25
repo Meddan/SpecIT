@@ -905,10 +905,6 @@ public class ContractGenerator {
                 createContract(((InstanceOfExpr) e).getExpression(), b);
             }
             return e;
-        } else if (e instanceof LambdaExpr) {
-            System.out.println("LAMDA EXPRESSIONS ARE NOT SUPPORTED");
-            b.setPure(false);
-            return e;
         } else if (e instanceof SuperExpr) {
             //TODO: Need to have entire package in scope
             //TODO: Also implement this
@@ -916,7 +912,9 @@ public class ContractGenerator {
             b.setPure(false);
             return e;
         } else {
-            System.out.println("Expression " + e + " of " + e.getClass() + " is not covered");
+            if(!b.isFailing()){
+                b.setFailing(new UncoveredStatementException(e.toString() + " is not covered"));
+            }
             b.setPure(false);
             return null;
         }
