@@ -589,7 +589,7 @@ public class ContractGenerator {
                 if(!b.isFailing()) {
                     b.setFailing(new SymbolSolverException("Method call"));
                 }
-                return null;
+                return newMCE;
             }
             if(activeReferences.contains(sr.getCorrespondingDeclaration().getName())){
                 return e;
