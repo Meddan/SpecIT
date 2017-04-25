@@ -319,9 +319,9 @@ public class ContractGenerator {
         /* We first identify if the current statement is assert or return in which case we want to make sure our
         assertions (ensures) are handled correctly.
         */
-        if(b.isFailing()){
+/*        if(b.isFailing()){
             return;
-        }
+        }*/
         //System.out.println("Statement s of " + s.getClass());
         if (s instanceof AssertStmt){
             AssertStmt as = (AssertStmt) s;
@@ -398,16 +398,11 @@ public class ContractGenerator {
                 IfStmt sif = (IfStmt) s;
                 if(b.getLeafs().size() > 10){
                     System.out.println("Too many leafs in: " + b.getCallableDeclaration().getName());
-                    b.setFailing(Optional.of(new TooManyLeafsException()));
+                    b.setFailing(new TooManyLeafsException());
                     return;
                 }
                 for(Behavior beh : b.getLeafs()) {
                     Expression ifCond = createContract(sif.getCondition(), beh);
-                    if(ifCond == null){
-                        Optional<Exception> opte = Optional.of(new SymbolSolverException());
-                        beh.setFailing(opte);
-                        continue;
-                    }
                     Behavior a = new Behavior(beh);
                     a.addPreCon(ifCond);
                     beh.setClosed(true);
@@ -529,40 +524,19 @@ public class ContractGenerator {
                 SynchronizedStmt ss = (SynchronizedStmt) s;
                 createContract(ss.getExpression(), b);
                 createContract(ss.getBody(), b);
-            } else if(s instanceof TryStmt){
-                b.setFailing(Optional.of(new UncoveredStatementException()));
             } else if (s instanceof LabeledStmt){
                 LabeledStmt ls = (LabeledStmt) s;
                 createContract(ls.getStatement(), b);
-            } else if (s instanceof ExplicitConstructorInvocationStmt) {
-                ExplicitConstructorInvocationStmt ecis = (ExplicitConstructorInvocationStmt) s;
-                //JavaParserConstructorDeclaration jvpcd;
-                /*
-                SymbolReference<> sr;
-                try {
-                    sr = JavaParserFacade.get(combinedTypeSolver).solve(ecis);
-                } catch (Exception error) {
-                    System.out.println("Could not solver reference of super!");
-                    throw new SymbolSolverException();
-                }
-                if(sr.getCorrespondingDeclaration() instanceof JavaParserConstructorDeclaration){
-                    JavaParserConstructorDeclaration jpcd = (JavaParserConstructorDeclaration) sr.getCorrespondingDeclaration();
-                    System.out.println("thisname" +  jpcd.getName());
-                    createContract(sr.getCorrespondingDeclaration(), new Behavior(null));
-                }*/
-                b.setFailing(Optional.of(new UncoveredStatementException()));
-
             } else {
-                System.out.println("Statement " + s + " of class " + s.getClass() + " is not covered");
-                b.setFailing(Optional.of(new UncoveredStatementException()));
+                b.setFailing(new UncoveredStatementException(s.getClass().toString()));
             }
         }
     }
 
     private Expression createContract(Expression e, Behavior b) {
-        if(b.isFailing()){
+/*        if(b.isFailing()){
             return e;
-        }
+        }*/
         if(e == null){
             return null;
         }
@@ -592,7 +566,10 @@ public class ContractGenerator {
             for(Expression exp : mce.getArguments()){
                 Expression newExp = createContract(exp, b);
                 if(newExp == null) {
-                    b.setFailing(Optional.of(new UnresolvedParameterException()));
+                    if(!b.isFailing()) {
+                        b.setFailing(new UnresolvedParameterException());
+                        System.out.println(exp + " " + exp.getRange());
+                    }
                     return null;
                 }
                 newArgs.add(newExp);
@@ -606,7 +583,9 @@ public class ContractGenerator {
                     System.out.println("StackOverflow when doing " + e);
                     System.out.println("in " + b.getCallableDeclaration().getName());
                 }
-                b.setFailing(Optional.of(new SymbolSolverException()));
+                if(!b.isFailing()) {
+                    b.setFailing(new SymbolSolverException("Method call"));
+                }
                 return null;
             }
             if(activeReferences.contains(sr.getCorrespondingDeclaration().getName())){
@@ -624,7 +603,7 @@ public class ContractGenerator {
                 b.setClosed(true);
                 if(temp == null){
                     contracts.put(md, null);
-                    b.setFailing(Optional.of(new CallingMethodWithoutContractException()));
+                    b.setFailing(new CallingMethodWithoutContractException());
                     return null;
                 }
                 for(Behavior beh : temp.getLeafs()){
@@ -863,7 +842,11 @@ public class ContractGenerator {
             ArrayInitializerExpr newAie = aie.clone();
             NodeList<Expression> newValues = new NodeList<>();
             for (Expression exp : aie.getValues()) {
-                newValues.add(createContract(exp, b));
+                Expression newExp = createContract(exp, b);
+                if(newExp == null){
+                    return null;
+                }
+                newValues.add(newExp);
             }
             newAie.setValues(newValues);
             return newAie;

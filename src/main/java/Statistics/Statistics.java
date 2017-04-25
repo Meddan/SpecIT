@@ -1,6 +1,8 @@
 package Statistics;
 
 import Contract.*;
+import ContractGeneration.SymbolSolverException;
+import ContractGeneration.UncoveredStatementException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
@@ -14,6 +16,9 @@ public class Statistics {
 
     private static ArrayList<MethodStatistics> methodStats = new ArrayList<>();
     private static int failingBehaviors = 0;
+    private static int methodFailure = 0;
+    private static int otherFailure = 0;
+    private static int uncoveredStatement;
 
     private static DescriptiveStatistics prePerMethod = new DescriptiveStatistics();
     private static DescriptiveStatistics postPerMethod = new DescriptiveStatistics();
@@ -21,8 +26,19 @@ public class Statistics {
     private static DescriptiveStatistics postPerBehavior = new DescriptiveStatistics();
     private static DescriptiveStatistics behPerMethod = new DescriptiveStatistics();
 
-    public static void failingBehavior(){
+
+
+    private static void failingBehavior(){
         failingBehaviors++;
+    }
+    private static void methodFail(){
+        methodFailure++;
+    }
+    private static void otherFail() {
+        otherFailure++;
+    }
+    private static void uncoveredStatementFail() {
+        uncoveredStatement++;
     }
 
     /**
@@ -42,6 +58,18 @@ public class Statistics {
                 setPreCons(ms, b);
             } else {
                 failingBehavior();
+                if(b.getFailing().get() instanceof SymbolSolverException){
+                    if(((SymbolSolverException) b.getFailing().get()).message.equals("Method call")){
+                        methodFail();
+                    } else {
+                        System.out.println(b.getFailing().get());
+                        otherFail();
+                    }
+                } else if (b.getFailing().get() instanceof UncoveredStatementException){
+                    uncoveredStatementFail();
+                } else {
+                    System.out.println(b.getFailing().get());
+                }
             }
         }
 
@@ -91,8 +119,12 @@ public class Statistics {
 
         sb.append("========= STATS GATHERED =========\n");
         sb.append("Methods processed: " + methodStats.size() + "\n");
-        sb.append("Successful behaviors: " + totalBehaviors + "\n");
+        sb.append("Successful behaviors: " + (totalBehaviors - failingBehaviors) + "\n");
         sb.append("Failing behaviors: " + failingBehaviors + "\n");
+        sb.append("\tSymbol solver Failures: " + (methodFailure + otherFailure) + "\n");
+        sb.append("\t\tMethod Failures: " + methodFailure + "\n");
+        sb.append("\t\tOther Failures: " + otherFailure + "\n");
+        sb.append("\tUncovered Statement Failures: " + uncoveredStatement + "\n");
         sb.append("Total postconditions: " + totalPostCons + "\n");
         sb.append("Total preconditions: " + totalPreCons + "\n");
         sb.append(String.format("Preconditions per method: \n%s \n", formatStats(prePerMethod)));

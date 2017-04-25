@@ -494,8 +494,8 @@ public class Behavior {
     public boolean isFailing(){
         return failing.isPresent();
     }
-    public void setFailing(Optional<Exception> failing) {
-        this.failing = failing;
+    public void setFailing(Exception failing) {
+        this.failing = Optional.of(failing);
     }
     public Set<Variable> getChanged(){
         Set<Variable> allChanged = new HashSet<Variable>();
