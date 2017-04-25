@@ -22,6 +22,7 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.*;
 import com.github.javaparser.symbolsolver.model.declarations.*;
+import com.github.javaparser.symbolsolver.model.resolution.UnsolvedSymbolException;
 import com.github.javaparser.symbolsolver.model.typesystem.Type;
 import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionMethodDeclaration;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
@@ -38,6 +39,7 @@ import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.logging.FileHandler;
 
 import Contract.*;
 import org.apache.commons.math3.analysis.function.Exp;
@@ -72,7 +74,7 @@ public class ContractGenerator {
         //Start generating contracts, method by method
         for (BodyDeclaration<?> bd : target.getMembers()){
             if(bd instanceof CallableDeclaration){
-                CallableDeclaration cd = (CallableDeclaration) bd;
+                CallableDeclaration cd = (CallableDeclaration) bd;q
                 Contract temp = createContract((CallableDeclaration) bd);
                 if(temp != null){
                     contracts.put(cd ,temp);
@@ -198,46 +200,66 @@ public class ContractGenerator {
         }
     }
     private Variable getVariableFromExpression(Expression e){
-        String clazz = getClassName(e);
-        if(e instanceof NameExpr){
-            NameExpr ne = (NameExpr) e;
-            String name = ne.getName().toString();
-            Declaration d = JavaParserFacade.get(combinedTypeSolver).solve(ne).getCorrespondingDeclaration();
-            if(d instanceof JavaParserFieldDeclaration){
-                JavaParserFieldDeclaration jpfd = (JavaParserFieldDeclaration) d;
-                if(jpfd.getWrappedNode().getModifiers().contains(Modifier.STATIC)){
-                    return new Variable(Variable.Scope.staticfield, name, clazz);
-                } else {
-                    return new Variable(Variable.Scope.field, name, clazz);
-                }
-            } else if (d instanceof JavaParserSymbolDeclaration || d instanceof JavaParserParameterDeclaration){
-                return new Variable(Variable.Scope.local, name, clazz);
-            }
-        } else if (e instanceof FieldAccessExpr){
-            FieldAccessExpr fae = (FieldAccessExpr) e;
-            String name = fae.getName().toString();
-            Expression scope = getFirstScope(fae);
-
-            if(scope instanceof ThisExpr){
-                return new Variable(Variable.Scope.field, name, clazz);
-            }
-
-            try {
-                Declaration d = JavaParserFacade.get(combinedTypeSolver).solve(fae.getScope().get()).getCorrespondingDeclaration();
+        try {
+            String clazz = getClassName(e);
+            if (e instanceof NameExpr) {
+                NameExpr ne = (NameExpr) e;
+                String name = ne.getName().toString();
+                Declaration d = JavaParserFacade.get(combinedTypeSolver).solve(ne).getCorrespondingDeclaration();
                 if (d instanceof JavaParserFieldDeclaration) {
                     JavaParserFieldDeclaration jpfd = (JavaParserFieldDeclaration) d;
                     if (jpfd.getWrappedNode().getModifiers().contains(Modifier.STATIC)) {
                         return new Variable(Variable.Scope.staticfield, name, clazz);
                     } else {
-                        return new Variable(Variable.Scope.field, scope.toString() + "." + name, clazz);
+                        return new Variable(Variable.Scope.field, name, clazz);
+                    }
+                } else if (d instanceof JavaParserSymbolDeclaration || d instanceof JavaParserParameterDeclaration) {
+                    return new Variable(Variable.Scope.local, name, clazz);
+                }
+            } else if (e instanceof FieldAccessExpr) {
+                FieldAccessExpr fae = (FieldAccessExpr) e;
+                String name = fae.getName().toString();
+                Expression scope = getFirstScope(fae);
+
+                if (scope instanceof ThisExpr) {
+                    return new Variable(Variable.Scope.field, name, clazz);
+                }
+                try {
+                    Declaration d = JavaParserFacade.get(combinedTypeSolver).solve(fae.getScope().get()).getCorrespondingDeclaration();
+                    if (d instanceof JavaParserFieldDeclaration) {
+                        JavaParserFieldDeclaration jpfd = (JavaParserFieldDeclaration) d;
+                        if (jpfd.getWrappedNode().getModifiers().contains(Modifier.STATIC)) {
+                            return new Variable(Variable.Scope.staticfield, name, clazz);
+                        } else {
+                            return new Variable(Variable.Scope.field, scope.toString() + "." + name, clazz);
+                        }
+                    } else if (d instanceof JavaParserSymbolDeclaration) {
+                        return new Variable(Variable.Scope.local, name, clazz);
+                    }
+                } catch (UnsupportedOperationException uoe) {
+                    return new Variable(Variable.Scope.staticfield, name, clazz);
+                }
+            }
+            if (e instanceof ArrayAccessExpr) {
+                ArrayAccessExpr aae = (ArrayAccessExpr) e;
+                Declaration d = JavaParserFacade.get(combinedTypeSolver).solve(aae.getName()).getCorrespondingDeclaration();
+                String name = aae.getName().toString();
+                if (d instanceof JavaParserFieldDeclaration) {
+                    JavaParserFieldDeclaration jpfd = (JavaParserFieldDeclaration) d;
+                    if (jpfd.getWrappedNode().getModifiers().contains(Modifier.STATIC)) {
+                        return new Variable(Variable.Scope.staticfield, name, clazz);
+                    } else {
+                        return new Variable(Variable.Scope.field, name, clazz);
                     }
                 } else if (d instanceof JavaParserSymbolDeclaration) {
                     return new Variable(Variable.Scope.local, name, clazz);
                 }
-            } catch (UnsupportedOperationException uoe){
-                return new Variable(Variable.Scope.staticfield, name, clazz);
+
             }
+        } catch (Exception use){
+            return null;
         }
+        System.out.println(e + " " + e.getClass() + " " + e.getRange());
         throw new IllegalArgumentException();
     }
     public Contract createContract(CallableDeclaration cd) {
@@ -548,11 +570,13 @@ public class ContractGenerator {
         } else if(e instanceof MethodCallExpr){
             MethodCallExpr mce = (MethodCallExpr) e;
             if(mce.getScope().isPresent()){
-                BinaryExpr be = new BinaryExpr();
-                be.setOperator(BinaryExpr.Operator.NOT_EQUALS);
-                be.setLeft(mce.getScope().get().clone());
-                be.setRight(new NullLiteralExpr());
-                b.addPreCon(be);
+                if(!(mce.getScope().get() instanceof SuperExpr)) {
+                    BinaryExpr be = new BinaryExpr();
+                    be.setOperator(BinaryExpr.Operator.NOT_EQUALS);
+                    be.setLeft(mce.getScope().get().clone());
+                    be.setRight(new NullLiteralExpr());
+                    b.addPreCon(be);
+                }
             }
             MethodCallExpr newMCE = mce.clone();
             SymbolReference sr;
@@ -569,7 +593,7 @@ public class ContractGenerator {
             try{
                 sr = JavaParserFacade.get(combinedTypeSolver).solve(mce, false);
             } catch (Exception | StackOverflowError error){
-                System.out.println("Cannot solve " + mce);
+                //System.out.println("Cannot solve " + mce + " " + mce.getRange() + " " + error.getClass());
                 if(error instanceof StackOverflowError){
                     System.out.println("StackOverflow when doing " + e);
                     System.out.println("in " + b.getCallableDeclaration().getName());
@@ -635,7 +659,7 @@ public class ContractGenerator {
                     b.setClosed(true);
                 }
                 activeReferences.remove(sr.getCorrespondingDeclaration().getName());
-                return null;
+                return newMCE;
             } else {
                 //TODO: Handle other method calls
                 System.out.println("Method call expression with declaration: " + sr.getCorrespondingDeclaration() + " is not covered!");
@@ -694,11 +718,23 @@ public class ContractGenerator {
                 b.setPure(b.isLocalVar(ne.getName()));
             } else if(ae.getTarget() instanceof ArrayAccessExpr){
                 ArrayAccessExpr aae = (ArrayAccessExpr) ae.getTarget();
-                NameExpr ne = (NameExpr) aae.getName();
-                v = getVariableFromExpression(ne);
+                SimpleName name;
+                if(aae.getName() instanceof NameExpr){
+                    name = ((NameExpr) aae.getName()).getName();
+                } else if (aae.getName() instanceof FieldAccessExpr){
+                    name = ((FieldAccessExpr) aae.getName()).getName();
+                } else {
+                    throw new IllegalArgumentException();
+                }
+
+
+                v = getVariableFromExpression(aae);
                 String index = createContract(aae.getIndex(), b).toString();
+                if(v == null){
+                    return null;
+                }
                 v = new Variable(v.getScope(), v.getName() + "[" + index + "]", v.getClassName());
-                b.setPure(b.isLocalVar(ne.getName()));
+                b.setPure(b.isLocalVar(name));
             } else {
                 System.out.println("Assignment target " +  ae.getTarget() + " of " + ae.getTarget().getClass() + " not covered!");
                 b.setPure(false);
@@ -764,8 +800,15 @@ public class ContractGenerator {
                 return ue;
             }
         } else if (e instanceof EnclosedExpr) {
-            if (((EnclosedExpr) e).getInner().isPresent()) {
-                return ((EnclosedExpr) e).setInner(createContract(((EnclosedExpr) e).getInner().get(), b));
+            EnclosedExpr ee = (EnclosedExpr) e;
+            if (ee.getInner().isPresent()) {
+                Expression inner = ee.getInner().get();
+                Expression newInner = createContract(inner, b);
+                if(newInner == null){
+                    return null;
+                } else {
+                    return new EnclosedExpr(newInner.clone());
+                }
             } else {
                 //This should really not happen...
                 System.out.println("This is not covered! Enclosed expression is non-existent!");
@@ -820,6 +863,9 @@ public class ContractGenerator {
             String newIndex = createContract(aae.getIndex(), b).toString();
             try {
                 Variable v = getVariableFromExpression(aae.getName());
+                if(v == null){
+                    return null;
+                }
                 v = new Variable(v.getScope(), v.getName() + newIndex, v.getClassName());
                 return b.getAssignedValue(v).getValue();
             } catch (IllegalArgumentException iae){
@@ -952,23 +998,23 @@ public class ContractGenerator {
 
     public static void main(String args[]){
         //File projectDir = new File("../RCC");
-        File projectDir = new File("src/main/java/Examples");
+        //File projectDir = new File("src/main/java/Examples");
         //File projectDir = new File("src/main/java/Examples/SingleExample");
-        //File projectDir = new File("./Votail0.0.1b");
+        File projectDir = new File("./Votail0.0.1b");
+        //File projectDir = new File("Votail0.0.1b/src");
         //File projectDir = new File("../Test");
         try {
             clearDirectory();
+            testClasses(projectDir);
         } catch (IOException ioe){
             System.out.println("Could not delete directory with generated files.");
             System.out.println("Consider manually deleting and rerunning.");
             ioe.printStackTrace();
             System.exit(1);
         }
-
-        testClasses(projectDir);
         System.out.println(Statistics.getStatistics());
     }
-    public static void testClasses(File projectDir) {
+    public static void testClasses(File projectDir) throws IOException {
         new DirExplorer((level, path, file) -> path.endsWith(".java"), (level, path, file) -> {
             System.out.println(path);
             System.out.println(Strings.repeat("=", path.length()));
