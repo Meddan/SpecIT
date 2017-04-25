@@ -74,7 +74,7 @@ public class ContractGenerator {
         //Start generating contracts, method by method
         for (BodyDeclaration<?> bd : target.getMembers()){
             if(bd instanceof CallableDeclaration){
-                CallableDeclaration cd = (CallableDeclaration) bd;q
+                CallableDeclaration cd = (CallableDeclaration) bd;
                 Contract temp = createContract((CallableDeclaration) bd);
                 if(temp != null){
                     contracts.put(cd ,temp);
