@@ -899,7 +899,6 @@ public class ContractGenerator {
 
     private static void clearDirectory() throws IOException{
         Path p = Paths.get("Generated");
-        System.out.println(Files.exists(p));
         if(Files.exists(p)){
             Files.walkFileTree(p, new SimpleFileVisitor<Path>(){
                 @Override
