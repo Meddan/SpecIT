@@ -1023,6 +1023,7 @@ public class ContractGenerator {
     }
 
     public static void main(String args[]){
+        long start = System.currentTimeMillis();
         //File projectDir = new File("../RCC");
         //File projectDir = new File("src/main/java/Examples");
         //File projectDir = new File("src/main/java/Examples/SingleExample");
@@ -1040,8 +1041,12 @@ public class ContractGenerator {
             ioe.printStackTrace();
             System.exit(1);
         }
+        long end = System.currentTimeMillis();
+
         System.out.println(Statistics.getStatistics());
+        System.out.println("Time to run: " + (end - start)/1000);
     }
+
     public static void testClasses(File projectDir) throws IOException {
         new DirExplorer((level, path, file) -> path.endsWith(".java"), (level, path, file) -> {
             System.out.println(path);
