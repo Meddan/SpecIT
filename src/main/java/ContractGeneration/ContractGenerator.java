@@ -21,9 +21,11 @@ import com.github.javaparser.ast.visitor.VoidVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.*;
+import com.github.javaparser.symbolsolver.javassistmodel.JavassistFieldDeclaration;
 import com.github.javaparser.symbolsolver.model.declarations.*;
 import com.github.javaparser.symbolsolver.model.resolution.UnsolvedSymbolException;
 import com.github.javaparser.symbolsolver.model.typesystem.Type;
+import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionFieldDeclaration;
 import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionMethodDeclaration;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
@@ -215,7 +217,15 @@ public class ContractGenerator {
                     }
                 } else if (d instanceof JavaParserSymbolDeclaration || d instanceof JavaParserParameterDeclaration) {
                     return new Variable(Variable.Scope.local, name, clazz);
+                } else if (d instanceof ReflectionFieldDeclaration) {
+                    // The variable is some field from java standard library (JRE)
+                    if(d.asField().isStatic()){
+                        return new Variable(Variable.Scope.staticfield, name, clazz); // TODO : Reconsider?
+                    } else {
+                        return new Variable(Variable.Scope.field, name, clazz); // TODO : Reconsider?
+                    }
                 }
+                System.out.println(d);
             } else if (e instanceof FieldAccessExpr) {
                 FieldAccessExpr fae = (FieldAccessExpr) e;
                 String name = fae.getName().toString();
@@ -253,6 +263,8 @@ public class ContractGenerator {
                     }
                 } else if (d instanceof JavaParserSymbolDeclaration) {
                     return new Variable(Variable.Scope.local, name, clazz);
+                } else if(d instanceof JavaParserParameterDeclaration){
+                    return new Variable(Variable.Scope.parameter, name, clazz);
                 }
 
             }
