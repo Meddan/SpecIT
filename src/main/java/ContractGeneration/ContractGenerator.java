@@ -428,7 +428,9 @@ public class ContractGenerator {
                 for(Behavior beh : b.getLeafs()) {
                     Expression ifCond = createContract(sif.getCondition(), beh);
                     Behavior a = new Behavior(beh);
-                    a.addPreCon(ifCond);
+                    if(ifCond != null) {
+                        a.addPreCon(ifCond);
+                    }
                     beh.setClosed(true);
                     beh.addChild(a);
                     createContract(sif.getThenStmt(), a);
@@ -437,12 +439,16 @@ public class ContractGenerator {
                         beh.addChild(d);
                         //TODO: d.addPreCon(); need to fix double negation
                         //d.addPreCon(ifCond);
-                        d.addPreCon(new UnaryExpr(new EnclosedExpr(ifCond), UnaryExpr.Operator.LOGICAL_COMPLEMENT));
+                        if(ifCond != null) {
+                            d.addPreCon(new UnaryExpr(new EnclosedExpr(ifCond), UnaryExpr.Operator.LOGICAL_COMPLEMENT));
+                        }
                         createContract(sif.getElseStmt().get(), d);
                     } else {
                         Behavior e = new Behavior(beh);
                         beh.addChild(e);
-                        e.addPreCon(new UnaryExpr(new EnclosedExpr(ifCond), UnaryExpr.Operator.LOGICAL_COMPLEMENT));
+                        if(ifCond != null) {
+                            e.addPreCon(new UnaryExpr(new EnclosedExpr(ifCond), UnaryExpr.Operator.LOGICAL_COMPLEMENT));
+                        }
                         //TODO: e.addPreCon(); need to fix double negation
                     }
                 }
@@ -569,10 +575,11 @@ public class ContractGenerator {
         } else if (e instanceof NameExpr){
             Variable v = getVariableFromExpression(e);
             VariableValue value = b.getAssignedValue(v);
-            if (value.getStatus() == VariableValue.Status.known) {
+            if (value.getStatus() != VariableValue.Status.unknown) {
                 return value.getValue();
+            } else {
+                return null;
             }
-            return e;
         } else if(e instanceof MethodCallExpr){
             MethodCallExpr mce = (MethodCallExpr) e;
             if(mce.getScope().isPresent()){
@@ -694,6 +701,8 @@ public class ContractGenerator {
                     if (!(initExp instanceof ArrayCreationExpr) && !(initExp instanceof ObjectCreationExpr)) {
                         //b.putAssignedValue(vd.getId().getName(), new NameExpr(vd.getId().getName()));
                         b.putAssignedValue(v, createContract(initExp, b));
+                    } else {
+                        b.putAssignedValue(v, null);
                     }
                 }
             }
@@ -1022,8 +1031,8 @@ public class ContractGenerator {
         long start = System.currentTimeMillis();
         //File projectDir = new File("../RCC");
         //File projectDir = new File("src/main/java/Examples");
-        //File projectDir = new File("src/main/java/Examples/SingleExample");
-        File projectDir = new File("./Votail0.0.1b");
+        File projectDir = new File("src/main/java/Examples/SingleExample");
+        //File projectDir = new File("./Votail0.0.1b");
         //File projectDir = new File("./junit5-master");
         //File projectDir = new File("./junit4-master");
         //File projectDir = new File("Votail0.0.1b/src");
