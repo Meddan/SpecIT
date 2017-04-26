@@ -229,7 +229,6 @@ public class ContractGenerator {
                         return new Variable(Variable.Scope.field, name, clazz); // TODO : Reconsider?
                     }
                 }
-                System.out.println(d);
             } else if (e instanceof FieldAccessExpr) {
                 FieldAccessExpr fae = (FieldAccessExpr) e;
                 String name = fae.getName().toString();
@@ -249,6 +248,8 @@ public class ContractGenerator {
                         }
                     } else if (d instanceof JavaParserSymbolDeclaration) {
                         return new Variable(Variable.Scope.local, name, clazz);
+                    } else if(d instanceof JavaParserParameterDeclaration){
+                        return new Variable(Variable.Scope.parameter, scope.toString() + "." + name, clazz);
                     }
                 } catch (UnsupportedOperationException uoe) {
                     return new Variable(Variable.Scope.staticfield, name, clazz);
@@ -270,7 +271,6 @@ public class ContractGenerator {
                 } else if(d instanceof JavaParserParameterDeclaration){
                     return new Variable(Variable.Scope.parameter, name, clazz);
                 }
-
             }
         } catch (Exception use){
             return null;
@@ -1044,7 +1044,7 @@ public class ContractGenerator {
         //File projectDir = new File("./junit5-master");
         //File projectDir = new File("./junit4-master");
         //File projectDir = new File("Votail0.0.1b/src");
-        //File projectDir = new File("../Test");
+        //File projectDir = new File("./libgdx-master");
         try {
             clearDirectory();
             testClasses(projectDir);
