@@ -776,7 +776,14 @@ public class ContractGenerator {
 
 
                 v = getVariableFromExpression(aae);
-                String index = createContract(aae.getIndex(), b).toString();
+                Expression exp = createContract(aae.getIndex(), b);
+
+                if(exp == null){
+                    return null;
+                }
+
+                String index = exp.toString();
+
                 if(v == null){
                     return null;
                 }
@@ -911,7 +918,14 @@ public class ContractGenerator {
             return newAie;
         } else if (e instanceof ArrayAccessExpr) {
             ArrayAccessExpr aae = (ArrayAccessExpr) e;
-            String newIndex = createContract(aae.getIndex(), b).toString();
+            Expression exp = createContract(aae.getIndex(), b);
+
+            if(exp == null){
+                return null;
+            }
+
+            String newIndex = exp.toString();
+
             try {
                 Variable v = getVariableFromExpression(aae.getName());
                 if(v == null){
