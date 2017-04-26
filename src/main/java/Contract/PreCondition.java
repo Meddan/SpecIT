@@ -26,14 +26,7 @@ public class PreCondition {
         if(expression == null){
             return "";
         }
-        String exp = expression.toString();
-        Matcher m = Pattern.compile("\\\\old\\(([a-zA-Z._]+)\\)").matcher(exp);
-        StringBuffer sb = new StringBuffer();
-        while (m.find()){
-            m.appendReplacement(sb,"$1");
-        }
-        m.appendTail(sb);
-        return "requires " + sb.toString() + ";\n";
+        return "requires " + expression.toString() + ";\n";
     }
 
     public boolean equals(Object o){
