@@ -1044,7 +1044,11 @@ public class ContractGenerator {
         long end = System.currentTimeMillis();
 
         System.out.println(Statistics.getStatistics());
-        System.out.println("Time to run: " + (double) (end - start)/1000);
+
+        long endStat = System.currentTimeMillis();
+        System.out.println("Time to analyze code: " + (double) (end - start)/1000);
+        System.out.println("Time to create statistics: " + (double) (endStat - end)/1000);
+        System.out.println("Total time: " + (double) (endStat - start)/1000);
     }
 
     public static void testClasses(File projectDir) throws IOException {
