@@ -1,10 +1,6 @@
 package Contract;
 
-import ContractGeneration.Resources;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.CallableDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.AssertStmt;
 import com.github.javaparser.ast.type.Type;
@@ -39,9 +35,12 @@ public class Behavior {
 
     private LinkedList<AssertStmt> asserts = new LinkedList<AssertStmt>();
 
+    private LinkedList<NullCheck> nullChecks = new LinkedList<>();
+
     private Behavior parent;
     private boolean closed = false;
     private boolean diverges = false;
+
 
     public boolean isPure() {
         return pure;
@@ -110,6 +109,7 @@ public class Behavior {
         this.isExceptional = original.getIsExceptional();
         this.assignedValues = (HashMap<Variable, VariableValue>) original.assignedValues.clone();
         this.callableDeclaration = original.getCallableDeclaration();
+        this.nullChecks = (LinkedList<NullCheck>) original.getNullChecks().clone();
         this.pure = original.isPure();
         this.impureMethods = original.impureMethods;
         this.failing = original.failing;
@@ -142,6 +142,22 @@ public class Behavior {
         }
         if(!this.closed) {
             preCons.add(toAdd);
+        }
+    }
+    public void addNullCheck(Expression exp){
+        if(exp != null) {
+            for(Behavior b : children){
+                b.addNullCheck(exp);
+            }
+            if(!this.closed) {
+                NullCheck toAdd = new NullCheck(exp);
+                for(NullCheck nc : nullChecks){
+                    if(toAdd.equals(nc)){
+                        return;
+                    }
+                }
+                nullChecks.add(toAdd);
+            }
         }
     }
 
@@ -215,6 +231,10 @@ public class Behavior {
         return exceptions;
     }
 
+    public LinkedList<NullCheck> getNullChecks(){
+        return nullChecks;
+    }
+
     public boolean getIsExceptional(){
         return isExceptional;
     }
@@ -231,6 +251,7 @@ public class Behavior {
         if(impureMethods) {
             sb.append("//might contain impure method calls\n");
         }
+        sb.append(createNullChecks());
         sb.append(createPreCons());
         sb.append(createPostCons());
         sb.append(createSignalsOnly());
@@ -243,6 +264,7 @@ public class Behavior {
 
         return sb.toString();
     }
+
 
     public boolean equals(Object o){
         if(o == null){
@@ -269,7 +291,15 @@ public class Behavior {
                 && exceptions.isEmpty()
                 && !diverges;
     }
+    private String createNullChecks() {
+        StringBuilder sb = new StringBuilder();
+        // Write out preconditions
+        for(NullCheck nc : nullChecks){
+            sb.append(nc.toString());
+        }
 
+        return sb.toString();
+    }
     private String createPreCons(){
         StringBuilder sb = new StringBuilder();
         // Write out preconditions

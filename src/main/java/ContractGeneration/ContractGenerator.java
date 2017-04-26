@@ -577,11 +577,7 @@ public class ContractGenerator {
             MethodCallExpr mce = (MethodCallExpr) e;
             if(mce.getScope().isPresent()){
                 if(!(mce.getScope().get() instanceof SuperExpr)) {
-                    BinaryExpr be = new BinaryExpr();
-                    be.setOperator(BinaryExpr.Operator.NOT_EQUALS);
-                    be.setLeft(mce.getScope().get().clone());
-                    be.setRight(new NullLiteralExpr());
-                    b.addPreCon(be);
+                    b.addNullCheck(mce.getScope().get().clone());
                 }
             }
             MethodCallExpr newMCE = mce.clone();

@@ -65,6 +65,7 @@ public class Statistics {
                 ms.addBehavior();
                 setPostCons(ms, b);
                 setPreCons(ms, b);
+                setNullChecks(ms, b);
             } else {
                 failingBehavior();
                 if(b.getFailing().get() instanceof SymbolSolverException){
@@ -94,6 +95,7 @@ public class Statistics {
 
         int totalPostCons = 0;
         int totalPreCons = 0;
+        int totalNullCons = 0;
         int totalBehaviors = 0;
 
         for(MethodStatistics ms : methodStats){
@@ -102,12 +104,15 @@ public class Statistics {
 
             ArrayList<Integer> postCons = ms.getAmountOfpostCons();
             ArrayList<Integer> preCons = ms.getAmountOfpreCons();
+            ArrayList<Integer> nullChecks = ms.getAmountOfNullChecks();
 
             int methPostCons = 0;
             int methPreCons = 0;
+            int methNullChecks = 0;
             for(int i = 0; i < ms.getAmountOfBehaviors(); i++){
                 Integer post = postCons.get(i);
                 Integer pre = preCons.get(i);
+                Integer nul = nullChecks.get(i);
 
                 if(post != null){
                     methPostCons += post;
@@ -118,12 +123,20 @@ public class Statistics {
                     methPreCons += pre;
                     prePerBehavior.addValue(pre.doubleValue());
                 }
+                if(nul != null){
+                    methNullChecks += nul;
+                    prePerBehavior.addValue(nul.doubleValue());
+                }
             }
 
             totalPostCons += methPostCons;
             totalPreCons += methPreCons;
+            totalPreCons += methNullChecks;
+            totalNullCons += methNullChecks;
+
             prePerMethod.addValue(methPreCons);
             postPerMethod.addValue(methPostCons);
+            prePerMethod.addValue(methNullChecks);
         }
 
         sb.append("========= STATS GATHERED =========\n");
@@ -138,6 +151,7 @@ public class Statistics {
         sb.append("\tUnresolved Parameter Failures: " + unresolvedParameter + "\n");
         sb.append("Total postconditions: " + totalPostCons + "\n");
         sb.append("Total preconditions: " + totalPreCons + "\n");
+        sb.append("\t Null checks: " + totalNullCons + "\n");
         sb.append(String.format("Preconditions per method: \n%s \n", formatStats(prePerMethod)));
         sb.append(String.format("Postconditions per method: \n%s \n", formatStats(postPerMethod)));
         sb.append(String.format("Behaviors per method: \n%s \n", formatStats(behPerMethod)));
@@ -172,5 +186,8 @@ public class Statistics {
 
     private static void setPreCons(MethodStatistics ms, Behavior b){
         ms.setAmountOfPreCons(b.getPreCons().size());
+    }
+    private static void setNullChecks(MethodStatistics ms, Behavior b){
+        ms.setAmountOfNullChecks(b.getNullChecks().size());
     }
 }
