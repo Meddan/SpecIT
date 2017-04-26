@@ -44,6 +44,7 @@ import java.util.*;
 import java.util.logging.FileHandler;
 
 import Contract.*;
+import javassist.expr.Cast;
 import org.apache.commons.math3.analysis.function.Exp;
 
 public class ContractGenerator {
@@ -751,6 +752,24 @@ public class ContractGenerator {
                     name = ((NameExpr) aae.getName()).getName();
                 } else if (aae.getName() instanceof FieldAccessExpr){
                     name = ((FieldAccessExpr) aae.getName()).getName();
+                } else if(aae.getName() instanceof EnclosedExpr) {
+                    // Here we assume that any enclosed expression in an assignment is a cast
+                    Expression ee = ((EnclosedExpr) aae.getName()).getInner().get();
+
+                    if(ee instanceof CastExpr){
+                        CastExpr ce = (CastExpr) ee;
+                        Expression exp = ce.getExpression();
+
+                        if(exp instanceof NameExpr){
+                            name = ((NameExpr) exp).getName();
+                        } else if(exp instanceof FieldAccessExpr){
+                            name = ((FieldAccessExpr) exp).getName();
+                        } else {
+                            throw new IllegalArgumentException();
+                        }
+                    } else {
+                        throw new IllegalArgumentException();
+                    }
                 } else {
                     throw new IllegalArgumentException();
                 }
@@ -775,7 +794,6 @@ public class ContractGenerator {
             BinaryExpr be = (BinaryExpr) e;
             Expression left = createContract(be.getLeft(), b);
             Expression right = createContract(be.getRight(), b);
-
             if (left != null && right != null) {
                 BinaryExpr newBe = new BinaryExpr();
                 newBe.setLeft(left.clone());
