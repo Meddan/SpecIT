@@ -216,7 +216,11 @@ public class ContractGenerator {
                         return new Variable(Variable.Scope.field, name, clazz);
                     }
                 } else if (d instanceof JavaParserSymbolDeclaration || d instanceof JavaParserParameterDeclaration) {
-                    return new Variable(Variable.Scope.local, name, clazz);
+                    if(savedParam.containsKey(e)){
+                        return new Variable(Variable.Scope.parameter, name, clazz);
+                    } else {
+                        return new Variable(Variable.Scope.local, name, clazz);
+                    }
                 } else if (d instanceof ReflectionFieldDeclaration) {
                     // The variable is some field from java standard library (JRE)
                     if(d.asField().isStatic()){
@@ -576,7 +580,11 @@ public class ContractGenerator {
             Variable v = getVariableFromExpression(e);
             VariableValue value = b.getAssignedValue(v);
             if (value.getStatus() != VariableValue.Status.unknown) {
-                return value.getValue();
+                if(value.getStatus() == VariableValue.Status.old){
+                    return e;
+                } else {
+                    return value.getValue();
+                }
             } else {
                 return null;
             }
