@@ -202,9 +202,9 @@ public class ContractGenerator {
             return s;
         }
     }
-    private Variable getVariableFromExpression(Expression e){
+    private Variable getVariableFromExpression(Expression e, Behavior b){
+        String clazz = getClassName(e);
         try {
-            String clazz = getClassName(e);
             if (e instanceof NameExpr) {
                 NameExpr ne = (NameExpr) e;
                 String name = ne.getName().toString();
@@ -274,7 +274,12 @@ public class ContractGenerator {
                 }
             }
         } catch (Exception use){
-            return null;
+            Variable potentialField = new Variable(Variable.Scope.field, e.toString(), clazz);
+            if(b.getAssignedValues().keySet().contains(potentialField)){
+                return potentialField;
+            } else {
+                return null;
+            }
         }
         throw new IllegalArgumentException();
     }
@@ -578,7 +583,7 @@ public class ContractGenerator {
         if(Resources.ignorableExpression(e)){
             return e;
         } else if (e instanceof NameExpr){
-            Variable v = getVariableFromExpression(e);
+            Variable v = getVariableFromExpression(e, b);
             VariableValue value = b.getAssignedValue(v);
             if (value.getStatus() != VariableValue.Status.unknown) {
                 if(value.getStatus() == VariableValue.Status.old){
@@ -739,11 +744,11 @@ public class ContractGenerator {
             AssignExpr ae = (AssignExpr) e;
             Variable v;
             if(ae.getTarget() instanceof FieldAccessExpr){
-                v = getVariableFromExpression(ae.getTarget());
+                v = getVariableFromExpression(ae.getTarget(), b);
                 b.setPure(false);
             } else if (ae.getTarget() instanceof NameExpr){
                 NameExpr ne = (NameExpr) ae.getTarget();
-                v = getVariableFromExpression(ae.getTarget());
+                v = getVariableFromExpression(ae.getTarget(), b);
                 b.setPure(b.isLocalVar(ne.getName()));
             } else if(ae.getTarget() instanceof ArrayAccessExpr){
                 ArrayAccessExpr aae = (ArrayAccessExpr) ae.getTarget();
@@ -775,7 +780,7 @@ public class ContractGenerator {
                 }
 
 
-                v = getVariableFromExpression(aae);
+                v = getVariableFromExpression(aae, b);
                 Expression exp = createContract(aae.getIndex(), b);
 
                 if(exp == null){
@@ -814,7 +819,7 @@ public class ContractGenerator {
             UnaryExpr ue = (UnaryExpr) e;
             if (ue.getExpression() instanceof NameExpr) {
                 NameExpr nameExpr = (NameExpr) ue.getExpression();
-                Variable v = getVariableFromExpression(nameExpr);
+                Variable v = getVariableFromExpression(nameExpr, b);
                 IntegerLiteralExpr ile = new IntegerLiteralExpr();
                 ile.setValue("1");
                 VariableValue value = b.getAssignedValue(v);
@@ -927,7 +932,7 @@ public class ContractGenerator {
             String newIndex = exp.toString();
 
             try {
-                Variable v = getVariableFromExpression(aae.getName());
+                Variable v = getVariableFromExpression(aae.getName(), b);
                 if(v == null){
                     return null;
                 }
@@ -1071,8 +1076,8 @@ public class ContractGenerator {
         long start = System.currentTimeMillis();
         //File projectDir = new File("../RCC");
         //File projectDir = new File("src/main/java/Examples");
-        File projectDir = new File("src/main/java/Examples/SingleExample");
-        //File projectDir = new File("./Votail0.0.1b");
+        //File projectDir = new File("src/main/java/Examples/SingleExample");
+        File projectDir = new File("./Votail0.0.1b");
         //File projectDir = new File("./junit5-master");
         //File projectDir = new File("./junit4-master");
         //File projectDir = new File("Votail0.0.1b/src");
