@@ -46,6 +46,7 @@ import java.util.logging.FileHandler;
 import Contract.*;
 import javassist.expr.Cast;
 import org.apache.commons.math3.analysis.function.Exp;
+import sun.reflect.annotation.ExceptionProxy;
 
 public class ContractGenerator {
     //Should be initialized with a class
@@ -344,6 +345,13 @@ public class ContractGenerator {
             return;
         }*/
         //System.out.println("Statement s of " + s.getClass());
+
+        if(b.getLeafs().size() > 20){
+            System.out.println("Too many leafs in " + b.getCallableDeclaration().getName());
+            b.setFailing(new TooManyLeafsException());
+            return;
+        }
+
         if (s instanceof AssertStmt){
             AssertStmt as = (AssertStmt) s;
             //An assert-statement can be seen as a precondition if it appears at the start of a function
@@ -577,6 +585,13 @@ public class ContractGenerator {
 /*        if(b.isFailing()){
             return e;
         }*/
+
+        if(b.getLeafs().size() > 20){
+            System.out.println("Too many leafs in " + b.getCallableDeclaration().getName());
+            b.setFailing(new TooManyLeafsException());
+            return null;
+        }
+
         if(e == null){
             return null;
         }
@@ -753,31 +768,53 @@ public class ContractGenerator {
             } else if(ae.getTarget() instanceof ArrayAccessExpr){
                 ArrayAccessExpr aae = (ArrayAccessExpr) ae.getTarget();
                 SimpleName name;
-                if(aae.getName() instanceof NameExpr){
-                    name = ((NameExpr) aae.getName()).getName();
-                } else if (aae.getName() instanceof FieldAccessExpr){
-                    name = ((FieldAccessExpr) aae.getName()).getName();
-                } else if(aae.getName() instanceof EnclosedExpr) {
-                    // Here we assume that any enclosed expression in an assignment is a cast
-                    Expression ee = ((EnclosedExpr) aae.getName()).getInner().get();
+                Expression arrayName = aae.getName();
+                int loops = 0;
+                String index = "";
 
-                    if(ee instanceof CastExpr){
-                        CastExpr ce = (CastExpr) ee;
-                        Expression exp = ce.getExpression();
+                do {
+                    loops++;
+                    if (aae.getName() instanceof NameExpr) {
+                        name = ((NameExpr) aae.getName()).getName();
+                    } else if (aae.getName() instanceof FieldAccessExpr) {
+                        name = ((FieldAccessExpr) aae.getName()).getName();
+                    } else if (aae.getName() instanceof EnclosedExpr) {
+                        // Here we assume that any enclosed expression in an assignment is a cast
+                        Expression ee = ((EnclosedExpr) aae.getName()).getInner().get();
 
-                        if(exp instanceof NameExpr){
-                            name = ((NameExpr) exp).getName();
-                        } else if(exp instanceof FieldAccessExpr){
-                            name = ((FieldAccessExpr) exp).getName();
+                        if (ee instanceof CastExpr) {
+                            CastExpr ce = (CastExpr) ee;
+                            Expression exp = ce.getExpression();
+
+                            if (exp instanceof NameExpr) {
+                                name = ((NameExpr) exp).getName();
+                            } else if (exp instanceof FieldAccessExpr) {
+                                name = ((FieldAccessExpr) exp).getName();
+                            } else {
+                                throw new IllegalArgumentException();
+                            }
                         } else {
                             throw new IllegalArgumentException();
                         }
+                    } else if (arrayName instanceof ArrayAccessExpr) {
+                        arrayName = ((ArrayAccessExpr) arrayName).getName();
+                        Expression exp = createContract(aae.getIndex(), b);
+                        name = null;
+
+                        if(exp == null){
+                            return null;
+                        }
+
+                        index = index.concat("[" + exp.toString() + "]");
+
                     } else {
                         throw new IllegalArgumentException();
                     }
-                } else {
-                    throw new IllegalArgumentException();
-                }
+
+                    if(loops > 1000){
+                        break;
+                    }
+                } while(arrayName instanceof ArrayAccessExpr);
 
 
                 v = getVariableFromExpression(aae, b);
@@ -787,12 +824,12 @@ public class ContractGenerator {
                     return null;
                 }
 
-                String index = exp.toString();
+                index = index.concat("[" + exp.toString() + "]");
 
                 if(v == null){
                     return null;
                 }
-                v = new Variable(v.getScope(), v.getName() + "[" + index + "]", v.getClassName());
+                v = new Variable(v.getScope(), v.getName() + index, v.getClassName());
                 b.setPure(b.isLocalVar(name));
             } else {
                 System.out.println("Assignment target " +  ae.getTarget() + " of " + ae.getTarget().getClass() + " not covered!");
@@ -1078,6 +1115,7 @@ public class ContractGenerator {
         //File projectDir = new File("src/main/java/Examples");
         //File projectDir = new File("src/main/java/Examples/SingleExample");
         File projectDir = new File("./Votail0.0.1b");
+        //File projectDir = new File("./Votail0.0.1b");
         //File projectDir = new File("./junit5-master");
         //File projectDir = new File("./junit4-master");
         //File projectDir = new File("Votail0.0.1b/src");
