@@ -23,6 +23,8 @@ public class Statistics {
     private static int uncoveredStatement = 0;
     private static int unresolvedParameter = 0;
 
+    private static int totalNullChecks = 0;
+
     private static DescriptiveStatistics prePerMethod = new DescriptiveStatistics();
     private static DescriptiveStatistics postPerMethod = new DescriptiveStatistics();
     private static DescriptiveStatistics prePerBehavior = new DescriptiveStatistics();
@@ -66,6 +68,7 @@ public class Statistics {
                 setPostCons(ms, b);
                 setPreCons(ms, b);
                 setNullChecks(ms, b);
+                totalNullChecks += b.getNullChecks().size();
             } else {
                 failingBehavior();
                 if(b.getFailing().get() instanceof SymbolSolverException){
@@ -152,6 +155,7 @@ public class Statistics {
         sb.append("Total postconditions: " + totalPostCons + "\n");
         sb.append("Total preconditions: " + totalPreCons + "\n");
         sb.append("\t Null checks: " + totalNullCons + "\n");
+        sb.append("Total amount of Null checks: " + totalNullChecks + "\n");
         sb.append(String.format("Preconditions per method: \n%s \n", formatStats(prePerMethod)));
         sb.append(String.format("Postconditions per method: \n%s \n", formatStats(postPerMethod)));
         sb.append(String.format("Behaviors per method: \n%s \n", formatStats(behPerMethod)));
