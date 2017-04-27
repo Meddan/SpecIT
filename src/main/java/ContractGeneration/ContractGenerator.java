@@ -329,9 +329,6 @@ public class ContractGenerator {
     }
 
     public void createContract(NodeList<Statement> stmtList, Behavior b) {
-        if(b.isFailing()){
-            return;
-        }
         boolean pure = true;
         for(Statement s : stmtList){
             createContract(s, b);
