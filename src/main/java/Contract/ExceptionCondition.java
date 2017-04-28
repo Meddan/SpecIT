@@ -48,9 +48,11 @@ public class ExceptionCondition {
             sb.append("true");
         } else {
             for(Expression e : expressions){
-                sb.append(e.toString());
-                if(!expressions.getLast().equals(e)){
-                    sb.append(" && ");
+                if(e != null) {
+                    sb.append(e.toString());
+                    if (!expressions.getLast().equals(e)) {
+                        sb.append(" && ");
+                    }
                 }
             }
         }
