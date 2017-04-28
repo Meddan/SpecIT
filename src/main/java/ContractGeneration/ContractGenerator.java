@@ -204,7 +204,13 @@ public class ContractGenerator {
         }
     }
     private Variable getVariableFromExpression(Expression e, Behavior b){
-        String clazz = getClassName(e);
+
+        String clazz = "";
+        try {
+            clazz = getClassName(e);
+        } catch (NullPointerException npe) {
+            return null;
+        }
         try {
             if (e instanceof NameExpr) {
                 NameExpr ne = (NameExpr) e;
