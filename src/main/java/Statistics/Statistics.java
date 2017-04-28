@@ -62,13 +62,13 @@ public class Statistics {
         MethodStatistics ms = new MethodStatistics();
 
         for(Behavior b : leafs){
+            totalNullChecks += b.getNullChecks().size();
             if(!b.isFailing()) {
                 successfulBehavior();
                 ms.addBehavior();
                 setPostCons(ms, b);
                 setPreCons(ms, b);
                 setNullChecks(ms, b);
-                totalNullChecks += b.getNullChecks().size();
             } else {
                 failingBehavior();
                 if(b.getFailing().get() instanceof SymbolSolverException){
