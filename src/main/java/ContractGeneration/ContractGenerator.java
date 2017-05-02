@@ -81,6 +81,7 @@ public class ContractGenerator {
                 CallableDeclaration cd = (CallableDeclaration) bd;
                 Contract temp = createContract((CallableDeclaration) bd);
                 if(temp != null){
+                    temp.setPathToMethod(path + " --> " + cd.getDeclarationAsString());
                     contracts.put(cd ,temp);
                 } else {
                     contracts.put(cd, null);
@@ -1123,11 +1124,11 @@ public class ContractGenerator {
         //File projectDir = new File("./Votail0.0.1b");
         //File projectDir = new File("./Votail0.0.1b");
         //File projectDir = new File("./junit5-master");
-        //File projectDir = new File("./junit4-master");
+        File projectDir = new File("./junit4-master");
         //File projectDir = new File("Votail0.0.1b/src");
         //File projectDir = new File("./libgdx-master");
         //File projectDir = new File("./RxJava-2.x");
-        File projectDir = new File("./elasticsearch-master");
+        //File projectDir = new File("./elasticsearch-master");
         try {
             clearDirectory();
             testClasses(projectDir);
