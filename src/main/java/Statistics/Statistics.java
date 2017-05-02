@@ -113,10 +113,6 @@ public class Statistics {
 
         for(MethodStatistics ms : methodStats){
 
-            if(ms.isInteresting()){
-                interestingMethods.add(ms.getPathToMethod());
-            }
-
             totalBehaviors += ms.getAmountOfBehaviors();
             behPerMethod.addValue(ms.getAmountOfBehaviors());
 
@@ -148,6 +144,11 @@ public class Statistics {
                 }
             }
 
+            ms.setInteresting(methPostCons);
+            System.out.println(methPostCons);
+            ms.setInteresting(methPreCons + methNullChecks);
+            ms.setInteresting(methNullChecks);
+
             totalPostCons += methPostCons;
             totalPreCons += methPreCons;
             totalPreCons += methNullChecks;
@@ -157,6 +158,10 @@ public class Statistics {
             postPerMethod.addValue(methPostCons);
             prePerMethod.addValue(methNullChecks);
             nullPerMethod.addValue(methNullChecks);
+
+            if(ms.isInteresting()){
+                interestingMethods.add(ms.getPathToMethod());
+            }
         }
 
         sb.append("========= STATS GATHERED =========\n");
@@ -187,7 +192,7 @@ public class Statistics {
             interestingMethodNames.append(interestingMethods.get(i) + "\n");
         }
 
-        writeStatsToFile(sb.toString(), interestingMethods.toString());
+        writeStatsToFile(sb.toString(), interestingMethodNames.toString());
 
         return sb.toString();
     }
