@@ -35,9 +35,11 @@ public class MethodStatistics {
     }
 
     public void setAmountOfPreCons(int n){
+        setInteresting(n);
         amountOfpreCons.add(behaviors, new Integer(n));
     }
     public void setAmountOfNullChecks(int n){
+        setInteresting(n);
         amountOfNullChecks.add(behaviors, new Integer(n));
     }
 
@@ -46,6 +48,7 @@ public class MethodStatistics {
     }
 
     public void setAmountOfPostCons(int n){
+        setInteresting(n);
         amountOfpostCons.add(behaviors, new Integer(n));
     }
 
