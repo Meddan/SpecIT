@@ -145,7 +145,6 @@ public class Statistics {
             }
 
             ms.setInteresting(methPostCons);
-            System.out.println(methPostCons);
             ms.setInteresting(methPreCons + methNullChecks);
             ms.setInteresting(methNullChecks);
 
