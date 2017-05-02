@@ -98,6 +98,7 @@ public class Statistics {
      */
     public static String getStatistics(){
         StringBuilder sb = new StringBuilder();
+        ArrayList<String> interestingMethods = new ArrayList<>();
 
         int totalPostCons = 0;
         int totalPreCons = 0;
@@ -105,6 +106,11 @@ public class Statistics {
         int totalBehaviors = 0;
 
         for(MethodStatistics ms : methodStats){
+
+            if(ms.isInteresting()){
+                interestingMethods.add(ms.getPathToMethod());
+            }
+
             totalBehaviors += ms.getAmountOfBehaviors();
             behPerMethod.addValue(ms.getAmountOfBehaviors());
 
