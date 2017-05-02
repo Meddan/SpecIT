@@ -7,11 +7,13 @@ import ContractGeneration.UnresolvedParameterException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import sun.security.krb5.internal.crypto.Des;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.nio.file.StandardOpenOption;
+import java.util.*;
 
 /**
  * Created by dover on 2017-03-28.
@@ -180,6 +182,13 @@ public class Statistics {
         sb.append(String.format("Null checks per behavior: \n%s \n", formatStats(nullPerBehavior)));
         sb.append("==================================\n");
 
+        StringBuilder interestingMethodNames = new StringBuilder();
+        for(String s : interestingMethods){
+            interestingMethodNames.append(s + "\n");
+        }
+
+        writeStatsToFile(sb.toString(), interestingMethods.toString());
+
         return sb.toString();
     }
 
@@ -188,8 +197,30 @@ public class Statistics {
                 ds.getMean(), ds.getMin(), ds.getPercentile(50), ds.getMax(), ds.getStandardDeviation());
     }
 
-    private static void writeStatsToFile(){
+    private static void writeStatsToFile(String stats, String interestingMethods){
         Path p = Paths.get("Statistics/" + projectName);
+
+        for(int i = 1; i < p.getNameCount(); i++){
+            Path currentPath = p.subpath(0,i);
+
+            if(!Files.exists(currentPath)){
+                try{
+                    Files.createDirectories(currentPath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        try {
+            if(Files.exists(p)){
+                Files.write(p, Arrays.asList("\n\n ####### NEW RUN ####### \n\n" + stats + "\n\n===========INTERESTING METHODS===========\n\n" + interestingMethods), Charset.forName("UTF-8"), StandardOpenOption.APPEND);
+            } else {
+                Files.write(p, Arrays.asList(stats + "\n\n===========INTERESTING METHODS===========\n\n" + interestingMethods), Charset.forName("UTF-8"));
+            }
+        } catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     private static void setPostCons(MethodStatistics ms, Behavior b){
