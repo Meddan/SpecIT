@@ -1122,15 +1122,15 @@ public class ContractGenerator {
         //File projectDir = new File("src/main/java/Examples");
         //File projectDir = new File("src/main/java/Examples/SingleExample");
         //File projectDir = new File("./Votail0.0.1b");
-        //File projectDir = new File("./Votail0.0.1b");
+        File projectDir = new File("./Votail0.0.1b");
         //File projectDir = new File("./junit5-master");
         //File projectDir = new File("./junit4-master");
         //File projectDir = new File("Votail0.0.1b/src");
-        File projectDir = new File("./libgdx-master");
+        //File projectDir = new File("./libgdx-master");
         //File projectDir = new File("./RxJava-2.x");
         //File projectDir = new File("./elasticsearch-master");
 
-        Statistics.setProjectName(projectDir.toString());
+        Statistics.setProjectName(projectDir.getName());
 
         try {
             clearDirectory();
