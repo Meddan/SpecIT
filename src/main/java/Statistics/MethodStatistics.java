@@ -12,6 +12,7 @@ public class MethodStatistics {
     private ArrayList<Integer> amountOfNullChecks;
     private int behaviors;
 
+    private boolean interesting;
     private String pathToMethod;
 
     public MethodStatistics(String methodPath){
@@ -19,8 +20,16 @@ public class MethodStatistics {
         amountOfpreCons = new ArrayList<>();
         amountOfNullChecks = new ArrayList<>();
         behaviors = -1;
-
+        interesting = false;
         pathToMethod = methodPath;
+    }
+
+    public void setInteresting(boolean b){
+        interesting = b;
+    }
+
+    public boolean isInteresting(){
+        return interesting;
     }
 
     public void setAmountOfPreCons(int n){
