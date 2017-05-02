@@ -33,9 +33,12 @@ public class Contract {
     private final Behavior initialBehavior;
     private Comment oldComment;
 
+    private String pathToMethod;
+
     public Contract(){
         currentBehavior = new Behavior(null);
         initialBehavior = currentBehavior;
+        pathToMethod = "";
     }
 
     public boolean isPure() {
@@ -46,6 +49,13 @@ public class Contract {
         return pure;
     }
 
+    public void setPathToMethod(String s){
+        pathToMethod = s;
+    }
+
+    public String getPathToMethod(){
+        return pathToMethod;
+    }
 
     public Behavior getCurrentBehavior(){
         return currentBehavior;
