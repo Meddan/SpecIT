@@ -7,6 +7,8 @@ import ContractGeneration.UnresolvedParameterException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import sun.security.krb5.internal.crypto.Des;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,6 +17,8 @@ import java.util.LinkedList;
  * Created by dover on 2017-03-28.
  */
 public class Statistics {
+
+    public static String projectName;
 
     private static ArrayList<MethodStatistics> methodStats = new ArrayList<>();
     private static int successBehaviors = 0;
@@ -184,6 +188,10 @@ public class Statistics {
                 ds.getMean(), ds.getMin(), ds.getPercentile(50), ds.getMax(), ds.getStandardDeviation());
     }
 
+    private static void writeStatsToFile(){
+        Path p = Paths.get("Statistics/" + projectName);
+    }
+
     private static void setPostCons(MethodStatistics ms, Behavior b){
         int amountOfPostCons = 0;
 
@@ -206,5 +214,9 @@ public class Statistics {
     }
     private static void setNullChecks(MethodStatistics ms, Behavior b){
         ms.setAmountOfNullChecks(b.getNullChecks().size());
+    }
+
+    public static void setProjectName(String s){
+        projectName = s;
     }
 }
