@@ -62,7 +62,7 @@ public class Statistics {
     public static void gatherStatistics(Contract c){
         LinkedList<Behavior> leafs =  c.getLeafs();
 
-        MethodStatistics ms = new MethodStatistics();
+        MethodStatistics ms = new MethodStatistics(c.getPathToMethod());
 
         for(Behavior b : leafs){
             totalNullChecks += b.getNullChecks().size();

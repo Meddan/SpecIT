@@ -12,11 +12,15 @@ public class MethodStatistics {
     private ArrayList<Integer> amountOfNullChecks;
     private int behaviors;
 
-    public MethodStatistics(){
+    private String pathToMethod;
+
+    public MethodStatistics(String methodPath){
         amountOfpostCons = new ArrayList<>();
         amountOfpreCons = new ArrayList<>();
         amountOfNullChecks = new ArrayList<>();
         behaviors = -1;
+
+        pathToMethod = methodPath;
     }
 
     public void setAmountOfPreCons(int n){
