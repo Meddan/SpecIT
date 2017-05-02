@@ -5,6 +5,7 @@ import ContractGeneration.SymbolSolverException;
 import ContractGeneration.UncoveredStatementException;
 import ContractGeneration.UnresolvedParameterException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import sun.security.krb5.internal.crypto.Des;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +31,8 @@ public class Statistics {
     private static DescriptiveStatistics prePerBehavior = new DescriptiveStatistics();
     private static DescriptiveStatistics postPerBehavior = new DescriptiveStatistics();
     private static DescriptiveStatistics behPerMethod = new DescriptiveStatistics();
+    private static DescriptiveStatistics nullPerMethod = new DescriptiveStatistics();
+    private static DescriptiveStatistics nullPerBehavior = new DescriptiveStatistics();
 
 
     private static void successfulBehavior(){
@@ -129,6 +132,7 @@ public class Statistics {
                 if(nul != null){
                     methNullChecks += nul;
                     prePerBehavior.addValue(nul.doubleValue());
+                    nullPerBehavior.addValue(nul.doubleValue());
                 }
             }
 
@@ -140,6 +144,7 @@ public class Statistics {
             prePerMethod.addValue(methPreCons);
             postPerMethod.addValue(methPostCons);
             prePerMethod.addValue(methNullChecks);
+            nullPerMethod.addValue(methNullChecks);
         }
 
         sb.append("========= STATS GATHERED =========\n");
@@ -158,9 +163,11 @@ public class Statistics {
         sb.append("Total amount of Null checks: " + totalNullChecks + "\n");
         sb.append(String.format("Preconditions per method: \n%s \n", formatStats(prePerMethod)));
         sb.append(String.format("Postconditions per method: \n%s \n", formatStats(postPerMethod)));
+        sb.append(String.format("Null checks per method \n%s \n", formatStats(nullPerMethod)));
         sb.append(String.format("Behaviors per method: \n%s \n", formatStats(behPerMethod)));
         sb.append(String.format("Preconditions per behavior: \n%s \n", formatStats(prePerBehavior)));
         sb.append(String.format("Postconditions per behavior: \n%s \n", formatStats(postPerBehavior)));
+        sb.append(String.format("Null checks per behavior: \n%s \n", formatStats(nullPerBehavior)));
         sb.append("==================================\n");
 
         return sb.toString();
