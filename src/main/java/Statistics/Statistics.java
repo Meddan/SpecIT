@@ -183,8 +183,8 @@ public class Statistics {
         sb.append("==================================\n");
 
         StringBuilder interestingMethodNames = new StringBuilder();
-        for(String s : interestingMethods){
-            interestingMethodNames.append(s + "\n");
+        for(int i = 0; i < interestingMethods.size(); i++){
+            interestingMethodNames.append(interestingMethods.get(i) + "\n");
         }
 
         writeStatsToFile(sb.toString(), interestingMethods.toString());

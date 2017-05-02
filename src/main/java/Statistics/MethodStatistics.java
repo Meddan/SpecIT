@@ -29,9 +29,8 @@ public class MethodStatistics {
     }
 
     public void setInteresting(int n){
-        if(n > 100) {
+        if(n > 50) {
             interesting = true;
-            System.out.println("INTERESTING");
         }
     }
 
