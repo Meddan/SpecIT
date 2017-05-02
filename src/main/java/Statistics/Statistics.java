@@ -188,6 +188,9 @@ public class Statistics {
         sb.append("==================================\n");
 
         StringBuilder interestingMethodNames = new StringBuilder();
+
+        interestingMethodNames.append("\n\n===========INTERESTING METHODS===========\n");
+        interestingMethodNames.append("======== " + interestingMethods.size() + " found ========\n\n");
         for(int i = 0; i < interestingMethods.size(); i++){
             interestingMethodNames.append(interestingMethods.get(i) + "\n");
         }
@@ -219,9 +222,9 @@ public class Statistics {
 
         try {
             if(Files.exists(p)){
-                Files.write(p, Arrays.asList("\n\n ####### NEW RUN ####### \n\n" + stats + "\n\n===========INTERESTING METHODS===========\n\n" + interestingMethods), Charset.forName("UTF-8"), StandardOpenOption.APPEND);
+                Files.write(p, Arrays.asList("\n\n ####### NEW RUN ####### \n\n" + stats  + interestingMethods), Charset.forName("UTF-8"), StandardOpenOption.APPEND);
             } else {
-                Files.write(p, Arrays.asList(stats + "\n\n===========INTERESTING METHODS===========\n\n" + interestingMethods), Charset.forName("UTF-8"));
+                Files.write(p, Arrays.asList(stats + interestingMethods), Charset.forName("UTF-8"));
             }
         } catch (IOException e){
             e.printStackTrace();
