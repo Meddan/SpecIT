@@ -1,0 +1,36 @@
+========= STATS GATHERED =========
+Methods processed: 3736
+Total behaviors: 4289
+Successful behaviors: 1428
+Failing behaviors: 2861
+	Symbol solver Failures: 2071
+		Method Failures: 2071
+		Other Failures: 0
+	Uncovered Statement Failures: 401
+	Unresolved Parameter Failures: 389
+Total postconditions: 3070
+Total preconditions: 429
+	 Null checks: 239
+Total amount of Null checks: 4174
+Preconditions per method: 
+Mean: 0,057 Min: 0,000 Median: 0,000 Max: 16,000 Standard Deviation: 0,467 
+Postconditions per method: 
+Mean: 0,822 Min: 0,000 Median: 0,000 Max: 96,000 Standard Deviation: 2,476 
+Null checks per method 
+Mean: 0,064 Min: 0,000 Median: 0,000 Max: 16,000 Standard Deviation: 0,505 
+Behaviors per method: 
+Mean: 0,382 Min: 0,000 Median: 0,000 Max: 8,000 Standard Deviation: 0,544 
+Preconditions per behavior: 
+Mean: 0,150 Min: 0,000 Median: 0,000 Max: 9,000 Standard Deviation: 0,535 
+Postconditions per behavior: 
+Mean: 2,150 Min: 0,000 Median: 1,000 Max: 14,000 Standard Deviation: 2,490 
+Null checks per behavior: 
+Mean: 0,167 Min: 0,000 Median: 0,000 Max: 9,000 Standard Deviation: 0,641 
+==================================
+
+
+===========INTERESTING METHODS===========
+======== 1 found ========
+
+/junit4-master/src/main/java/org/junit/runner/Description.java --> public Class<?> getTestClass()
+
