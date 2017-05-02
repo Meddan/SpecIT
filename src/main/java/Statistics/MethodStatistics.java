@@ -24,9 +24,14 @@ public class MethodStatistics {
         pathToMethod = methodPath;
     }
 
+    public String getPathToMethod(){
+        return pathToMethod;
+    }
+
     public void setInteresting(int n){
-        if(n > 25) {
+        if(n > 100) {
             interesting = true;
+            System.out.println("INTERESTING");
         }
     }
 
