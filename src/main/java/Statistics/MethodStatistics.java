@@ -24,8 +24,10 @@ public class MethodStatistics {
         pathToMethod = methodPath;
     }
 
-    public void setInteresting(boolean b){
-        interesting = b;
+    public void setInteresting(int n){
+        if(n > 25) {
+            interesting = true;
+        }
     }
 
     public boolean isInteresting(){
