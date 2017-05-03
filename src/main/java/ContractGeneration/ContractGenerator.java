@@ -448,6 +448,9 @@ public class ContractGenerator {
                     return;
                 }
                 for(Behavior beh : b.getLeafs()) {
+                    if(beh.isClosed()){
+                        continue;
+                    }
                     Expression ifCond = createContract(sif.getCondition(), beh);
                     Behavior a = new Behavior(beh);
                     if(ifCond != null) {
@@ -1120,7 +1123,7 @@ public class ContractGenerator {
         long start = System.currentTimeMillis();
         //File projectDir = new File("../RCC");
         //File projectDir = new File("src/main/java/Examples");
-        //File projectDir = new File("src/main/java/Examples/SingleExample");
+        File projectDir = new File("src/main/java/Examples/SingleExample");
         //File projectDir = new File("./Votail0.0.1b");
         //File projectDir = new File("./Votail0.0.1b");
         //File projectDir = new File("./junit5-master");
@@ -1128,7 +1131,7 @@ public class ContractGenerator {
         //File projectDir = new File("Votail0.0.1b/src");
         //File projectDir = new File("./libgdx-master");
         //File projectDir = new File("./RxJava-2.x");
-        File projectDir = new File("./elasticsearch-master");
+        //File projectDir = new File("./elasticsearch-master");
 
         Statistics.setProjectName(projectDir.getName());
 
