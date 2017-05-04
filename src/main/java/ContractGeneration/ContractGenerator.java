@@ -686,10 +686,13 @@ public class ContractGenerator {
                     for (Variable v : beh.getAssignedValues().keySet()){
                         //TODO: Fix pls
                         VariableValue value = beh.getAssignedValue(v);
-                        if (value.getStatus() == VariableValue.Status.unknown){
-                            newChild.putAssignedValue(v, null);
-                        } else {
-                            newChild.putAssignedValue(v, createContract(value.getValue(), b));
+
+                        if(!(newChild.getAssignedValues().containsKey(v) && beh.getAssignedValues().containsValue(value))) {
+                            if (value.getStatus() == VariableValue.Status.unknown) {
+                                newChild.putAssignedValue(v, null);
+                            } else {
+                                newChild.putAssignedValue(v, createContract(value.getValue(), b));
+                            }
                         }
                     }
                     newChild.setExceptional(beh.getIsExceptional());
@@ -1123,7 +1126,8 @@ public class ContractGenerator {
         long start = System.currentTimeMillis();
         //File projectDir = new File("../RCC");
         //File projectDir = new File("src/main/java/Examples");
-        File projectDir = new File("src/main/java/Examples/SingleExample");
+        //File projectDir = new File("src/main/java/Examples/SingleExample");
+        File projectDir = new File("src/main/java/Examples/SymbolSolver");
         //File projectDir = new File("./Votail0.0.1b");
         //File projectDir = new File("./Votail0.0.1b");
         //File projectDir = new File("./junit5-master");
