@@ -33,3 +33,42 @@ Mean: 0,000 Min: 0,000 Median: 0,000 Max: 0,000 Standard Deviation: 0,000
 ======== 0 found ========
 
 
+
+
+ ####### NEW RUN ####### 
+
+========= STATS GATHERED =========
+Methods processed: 113
+Total behaviors: 156
+Successful behaviors: 64
+Failing behaviors: 92
+	Symbol solver Failures: 81
+		Method Failures: 81
+		Other Failures: 0
+	Uncovered Statement Failures: 4
+	Unresolved Parameter Failures: 7
+Total postconditions: 410
+Total preconditions: 46
+	 Null checks: 3
+Total amount of Null checks: 238
+Preconditions per method: 
+Mean: 0,204 Min: 0,000 Median: 0,000 Max: 11,000 Standard Deviation: 1,038 
+Postconditions per method: 
+Mean: 3,628 Min: 0,000 Median: 0,000 Max: 16,000 Standard Deviation: 4,811 
+Null checks per method 
+Mean: 0,027 Min: 0,000 Median: 0,000 Max: 1,000 Standard Deviation: 0,161 
+Behaviors per method: 
+Mean: 0,566 Min: 0,000 Median: 0,000 Max: 3,000 Standard Deviation: 0,693 
+Preconditions per behavior: 
+Mean: 0,359 Min: 0,000 Median: 0,000 Max: 11,000 Standard Deviation: 1,169 
+Postconditions per behavior: 
+Mean: 6,406 Min: 0,000 Median: 7,000 Max: 15,000 Standard Deviation: 3,907 
+Null checks per behavior: 
+Mean: 0,047 Min: 0,000 Median: 0,000 Max: 1,000 Standard Deviation: 0,213 
+==================================
+
+
+===========INTERESTING METHODS===========
+======== 0 found ========
+
+
