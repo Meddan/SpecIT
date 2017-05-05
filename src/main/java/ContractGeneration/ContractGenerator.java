@@ -751,11 +751,15 @@ public class ContractGenerator {
             if(fae.getScope().isPresent()){
                 Expression scope = fae.getScope().get();
                 if(!(scope instanceof ThisExpr)){
-                    Variable v = getVariableFromExpression(fae.getScope().get(), b);
-                    if(v != null) {
-                        if (v.getScope() == Variable.Scope.parameter) {
-                            b.addNullCheck(scope);
+                    try {
+                        Variable v = getVariableFromExpression(fae.getScope().get(), b);
+                        if(v != null) {
+                            if (v.getScope() == Variable.Scope.parameter) {
+                                b.addNullCheck(scope);
+                            }
                         }
+                    } catch (IllegalArgumentException iae) {
+                        return e;
                     }
                 }
             }
