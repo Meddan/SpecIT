@@ -104,7 +104,7 @@ public class Statistics {
      */
     public static String getStatistics(){
         StringBuilder sb = new StringBuilder();
-        ArrayList<String> interestingMethods = new ArrayList<>();
+        ArrayList<MethodStatistics> interestingMethods = new ArrayList<>();
 
         int totalPostCons = 0;
         int totalPreCons = 0;
@@ -159,7 +159,7 @@ public class Statistics {
             nullPerMethod.addValue(methNullChecks);
 
             if(ms.isInteresting()){
-                interestingMethods.add(ms.getPathToMethod());
+                interestingMethods.add(ms);
             }
         }
 
@@ -186,12 +186,19 @@ public class Statistics {
         sb.append(String.format("Null checks per behavior: \n%s \n", formatStats(nullPerBehavior)));
         sb.append("==================================\n");
 
+        interestingMethods.sort(Comparator.comparingInt(o -> ( (- o.getTotalNullChecks()) - o.getTotalPreCons() - o.getTotalPostCons())));
+
         StringBuilder interestingMethodNames = new StringBuilder();
 
         interestingMethodNames.append("\n\n===========INTERESTING METHODS===========\n");
         interestingMethodNames.append("======== " + interestingMethods.size() + " found ========\n\n");
         for(int i = 0; i < interestingMethods.size(); i++){
-            interestingMethodNames.append(interestingMethods.get(i) + "\n");
+            MethodStatistics temp = interestingMethods.get(i);
+
+            interestingMethodNames.append(temp.getPathToMethod() + " " +
+                    "\n\t Total PostCons " + temp.getTotalPostCons() +
+                    "\n\t Total PreCons " + temp.getTotalPreCons() +
+                    "\n\t Total NullChecks " + temp.getTotalNullChecks() + "\n");
         }
 
         writeStatsToFile(sb.toString(), interestingMethodNames.toString());
