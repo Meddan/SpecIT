@@ -223,9 +223,9 @@ public class Statistics {
         sb.append("Postconditions per method " + formatTabular(postPerMethod) + "\n");
         sb.append("Null checks per method " + formatTabular(nullPerMethod) + "\n");
         sb.append("Behaviors per method " + formatTabular(behPerMethod) + "\n");
-        sb.append("Preconditions per behavior " + formatTabular(prePerMethod) + "\n");
-        sb.append("Postconditions per behavior " + formatTabular(postPerMethod) + "\n");
-        sb.append("Null checks per method " + formatTabular(nullPerMethod) + "\n");
+        sb.append("Preconditions per behavior " + formatTabular(prePerBehavior) + "\n");
+        sb.append("Postconditions per behavior " + formatTabular(postPerBehavior) + "\n");
+        sb.append("Null checks per method " + formatTabular(nullPerBehavior) + "\n");
         sb.append("\\end{tabular}");
 
         return sb.toString();
