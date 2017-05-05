@@ -551,10 +551,10 @@ public class ContractGenerator {
                 if(fs.getCompare().isPresent()){
                     createContract(fs.getCompare().get(), temporary);
                 }
+                createContract(fs.getBody(), temporary);
                 for(Expression e : fs.getUpdate()){
                     createContract(e, temporary);
                 }
-                createContract(fs.getBody(), temporary);
                 for(Variable v : temporary.getChanged()){
                     b.putAssignedValue(v, null);
                 }
