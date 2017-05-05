@@ -748,22 +748,17 @@ public class ContractGenerator {
             return null;
         } else if (e instanceof FieldAccessExpr){
             FieldAccessExpr fae = (FieldAccessExpr) e;
-            /*if(fae.getScope().isPresent()){
+            if(fae.getScope().isPresent()){
                 Expression scope = fae.getScope().get();
-                SimpleName firstScope = getFirstScope(fae);
-                if(b.isLocalVar(firstScope)){
-                    return b.getAssignedValue(firstScope);
-                }
                 if(!(scope instanceof ThisExpr)){
-                    BinaryExpr be = new BinaryExpr(scope, new NullLiteralExpr(), BinaryExpr.Operator.NOT_EQUALS);
-                    b.addPreCon(be);
-                }
-                if(scope instanceof FieldAccessExpr){
-                    createContract(scope, b);
+                    Variable v = getVariableFromExpression(fae.getScope().get(), b);
+                    if(v != null) {
+                        if (v.getScope() != Variable.Scope.local) {
+                            b.addNullCheck(scope);
+                        }
+                    }
                 }
             }
-            NameExpr ne = new NameExpr(fae.toString());
-            return createContract(ne, b);*/
             return e;
         } else if (e instanceof AssignExpr){
             AssignExpr ae = (AssignExpr) e;
@@ -1126,10 +1121,9 @@ public class ContractGenerator {
         long start = System.currentTimeMillis();
         //File projectDir = new File("../RCC");
         //File projectDir = new File("src/main/java/Examples");
+        //File projectDir = new File("src/main/java/Examples/SymbolSolver");
         //File projectDir = new File("src/main/java/Examples/SingleExample");
-        File projectDir = new File("src/main/java/Examples/SymbolSolver");
-        //File projectDir = new File("./Votail0.0.1b");
-        //File projectDir = new File("./Votail0.0.1b");
+        File projectDir = new File("./Votail0.0.1b");
         //File projectDir = new File("./junit5-master");
         //File projectDir = new File("./junit4-master");
         //File projectDir = new File("Votail0.0.1b/src");
