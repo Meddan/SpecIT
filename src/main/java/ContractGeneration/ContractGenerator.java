@@ -753,7 +753,7 @@ public class ContractGenerator {
                 if(!(scope instanceof ThisExpr)){
                     Variable v = getVariableFromExpression(fae.getScope().get(), b);
                     if(v != null) {
-                        if (v.getScope() != Variable.Scope.local) {
+                        if (v.getScope() == Variable.Scope.parameter) {
                             b.addNullCheck(scope);
                         }
                     }
