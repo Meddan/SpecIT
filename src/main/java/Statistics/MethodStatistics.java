@@ -12,6 +12,10 @@ public class MethodStatistics {
     private ArrayList<Integer> amountOfNullChecks;
     private int behaviors;
 
+    private int totalPostCons;
+    private int totalPreCons;
+    private int totalNullChecks;
+
     private boolean interesting;
     private String pathToMethod;
 
@@ -22,6 +26,9 @@ public class MethodStatistics {
         behaviors = -1;
         interesting = false;
         pathToMethod = methodPath;
+        totalPreCons = 0;
+        totalPostCons = 0;
+        totalNullChecks = 0;
     }
 
     public String getPathToMethod(){
@@ -40,10 +47,12 @@ public class MethodStatistics {
 
     public void setAmountOfPreCons(int n){
         setInteresting(n);
+        totalPreCons += n;
         amountOfpreCons.add(behaviors, new Integer(n));
     }
     public void setAmountOfNullChecks(int n){
         setInteresting(n);
+        totalNullChecks += n;
         amountOfNullChecks.add(behaviors, new Integer(n));
     }
 
@@ -53,6 +62,7 @@ public class MethodStatistics {
 
     public void setAmountOfPostCons(int n){
         setInteresting(n);
+        totalPostCons += n;
         amountOfpostCons.add(behaviors, new Integer(n));
     }
 
@@ -69,5 +79,17 @@ public class MethodStatistics {
 
     public int getAmountOfBehaviors(){
         return behaviors + 1;
+    }
+
+    public int getTotalPostCons() {
+        return totalPostCons;
+    }
+
+    public int getTotalPreCons() {
+        return totalPreCons;
+    }
+
+    public int getTotalNullChecks() {
+        return totalNullChecks;
     }
 }
