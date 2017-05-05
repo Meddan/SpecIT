@@ -201,7 +201,7 @@ public class Statistics {
                     "\n\t Total NullChecks " + temp.getTotalNullChecks() + "\n");
         }
 
-        writeStatsToFile(sb.toString(), interestingMethodNames.toString());
+        writeStatsToFile(sb.toString(), createTabular(), interestingMethodNames.toString());
 
         return sb.toString();
     }
@@ -211,7 +211,34 @@ public class Statistics {
                 ds.getMean(), ds.getMin(), ds.getPercentile(50), ds.getMax(), ds.getStandardDeviation());
     }
 
-    private static void writeStatsToFile(String stats, String interestingMethods){
+    private static String createTabular(){
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("\\begin{tabular}{| l | l | l | l | l | l |} \n");
+        sb.append("\\hline \n");
+        sb.append("\\multicolumn{6}{|c|}{Project name} \\\\ \n");
+        sb.append("\\hline \n");
+        sb.append("Statistic measured & Min & Mean & Median & Max & $\\sigma$ \\\\ \\hline \n");
+        sb.append("Preconditions per method " + formatTabular(prePerMethod) + "\n");
+        sb.append("Postconditions per method " + formatTabular(postPerMethod) + "\n");
+        sb.append("Null checks per method " + formatTabular(nullPerMethod) + "\n");
+        sb.append("Behaviors per method " + formatTabular(behPerMethod) + "\n");
+        sb.append("Preconditions per behavior " + formatTabular(prePerMethod) + "\n");
+        sb.append("Postconditions per behavior " + formatTabular(postPerMethod) + "\n");
+        sb.append("Null checks per method " + formatTabular(nullPerMethod) + "\n");
+        sb.append("\\end{tabular}");
+
+        return sb.toString();
+
+    }
+
+    private static String formatTabular(DescriptiveStatistics ds){
+        return String.format("& %.3f & %.3f & %.3f & %.3f & %.3f \\\\ \\hline",
+                ds.getMin(), ds.getMean(), ds.getPercentile(50), ds.getMax(), ds.getStandardDeviation());
+
+    }
+
+    private static void writeStatsToFile(String stats, String tabular, String interestingMethods){
         Path p = Paths.get("Statistics/" + projectName);
 
         for(int i = 1; i < p.getNameCount(); i++){
@@ -228,9 +255,9 @@ public class Statistics {
 
         try {
             if(Files.exists(p)){
-                Files.write(p, Arrays.asList("\n\n ####### NEW RUN ####### \n\n" + stats  + interestingMethods), Charset.forName("UTF-8"), StandardOpenOption.APPEND);
+                Files.write(p, Arrays.asList("\n\n ####### NEW RUN ####### \n\n" + stats + tabular + interestingMethods), Charset.forName("UTF-8"), StandardOpenOption.APPEND);
             } else {
-                Files.write(p, Arrays.asList(stats + interestingMethods), Charset.forName("UTF-8"));
+                Files.write(p, Arrays.asList(stats + tabular + interestingMethods), Charset.forName("UTF-8"));
             }
         } catch (IOException e){
             e.printStackTrace();
