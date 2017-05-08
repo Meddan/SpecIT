@@ -10,6 +10,7 @@ public class MethodStatistics {
     private ArrayList<Integer> amountOfpostCons;
     private ArrayList<Integer> amountOfpreCons;
     private ArrayList<Integer> amountOfNullChecks;
+    private ArrayList<Boolean> isFailing;
     private int behaviors;
 
     private int totalPostCons;
@@ -23,6 +24,7 @@ public class MethodStatistics {
         amountOfpostCons = new ArrayList<>();
         amountOfpreCons = new ArrayList<>();
         amountOfNullChecks = new ArrayList<>();
+        isFailing = new ArrayList<>();
         behaviors = -1;
         interesting = false;
         pathToMethod = methodPath;
@@ -54,6 +56,10 @@ public class MethodStatistics {
         setInteresting(n);
         totalNullChecks += n;
         amountOfNullChecks.add(behaviors, new Integer(n));
+    }
+
+    public void setIsFailing(boolean b){
+        isFailing.add(behaviors, b);        
     }
 
     public ArrayList<Integer> getAmountOfpostCons(){
