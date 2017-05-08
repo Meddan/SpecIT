@@ -272,7 +272,7 @@ public class Statistics {
         HashMap<Variable, VariableValue> hm = b.getAssignedValues();
         if(!b.getIsExceptional()) {
             for (Variable v : hm.keySet()){
-                if(b.getAssignedValue(v) != null){
+                if(b.getAssignedValue(v) != null && b.getAssignedValue(v).getStatus() == VariableValue.Status.known){
                     amountOfPostCons++;
                 }
             }
