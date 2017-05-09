@@ -59,7 +59,7 @@ public class MethodStatistics {
     }
 
     public void setIsFailing(boolean b){
-        isFailing.add(behaviors, b);        
+        isFailing.add(behaviors, b);
     }
 
     public ArrayList<Integer> getAmountOfpostCons(){
@@ -77,6 +77,9 @@ public class MethodStatistics {
     }
     public ArrayList<Integer> getAmountOfNullChecks(){
         return amountOfNullChecks;
+    }
+    public ArrayList<Boolean> getIsFailing() {
+        return isFailing;
     }
 
     public void addBehavior(){
