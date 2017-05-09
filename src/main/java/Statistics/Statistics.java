@@ -40,6 +40,14 @@ public class Statistics {
     private static DescriptiveStatistics nullPerMethod = new DescriptiveStatistics();
     private static DescriptiveStatistics nullPerBehavior = new DescriptiveStatistics();
 
+    private static DescriptiveStatistics failPrePerMethod = new DescriptiveStatistics();
+    private static DescriptiveStatistics failPostPerMethod = new DescriptiveStatistics();
+    private static DescriptiveStatistics failPrePerBehavior = new DescriptiveStatistics();
+    private static DescriptiveStatistics failPostPerBehavior = new DescriptiveStatistics();
+    private static DescriptiveStatistics failBehPerMethod = new DescriptiveStatistics();
+    private static DescriptiveStatistics failNullPerMethod = new DescriptiveStatistics();
+    private static DescriptiveStatistics failNullPerBehavior = new DescriptiveStatistics();
+
 
     private static void successfulBehavior(){
         successBehaviors++;
@@ -72,12 +80,13 @@ public class Statistics {
 
         for(Behavior b : leafs){
             totalNullChecks += b.getNullChecks().size();
+            ms.addBehavior();
+            ms.setIsFailing(b.isFailing());
+            setPostCons(ms, b);
+            setPreCons(ms, b);
+            setNullChecks(ms, b);
             if(!b.isFailing()) {
                 successfulBehavior();
-                ms.addBehavior();
-                setPostCons(ms, b);
-                setPreCons(ms, b);
-                setNullChecks(ms, b);
             } else {
                 failingBehavior();
                 if(b.getFailing().get() instanceof SymbolSolverException){
@@ -113,34 +122,64 @@ public class Statistics {
 
         for(MethodStatistics ms : methodStats){
 
+            boolean isFailing = false;
+            boolean isSuccessful = false;
+
             totalBehaviors += ms.getAmountOfBehaviors();
             behPerMethod.addValue(ms.getAmountOfBehaviors());
 
             ArrayList<Integer> postCons = ms.getAmountOfpostCons();
             ArrayList<Integer> preCons = ms.getAmountOfpreCons();
             ArrayList<Integer> nullChecks = ms.getAmountOfNullChecks();
+            ArrayList<Boolean> failings = ms.getIsFailing();
 
             int methPostCons = 0;
             int methPreCons = 0;
             int methNullChecks = 0;
+            int failMethPostCons = 0;
+            int failMethPreCons = 0;
+            int failMethNullChecks = 0;
+
             for(int i = 0; i < ms.getAmountOfBehaviors(); i++){
                 Integer post = postCons.get(i);
                 Integer pre = preCons.get(i);
                 Integer nul = nullChecks.get(i);
 
                 if(post != null){
-                    methPostCons += post;
-                    postPerBehavior.addValue(post.doubleValue());
+                    if(!failings.get(i)) {
+                        isSuccessful = true;
+                        methPostCons += post;
+                        postPerBehavior.addValue(post.doubleValue());
+                    } else {
+                        isFailing = true;
+                        failMethPostCons += post;
+                        failPostPerBehavior.addValue(post);
+                    }
                 }
 
                 if(pre != null){
-                    methPreCons += pre;
-                    prePerBehavior.addValue(pre.doubleValue());
+                    if(!failings.get(i)) {
+                        isSuccessful = true;
+                        methPreCons += pre;
+                        prePerBehavior.addValue(pre.doubleValue());
+                    } else {
+                        isFailing = true;
+                        failMethPreCons += pre;
+                        failPrePerBehavior.addValue(pre);
+                    }
                 }
                 if(nul != null){
-                    methNullChecks += nul;
-                    prePerBehavior.addValue(nul.doubleValue());
-                    nullPerBehavior.addValue(nul.doubleValue());
+                    if(!failings.get(i)) {
+                        isSuccessful = true;
+                        methNullChecks += nul;
+                        prePerBehavior.addValue(nul.doubleValue());
+                        nullPerBehavior.addValue(nul.doubleValue());
+                    } else {
+                        isFailing = true;
+                        failMethNullChecks += nul;
+                        failPrePerBehavior.addValue(nul);
+                        failNullPerBehavior.addValue(nul);
+                    }
                 }
             }
 
@@ -153,10 +192,17 @@ public class Statistics {
             totalPreCons += methNullChecks;
             totalNullCons += methNullChecks;
 
-            prePerMethod.addValue(methPreCons);
-            postPerMethod.addValue(methPostCons);
-            prePerMethod.addValue(methNullChecks);
-            nullPerMethod.addValue(methNullChecks);
+            if(isSuccessful) {
+                prePerMethod.addValue(methPreCons + methNullChecks);
+                postPerMethod.addValue(methPostCons);
+                nullPerMethod.addValue(methNullChecks);
+            }
+
+            if(isFailing){
+                failPrePerMethod.addValue(failMethPreCons + failMethNullChecks);
+                failPostPerMethod.addValue(failMethPostCons);
+                failNullPerMethod.addValue(failMethNullChecks);
+            }
 
             if(ms.isInteresting()){
                 interestingMethods.add(ms);
