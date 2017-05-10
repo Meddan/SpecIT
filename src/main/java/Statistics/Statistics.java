@@ -125,8 +125,10 @@ public class Statistics {
             boolean isFailing = false;
             boolean isSuccessful = false;
 
+            int successfulBehaviors = 0;
+            int failingBehaviors = 0;
+
             totalBehaviors += ms.getAmountOfBehaviors();
-            behPerMethod.addValue(ms.getAmountOfBehaviors());
 
             ArrayList<Integer> postCons = ms.getAmountOfpostCons();
             ArrayList<Integer> preCons = ms.getAmountOfpreCons();
@@ -145,13 +147,19 @@ public class Statistics {
                 Integer pre = preCons.get(i);
                 Integer nul = nullChecks.get(i);
 
+                if(failings.get(i)){
+                    isFailing = true;
+                    failingBehaviors++;
+                } else {
+                    isSuccessful = true;
+                    successfulBehaviors++;
+                }
+
                 if(post != null){
                     if(!failings.get(i)) {
-                        isSuccessful = true;
                         methPostCons += post;
                         postPerBehavior.addValue(post.doubleValue());
                     } else {
-                        isFailing = true;
                         failMethPostCons += post;
                         failPostPerBehavior.addValue(post);
                     }
@@ -159,23 +167,19 @@ public class Statistics {
 
                 if(pre != null){
                     if(!failings.get(i)) {
-                        isSuccessful = true;
                         methPreCons += pre;
                         prePerBehavior.addValue(pre.doubleValue());
                     } else {
-                        isFailing = true;
                         failMethPreCons += pre;
                         failPrePerBehavior.addValue(pre);
                     }
                 }
                 if(nul != null){
                     if(!failings.get(i)) {
-                        isSuccessful = true;
                         methNullChecks += nul;
                         prePerBehavior.addValue(nul.doubleValue());
                         nullPerBehavior.addValue(nul.doubleValue());
                     } else {
-                        isFailing = true;
                         failMethNullChecks += nul;
                         failPrePerBehavior.addValue(nul);
                         failNullPerBehavior.addValue(nul);
@@ -193,12 +197,14 @@ public class Statistics {
             totalNullCons += methNullChecks;
 
             if(isSuccessful) {
+                behPerMethod.addValue(successfulBehaviors);
                 prePerMethod.addValue(methPreCons + methNullChecks);
                 postPerMethod.addValue(methPostCons);
                 nullPerMethod.addValue(methNullChecks);
             }
 
             if(isFailing){
+                failBehPerMethod.addValue(failingBehaviors);
                 failPrePerMethod.addValue(failMethPreCons + failMethNullChecks);
                 failPostPerMethod.addValue(failMethPostCons);
                 failNullPerMethod.addValue(failMethNullChecks);
@@ -262,7 +268,7 @@ public class Statistics {
 
         sb.append("\\begin{tabular}{| l | l | l | l | l | l |} \n");
         sb.append("\\hline \n");
-        sb.append("\\multicolumn{6}{|c|}{Project name} \\\\ \n");
+        sb.append("\\multicolumn{6}{|c|}{" + projectName + " [SUCCESSFUL]} \\\\ \n");
         sb.append("\\hline \n");
         sb.append("Statistic measured & Min & Mean & Median & Max & $\\sigma$ \\\\ \\hline \n");
         sb.append("Preconditions per method " + formatTabular(prePerMethod) + "\n");
@@ -272,6 +278,20 @@ public class Statistics {
         sb.append("Preconditions per behavior " + formatTabular(prePerBehavior) + "\n");
         sb.append("Postconditions per behavior " + formatTabular(postPerBehavior) + "\n");
         sb.append("Null checks per method " + formatTabular(nullPerBehavior) + "\n");
+        sb.append("\\end{tabular}\n");
+
+        sb.append("\\begin{tabular}{| l | l | l | l | l | l |} \n");
+        sb.append("\\hline \n");
+        sb.append("\\multicolumn{6}{|c|}{" + projectName + " [FAILING]} \\\\ \n");
+        sb.append("\\hline \n");
+        sb.append("Statistic measured & Min & Mean & Median & Max & $\\sigma$ \\\\ \\hline \n");
+        sb.append("Preconditions per method " + formatTabular(failPrePerMethod) + "\n");
+        sb.append("Postconditions per method " + formatTabular(failPostPerMethod) + "\n");
+        sb.append("Null checks per method " + formatTabular(failNullPerMethod) + "\n");
+        sb.append("Behaviors per method " + formatTabular(failBehPerMethod) + "\n");
+        sb.append("Preconditions per behavior " + formatTabular(failPostPerBehavior) + "\n");
+        sb.append("Postconditions per behavior " + formatTabular(failPostPerBehavior) + "\n");
+        sb.append("Null checks per method " + formatTabular(failNullPerBehavior) + "\n");
         sb.append("\\end{tabular}");
 
         return sb.toString();
