@@ -38,7 +38,7 @@ public class MethodStatistics {
     }
 
     public void setInteresting(int n){
-        if(n > 50) {
+        if(n > 50 && !isFailing.get(behaviors)) {
             interesting = true;
         }
     }
