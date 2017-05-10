@@ -1,0 +1,468 @@
+========= STATS GATHERED =========
+Methods processed: 30268
+Total behaviors: 50843
+Successful behaviors: 16502
+Failing behaviors: 34341
+	Symbol solver Failures: 26544
+		Method Failures: 26544
+		Other Failures: 0
+	Uncovered Statement Failures: 3622
+	Unresolved Parameter Failures: 4175
+Total postconditions: 25662
+Total preconditions: 29964
+	 Null checks: 10651
+Total amount of Null checks: 124776
+Preconditions per method: 
+Mean: 2,987 Min: 0,000 Median: 0,000 Max: 1128,000 Standard Deviation: 25,569 
+Postconditions per method: 
+Mean: 2,558 Min: 0,000 Median: 1,000 Max: 423,000 Standard Deviation: 11,748 
+Null checks per method 
+Mean: 1,062 Min: 0,000 Median: 0,000 Max: 396,000 Standard Deviation: 11,256 
+Behaviors per method: 
+Mean: 1,645 Min: 1,000 Median: 1,000 Max: 423,000 Standard Deviation: 6,684 
+Preconditions per behavior: 
+Mean: 0,908 Min: 0,000 Median: 0,000 Max: 66,000 Standard Deviation: 2,098 
+Postconditions per behavior: 
+Mean: 1,555 Min: 0,000 Median: 1,000 Max: 55,000 Standard Deviation: 2,478 
+Null checks per behavior: 
+Mean: 0,645 Min: 0,000 Median: 0,000 Max: 66,000 Standard Deviation: 2,461 
+==================================
+\begin{tabular}{| l | l | l | l | l | l |} 
+\hline 
+\multicolumn{6}{|c|}{libgdx-master [SUCCESSFUL]} \\ 
+\hline 
+Statistic measured & Min & Mean & Median & Max & $\sigma$ \\ \hline 
+Preconditions per method & 0,000 & 2,987 & 0,000 & 1128,000 & 25,569 \\ \hline
+Postconditions per method & 0,000 & 2,558 & 1,000 & 423,000 & 11,748 \\ \hline
+Null checks per method & 0,000 & 1,062 & 0,000 & 396,000 & 11,256 \\ \hline
+Behaviors per method & 1,000 & 1,645 & 1,000 & 423,000 & 6,684 \\ \hline
+Preconditions per behavior & 0,000 & 0,908 & 0,000 & 66,000 & 2,098 \\ \hline
+Postconditions per behavior & 0,000 & 1,555 & 1,000 & 55,000 & 2,478 \\ \hline
+Null checks per method & 0,000 & 0,645 & 0,000 & 66,000 & 2,461 \\ \hline
+\end{tabular}
+\begin{tabular}{| l | l | l | l | l | l |} 
+\hline 
+\multicolumn{6}{|c|}{libgdx-master [FAILING]} \\ 
+\hline 
+Statistic measured & Min & Mean & Median & Max & $\sigma$ \\ \hline 
+Preconditions per method & 0,000 & 7,085 & 1,000 & 16576,000 & 119,880 \\ \hline
+Postconditions per method & 0,000 & 3,315 & 1,000 & 1952,000 & 28,566 \\ \hline
+Null checks per method & 0,000 & 5,220 & 1,000 & 15120,000 & 107,043 \\ \hline
+Behaviors per method & 1,000 & 1,571 & 1,000 & 192,000 & 3,034 \\ \hline
+Preconditions per behavior & 0,000 & 2,110 & 1,000 & 63,000 & 4,289 \\ \hline
+Postconditions per behavior & 0,000 & 2,110 & 1,000 & 63,000 & 4,289 \\ \hline
+Null checks per method & 0,000 & 3,323 & 1,000 & 135,000 & 8,071 \\ \hline
+\end{tabular}
+
+===========INTERESTING METHODS===========
+======== 102 found ========
+
+/libgdx-master/gdx/src/com/badlogic/gdx/Input.java --> public static String toString(int keycode) 
+	 Total PostCons 423
+	 Total PreCons 1128
+	 Total NullChecks 0
+/libgdx-master/extensions/gdx-tools/src/com/badlogic/gdx/tools/texturepacker/MaxRectsPacker.java --> private boolean splitFreeNode(Rect freeNode, Rect usedNode) 
+	 Total PostCons 51
+	 Total PreCons 156
+	 Total NullChecks 1152
+/libgdx-master/backends/gdx-backends-gwt/src/com/badlogic/gdx/backends/gwt/emu/java/io/File.java --> public File getAbsoluteFile() 
+	 Total PostCons 342
+	 Total PreCons 967
+	 Total NullChecks 18
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g2d/ParticleEmitter.java --> public void update(float delta) 
+	 Total PostCons 413
+	 Total PreCons 599
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/input/RemoteInput.java --> public void run() 
+	 Total PostCons 0
+	 Total PreCons 788
+	 Total NullChecks 76
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g2d/PolygonSpriteBatch.java --> public void draw(Texture texture, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation, int srcX, int srcY, int srcWidth, int srcHeight, boolean flipX, boolean flipY) 
+	 Total PostCons 626
+	 Total PreCons 49
+	 Total NullChecks 12
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g2d/PolygonSpriteBatch.java --> public void draw(TextureRegion region, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation) 
+	 Total PostCons 542
+	 Total PreCons 37
+	 Total NullChecks 72
+/libgdx-master/backends/gdx-backends-gwt/src/com/badlogic/gwtref/gen/ReflectionCacheSourceCreator.java --> private String generateMethodStub(MethodStub stub) 
+	 Total PostCons 57
+	 Total PreCons 181
+	 Total NullChecks 399
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/JsonValue.java --> private void prettyPrint(JsonValue object, StringBuilder buffer, int indent, PrettyPrintSettings settings) 
+	 Total PostCons 81
+	 Total PreCons 214
+	 Total NullChecks 316
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g2d/ParticleEmitter.java --> private void restart() 
+	 Total PostCons 270
+	 Total PreCons 54
+	 Total NullChecks 279
+/libgdx-master/gdx/src/com/badlogic/gdx/math/Bresenham2.java --> public Array<GridPoint2> line(int startX, int startY, int endX, int endY, Pool<GridPoint2> pool, Array<GridPoint2> output) 
+	 Total PostCons 288
+	 Total PreCons 180
+	 Total NullChecks 126
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g2d/SpriteBatch.java --> public void draw(Texture texture, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation, int srcX, int srcY, int srcWidth, int srcHeight, boolean flipX, boolean flipY) 
+	 Total PostCons 518
+	 Total PreCons 57
+	 Total NullChecks 12
+/libgdx-master/backends/gdx-backends-gwt/src/com/badlogic/gdx/backends/gwt/emu/java/io/File.java --> public boolean mkdirs() 
+	 Total PostCons 110
+	 Total PreCons 182
+	 Total NullChecks 285
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g2d/PolygonSpriteBatch.java --> public void draw(TextureRegion region, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation, boolean clockwise) 
+	 Total PostCons 494
+	 Total PreCons 37
+	 Total NullChecks 24
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g2d/SpriteBatch.java --> public void draw(TextureRegion region, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation) 
+	 Total PostCons 434
+	 Total PreCons 45
+	 Total NullChecks 72
+/libgdx-master/extensions/gdx-tools/src/com/badlogic/gdx/tools/hiero/Hiero.java --> public void stateChanged(ChangeEvent evt) 
+	 Total PostCons 92
+	 Total PreCons 40
+	 Total NullChecks 396
+/libgdx-master/extensions/gdx-tools/src/com/badlogic/gdx/tools/hiero/Hiero.java --> public void actionPerformed(ActionEvent evt) 
+	 Total PostCons 92
+	 Total PreCons 40
+	 Total NullChecks 396
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/JsonValue.java --> private void json(JsonValue object, StringBuilder buffer, OutputType outputType) 
+	 Total PostCons 34
+	 Total PreCons 209
+	 Total NullChecks 261
+/libgdx-master/backends/gdx-backends-gwt/src/com/badlogic/gwtref/gen/ReflectionCacheSourceCreator.java --> private String generateSetterGetterStub(SetterGetterStub stub) 
+	 Total PostCons 12
+	 Total PreCons 110
+	 Total NullChecks 361
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g2d/PolygonSpriteBatch.java --> public void draw(Texture texture, float x, float y, float width, float height, int srcX, int srcY, int srcWidth, int srcHeight, boolean flipX, boolean flipY) 
+	 Total PostCons 429
+	 Total PreCons 31
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g2d/SpriteBatch.java --> public void draw(TextureRegion region, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation, boolean clockwise) 
+	 Total PostCons 386
+	 Total PreCons 45
+	 Total NullChecks 24
+/libgdx-master/extensions/gdx-tools/src/com/badlogic/gdx/tools/hiero/Kerning.java --> private void readPairPositioningAdjustmentFormat2(int subTablePosition) throws IOException 
+	 Total PostCons 128
+	 Total PreCons 112
+	 Total NullChecks 192
+/libgdx-master/extensions/gdx-tools/src/com/badlogic/gdx/tools/hiero/Kerning.java --> private void readPairPositioningAdjustmentFormat1(long subTablePosition) throws IOException 
+	 Total PostCons 128
+	 Total PreCons 112
+	 Total NullChecks 192
+/libgdx-master/extensions/gdx-tools/src/com/badlogic/gdx/tools/hiero/Kerning.java --> private void readExtensionPositioningFormat1(int subTablePosition) throws IOException 
+	 Total PostCons 128
+	 Total PreCons 124
+	 Total NullChecks 128
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/Color.java --> public Color sub(Color color) 
+	 Total PostCons 135
+	 Total PreCons 135
+	 Total NullChecks 108
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/Color.java --> public Color mul(Color color) 
+	 Total PostCons 135
+	 Total PreCons 135
+	 Total NullChecks 108
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/Color.java --> public Color add(Color color) 
+	 Total PostCons 135
+	 Total PreCons 135
+	 Total NullChecks 108
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/Color.java --> public Color lerp(final Color target, final float t) 
+	 Total PostCons 135
+	 Total PreCons 135
+	 Total NullChecks 108
+/libgdx-master/gdx/src/com/badlogic/gdx/scenes/scene2d/ui/TextField.java --> public TextFieldStyle(TextFieldStyle style) 
+	 Total PostCons 112
+	 Total PreCons 64
+	 Total NullChecks 191
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g2d/SpriteBatch.java --> public void draw(Texture texture, float x, float y, float width, float height, int srcX, int srcY, int srcWidth, int srcHeight, boolean flipX, boolean flipY) 
+	 Total PostCons 321
+	 Total PreCons 39
+	 Total NullChecks 0
+/libgdx-master/extensions/gdx-tools/src/com/badlogic/gdx/tools/hiero/Kerning.java --> private int[] readCoverageTable() throws IOException 
+	 Total PostCons 124
+	 Total PreCons 108
+	 Total NullChecks 100
+/libgdx-master/gdx/src/com/badlogic/gdx/math/Intersector.java --> public static boolean intersectRayBoundsFast(Ray ray, Vector3 center, Vector3 dimensions) 
+	 Total PostCons 103
+	 Total PreCons 24
+	 Total NullChecks 200
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/JsonValue.java --> public String trace() 
+	 Total PostCons 72
+	 Total PreCons 160
+	 Total NullChecks 48
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/Color.java --> public Color lerp(final float r, final float g, final float b, final float a, final float t) 
+	 Total PostCons 135
+	 Total PreCons 135
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/Color.java --> public Color add(float r, float g, float b, float a) 
+	 Total PostCons 135
+	 Total PreCons 135
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/Color.java --> public Color mul(float value) 
+	 Total PostCons 135
+	 Total PreCons 135
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/Color.java --> public Color set(float r, float g, float b, float a) 
+	 Total PostCons 135
+	 Total PreCons 135
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/Color.java --> public Color mul(float r, float g, float b, float a) 
+	 Total PostCons 135
+	 Total PreCons 135
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/Color.java --> public Color sub(float r, float g, float b, float a) 
+	 Total PostCons 135
+	 Total PreCons 135
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/Color.java --> public Color(float r, float g, float b, float a) 
+	 Total PostCons 108
+	 Total PreCons 135
+	 Total NullChecks 0
+/libgdx-master/extensions/gdx-jnigen/src/com/badlogic/gdx/jnigen/BuildTarget.java --> public BuildTarget(BuildTarget.TargetOs targetType, boolean is64Bit, String[] cIncludes, String[] cExcludes, String[] cppIncludes, String[] cppExcludes, String[] headerDirs, String compilerPrefix, String cFlags, String cppFlags, String linkerFlags) 
+	 Total PostCons 160
+	 Total PreCons 81
+	 Total NullChecks 0
+/libgdx-master/backends/gdx-backend-jglfw/src/com/badlogic/gdx/backends/jglfw/JglfwInput.java --> public static int getGdxKeyCode(int lwjglKeyCode) 
+	 Total PostCons 104
+	 Total PreCons 121
+	 Total NullChecks 0
+/libgdx-master/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/Lwjgl3Input.java --> public static int getGdxKeyCode(int lwjglKeyCode) 
+	 Total PostCons 104
+	 Total PreCons 121
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/compression/lz/BinTree.java --> public int GetMatches(int[] distances) throws IOException 
+	 Total PostCons 189
+	 Total PreCons 27
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/scenes/scene2d/ui/Cell.java --> void merge(Cell cell) 
+	 Total PostCons 32
+	 Total PreCons 81
+	 Total NullChecks 96
+/libgdx-master/backends/gdx-backend-lwjgl/src/com/badlogic/gdx/backends/lwjgl/LwjglInput.java --> public static int getGdxKeyCode(int lwjglKeyCode) 
+	 Total PostCons 104
+	 Total PreCons 104
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/math/Intersector.java --> public static boolean overlaps(Circle c, Rectangle r) 
+	 Total PostCons 27
+	 Total PreCons 30
+	 Total NullChecks 144
+/libgdx-master/backends/gdx-backends-gwt/src/com/badlogic/gdx/backends/gwt/GwtInput.java --> private static int keyForCode(int keyCode) 
+	 Total PostCons 99
+	 Total PreCons 99
+	 Total NullChecks 0
+/libgdx-master/backends/gdx-backend-lwjgl/src/com/badlogic/gdx/backends/lwjgl/LwjglInput.java --> public static int getLwjglKeyCode(int gdxKeyCode) 
+	 Total PostCons 97
+	 Total PreCons 97
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g2d/NinePatch.java --> public void scale(float scaleX, float scaleY) 
+	 Total PostCons 128
+	 Total PreCons 64
+	 Total NullChecks 0
+/libgdx-master/backends/gdx-backend-jglfw/src/com/badlogic/gdx/backends/jglfw/JglfwInput.java --> public static int getJglfwKeyCode(int gdxKeyCode) 
+	 Total PostCons 95
+	 Total PreCons 95
+	 Total NullChecks 0
+/libgdx-master/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/Lwjgl3Input.java --> public static int getGlfwKeyCode(int gdxKeyCode) 
+	 Total PostCons 95
+	 Total PreCons 95
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/Color.java --> public Color clamp() 
+	 Total PostCons 54
+	 Total PreCons 135
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/StringBuilder.java --> final void append0(CharSequence s, int start, int end) 
+	 Total PostCons 60
+	 Total PreCons 64
+	 Total NullChecks 64
+/libgdx-master/extensions/gdx-box2d/gdx-box2d-gwt/src/com/badlogic/gdx/physics/box2d/gwt/emu/org/jbox2d/dynamics/Island.java --> public void init(int bodyCapacity, int contactCapacity, int jointCapacity, ContactListener listener) 
+	 Total PostCons 112
+	 Total PreCons 64
+	 Total NullChecks 8
+/libgdx-master/extensions/gdx-tools/src/com/badlogic/gdx/tools/hiero/Kerning.java --> private void readGPOS() throws IOException 
+	 Total PostCons 64
+	 Total PreCons 24
+	 Total NullChecks 96
+/libgdx-master/backends/gdx-backend-lwjgl/src/com/badlogic/gdx/backends/lwjgl/LwjglAWTInput.java --> protected static int translateKeyCode(int keyCode) 
+	 Total PostCons 87
+	 Total PreCons 87
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g2d/ParticleEmitter.java --> public void reset() 
+	 Total PostCons 108
+	 Total PreCons 54
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/DataOutput.java --> public void writeString(String value) throws IOException 
+	 Total PostCons 20
+	 Total PreCons 117
+	 Total NullChecks 20
+/libgdx-master/extensions/gdx-jnigen/src/com/badlogic/gdx/jnigen/FileDescriptor.java --> public byte[] readBytes() 
+	 Total PostCons 48
+	 Total PreCons 104
+	 Total NullChecks 4
+/libgdx-master/extensions/gdx-box2d/gdx-box2d-gwt/src/com/badlogic/gdx/physics/box2d/gwt/emu/org/jbox2d/dynamics/Body.java --> public void setFixedRotation(boolean flag) 
+	 Total PostCons 52
+	 Total PreCons 22
+	 Total NullChecks 80
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/VertexAttributes.java --> public int compareTo(VertexAttributes o) 
+	 Total PostCons 48
+	 Total PreCons 56
+	 Total NullChecks 40
+/libgdx-master/backends/gdx-backend-android/src/com/badlogic/gdx/backends/android/surfaceview/GLSurfaceViewAPI18.java --> public boolean createSurface() 
+	 Total PostCons 16
+	 Total PreCons 94
+	 Total NullChecks 32
+/libgdx-master/extensions/gdx-box2d/gdx-box2d-gwt/src/com/badlogic/gdx/physics/box2d/gwt/emu/org/jbox2d/dynamics/World.java --> public void destroyBody(Body body) 
+	 Total PostCons 36
+	 Total PreCons 53
+	 Total NullChecks 52
+/libgdx-master/backends/gdx-backends-gwt/src/com/badlogic/gdx/backends/gwt/emu/com/badlogic/gdx/utils/BufferUtils.java --> public static void copy(Buffer src, Buffer dst, int numElements) 
+	 Total PostCons 28
+	 Total PreCons 35
+	 Total NullChecks 74
+/libgdx-master/extensions/gdx-tools/src/com/badlogic/gdx/tools/hiero/unicodefont/effects/EffectUtil.java --> public static String toString(Color color) 
+	 Total PostCons 32
+	 Total PreCons 33
+	 Total NullChecks 72
+/libgdx-master/extensions/gdx-tools/src/com/badlogic/gdx/tools/hiero/Kerning.java --> private void readClassDefinitionFormat1(IntArray[] glyphsByClass) throws IOException 
+	 Total PostCons 64
+	 Total PreCons 24
+	 Total NullChecks 48
+/libgdx-master/gdx/src/com/badlogic/gdx/scenes/scene2d/ui/Tree.java --> public void expandAll() 
+	 Total PostCons 24
+	 Total PreCons 44
+	 Total NullChecks 66
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/XmlWriter.java --> public XmlWriter text(Object text) throws IOException 
+	 Total PostCons 36
+	 Total PreCons 38
+	 Total NullChecks 50
+/libgdx-master/backends/gdx-backends-gwt/src/com/badlogic/gdx/backends/gwt/emu/java/io/File.java --> public File getCanonicalFile() 
+	 Total PostCons 22
+	 Total PreCons 45
+	 Total NullChecks 51
+/libgdx-master/backends/gdx-backends-gwt/src/com/badlogic/gwtref/client/ReflectionCache.java --> public static Type getType(Class clazz) 
+	 Total PostCons 31
+	 Total PreCons 64
+	 Total NullChecks 22
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g2d/ParticleEmitter.java --> public void flipY() 
+	 Total PostCons 0
+	 Total PreCons 0
+	 Total NullChecks 117
+/libgdx-master/backends/gdx-backend-lwjgl/src/com/badlogic/gdx/backends/lwjgl/LwjglApplicationConfiguration.java --> public void setFromDisplayMode(DisplayMode mode) 
+	 Total PostCons 52
+	 Total PreCons 24
+	 Total NullChecks 40
+/libgdx-master/backends/gdx-backends-gwt/src/com/badlogic/gdx/backends/gwt/emu/java/io/DataInputStream.java --> private int readUtfChar(StringBuilder sb) throws IOException 
+	 Total PostCons 38
+	 Total PreCons 64
+	 Total NullChecks 14
+/libgdx-master/gdx/src/com/badlogic/gdx/math/DelaunayTriangulator.java --> private int circumCircle(float xp, float yp, float x1, float y1, float x2, float y2, float x3, float y3) 
+	 Total PostCons 75
+	 Total PreCons 20
+	 Total NullChecks 14
+/libgdx-master/extensions/gdx-jnigen/src/com/badlogic/gdx/jnigen/AntScriptGenerator.java --> private String getSharedLibFilename(TargetOs os, boolean is64Bit, String sharedLibName) 
+	 Total PostCons 44
+	 Total PreCons 64
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g2d/ParticleEmitter.java --> public void start() 
+	 Total PostCons 54
+	 Total PreCons 54
+	 Total NullChecks 0
+/libgdx-master/extensions/gdx-jnigen/src/com/badlogic/gdx/jnigen/FileDescriptor.java --> public void copyTo(FileDescriptor dest) 
+	 Total PostCons 2
+	 Total PreCons 62
+	 Total NullChecks 43
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g3d/Attributes.java --> public final boolean same(final Attributes other, boolean compareValues) 
+	 Total PostCons 16
+	 Total PreCons 60
+	 Total NullChecks 28
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/IntFloatMap.java --> public Entries entries() 
+	 Total PostCons 50
+	 Total PreCons 40
+	 Total NullChecks 12
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/IntFloatMap.java --> public Keys keys() 
+	 Total PostCons 50
+	 Total PreCons 40
+	 Total NullChecks 12
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/IntFloatMap.java --> public Values values() 
+	 Total PostCons 50
+	 Total PreCons 40
+	 Total NullChecks 12
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/IntIntMap.java --> public Entries entries() 
+	 Total PostCons 50
+	 Total PreCons 40
+	 Total NullChecks 12
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/IntIntMap.java --> public Keys keys() 
+	 Total PostCons 50
+	 Total PreCons 40
+	 Total NullChecks 12
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/IntIntMap.java --> public Values values() 
+	 Total PostCons 50
+	 Total PreCons 40
+	 Total NullChecks 12
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/IntMap.java --> public Keys keys() 
+	 Total PostCons 50
+	 Total PreCons 40
+	 Total NullChecks 12
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/IntMap.java --> public Values<V> values() 
+	 Total PostCons 50
+	 Total PreCons 40
+	 Total NullChecks 12
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/IntMap.java --> public Entries<V> entries() 
+	 Total PostCons 50
+	 Total PreCons 40
+	 Total NullChecks 12
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/IntSet.java --> public IntSetIterator iterator() 
+	 Total PostCons 50
+	 Total PreCons 40
+	 Total NullChecks 12
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/LongMap.java --> public Keys keys() 
+	 Total PostCons 50
+	 Total PreCons 40
+	 Total NullChecks 12
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/LongMap.java --> public Values<V> values() 
+	 Total PostCons 50
+	 Total PreCons 40
+	 Total NullChecks 12
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/LongMap.java --> public Entries<V> entries() 
+	 Total PostCons 50
+	 Total PreCons 40
+	 Total NullChecks 12
+/libgdx-master/extensions/gdx-tools/src/com/badlogic/gdx/tools/flame/FlameMain.java --> protected JPanel getPanel(Influencer influencer) 
+	 Total PostCons 16
+	 Total PreCons 77
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/profiling/GLProfiler.java --> public static void disable() 
+	 Total PostCons 28
+	 Total PreCons 64
+	 Total NullChecks 0
+/libgdx-master/tests/gdx-tests/src/com/badlogic/gdx/tests/g3d/HeightField.java --> protected void setVertex(int index, VertexInfo info) 
+	 Total PostCons 16
+	 Total PreCons 64
+	 Total NullChecks 0
+/libgdx-master/gdx/src/com/badlogic/gdx/graphics/g3d/Attributes.java --> public int compareTo(Attributes other) 
+	 Total PostCons 12
+	 Total PreCons 38
+	 Total NullChecks 24
+/libgdx-master/gdx/src/com/badlogic/gdx/math/Intersector.java --> public static boolean isPointInTriangle(Vector2 p, Vector2 a, Vector2 b, Vector2 c) 
+	 Total PostCons 12
+	 Total PreCons 5
+	 Total NullChecks 52
+/libgdx-master/backends/gdx-backends-gwt/src/com/badlogic/gdx/backends/gwt/preloader/FileWrapper.java --> private static void copyDirectory(FileWrapper sourceDir, FileWrapper destDir) 
+	 Total PostCons 12
+	 Total PreCons 25
+	 Total NullChecks 27
+/libgdx-master/gdx/src/com/badlogic/gdx/files/FileHandle.java --> private static void copyDirectory(FileHandle sourceDir, FileHandle destDir) 
+	 Total PostCons 12
+	 Total PreCons 25
+	 Total NullChecks 27
+/libgdx-master/gdx/src/com/badlogic/gdx/utils/XmlReader.java --> protected String entity(String name) 
+	 Total PostCons 7
+	 Total PreCons 27
+	 Total NullChecks 30
+/libgdx-master/extensions/gdx-tools/src/com/badlogic/gdx/tools/flame/SpawnInfluencerPanel.java --> private Object spawnShapeToString(SpawnShapeValue spawnShapeValue) 
+	 Total PostCons 11
+	 Total PreCons 51
+	 Total NullChecks 0
+/libgdx-master/tests/gdx-tests/src/com/badlogic/gdx/tests/extensions/FreeTypeIncrementalTest.java --> private static boolean legalAtStart(int ch) 
+	 Total PostCons 1
+	 Total PreCons 57
+	 Total NullChecks 0
+

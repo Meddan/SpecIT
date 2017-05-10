@@ -1,0 +1,60 @@
+========= STATS GATHERED =========
+Methods processed: 3736
+Total behaviors: 4203
+Successful behaviors: 1477
+Failing behaviors: 2726
+	Symbol solver Failures: 1951
+		Method Failures: 1951
+		Other Failures: 0
+	Uncovered Statement Failures: 407
+	Unresolved Parameter Failures: 368
+Total postconditions: 856
+Total preconditions: 499
+	 Null checks: 269
+Total amount of Null checks: 3995
+Preconditions per method: 
+Mean: 0,358 Min: 0,000 Median: 0,000 Max: 25,000 Standard Deviation: 1,284 
+Postconditions per method: 
+Mean: 0,614 Min: 0,000 Median: 0,000 Max: 16,000 Standard Deviation: 0,917 
+Null checks per method 
+Mean: 0,193 Min: 0,000 Median: 0,000 Max: 25,000 Standard Deviation: 0,973 
+Behaviors per method: 
+Mean: 1,060 Min: 1,000 Median: 1,000 Max: 8,000 Standard Deviation: 0,337 
+Preconditions per behavior: 
+Mean: 0,169 Min: 0,000 Median: 0,000 Max: 9,000 Standard Deviation: 0,560 
+Postconditions per behavior: 
+Mean: 0,580 Min: 0,000 Median: 0,000 Max: 5,000 Standard Deviation: 0,711 
+Null checks per behavior: 
+Mean: 0,182 Min: 0,000 Median: 0,000 Max: 9,000 Standard Deviation: 0,671 
+==================================
+\begin{tabular}{| l | l | l | l | l | l |} 
+\hline 
+\multicolumn{6}{|c|}{junit4-master [SUCCESSFUL]} \\ 
+\hline 
+Statistic measured & Min & Mean & Median & Max & $\sigma$ \\ \hline 
+Preconditions per method & 0,000 & 0,358 & 0,000 & 25,000 & 1,284 \\ \hline
+Postconditions per method & 0,000 & 0,614 & 0,000 & 16,000 & 0,917 \\ \hline
+Null checks per method & 0,000 & 0,193 & 0,000 & 25,000 & 0,973 \\ \hline
+Behaviors per method & 1,000 & 1,060 & 1,000 & 8,000 & 0,337 \\ \hline
+Preconditions per behavior & 0,000 & 0,169 & 0,000 & 9,000 & 0,560 \\ \hline
+Postconditions per behavior & 0,000 & 0,580 & 0,000 & 5,000 & 0,711 \\ \hline
+Null checks per method & 0,000 & 0,182 & 0,000 & 9,000 & 0,671 \\ \hline
+\end{tabular}
+\begin{tabular}{| l | l | l | l | l | l |} 
+\hline 
+\multicolumn{6}{|c|}{junit4-master [FAILING]} \\ 
+\hline 
+Statistic measured & Min & Mean & Median & Max & $\sigma$ \\ \hline 
+Preconditions per method & 0,000 & 1,836 & 1,000 & 113,000 & 4,286 \\ \hline
+Postconditions per method & 0,000 & 0,770 & 0,000 & 24,000 & 1,474 \\ \hline
+Null checks per method & 0,000 & 1,533 & 1,000 & 81,000 & 2,954 \\ \hline
+Behaviors per method & 1,000 & 1,122 & 1,000 & 17,000 & 0,651 \\ \hline
+Preconditions per behavior & 0,000 & 0,686 & 0,000 & 6,000 & 0,876 \\ \hline
+Postconditions per behavior & 0,000 & 0,686 & 0,000 & 6,000 & 0,876 \\ \hline
+Null checks per method & 0,000 & 1,367 & 1,000 & 23,000 & 1,663 \\ \hline
+\end{tabular}
+
+===========INTERESTING METHODS===========
+======== 0 found ========
+
+
