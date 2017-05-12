@@ -14,4 +14,19 @@ public class NullCheck {
         return "requires " + expression.toString() + " != null;\n";
     }
 
+    public boolean equals(Object o){
+        if(o == null){
+            return false;
+        }
+
+        if(getClass() != o.getClass()){
+            return false;
+        }
+
+        NullCheck nc = ((NullCheck) o);
+
+        return expression.equals(nc.expression);
+
+    }
+
 }
