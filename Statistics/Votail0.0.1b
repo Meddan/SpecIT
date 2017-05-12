@@ -58,3 +58,67 @@ Null checks per method & 0,000 & 2,554 & 1,000 & 37,000 & 5,194 \\ \hline
 ======== 0 found ========
 
 
+
+
+ ####### NEW RUN ####### 
+
+========= STATS GATHERED =========
+Methods processed: 113
+Total behaviors: 156
+Successful behaviors: 64
+Failing behaviors: 92
+	Symbol solver Failures: 81
+		Method Failures: 81
+		Other Failures: 0
+	Uncovered Statement Failures: 4
+	Unresolved Parameter Failures: 7
+Total postconditions: 64
+Total preconditions: 46
+	 Null checks: 3
+Total amount of Null checks: 103
+Preconditions per method: 
+Mean: 0,885 Min: 0,000 Median: 0,000 Max: 11,000 Standard Deviation: 2,036 
+Postconditions per method: 
+Mean: 1,231 Min: 0,000 Median: 1,000 Max: 4,000 Standard Deviation: 0,783 
+Null checks per method 
+Mean: 0,058 Min: 0,000 Median: 0,000 Max: 1,000 Standard Deviation: 0,235 
+Behaviors per method: 
+Mean: 1,231 Min: 1,000 Median: 1,000 Max: 3,000 Standard Deviation: 0,469 
+Preconditions per behavior: 
+Mean: 0,359 Min: 0,000 Median: 0,000 Max: 11,000 Standard Deviation: 1,169 
+Postconditions per behavior: 
+Mean: 1,000 Min: 0,000 Median: 1,000 Max: 3,000 Standard Deviation: 0,713 
+Null checks per behavior: 
+Mean: 0,047 Min: 0,000 Median: 0,000 Max: 1,000 Standard Deviation: 0,213 
+==================================
+\begin{tabular}{| l | l | l | l | l | l |} 
+\hline 
+\multicolumn{6}{|c|}{Votail0.0.1b [SUCCESSFUL]} \\ 
+\hline 
+Statistic measured & Min & Mean & Median & Max & $\sigma$ \\ \hline 
+Preconditions per method & 0,000 & 0,885 & 0,000 & 11,000 & 2,036 \\ \hline
+Postconditions per method & 0,000 & 1,231 & 1,000 & 4,000 & 0,783 \\ \hline
+Null checks per method & 0,000 & 0,058 & 0,000 & 1,000 & 0,235 \\ \hline
+Behaviors per method & 1,000 & 1,231 & 1,000 & 3,000 & 0,469 \\ \hline
+Preconditions per behavior & 0,000 & 0,359 & 0,000 & 11,000 & 1,169 \\ \hline
+Postconditions per behavior & 0,000 & 1,000 & 1,000 & 3,000 & 0,713 \\ \hline
+Null checks per method & 0,000 & 0,047 & 0,000 & 1,000 & 0,213 \\ \hline
+\end{tabular}
+\begin{tabular}{| l | l | l | l | l | l |} 
+\hline 
+\multicolumn{6}{|c|}{Votail0.0.1b [FAILING]} \\ 
+\hline 
+Statistic measured & Min & Mean & Median & Max & $\sigma$ \\ \hline 
+Preconditions per method & 0,000 & 3,061 & 1,000 & 77,000 & 10,087 \\ \hline
+Postconditions per method & 0,000 & 1,697 & 1,000 & 16,000 & 2,443 \\ \hline
+Null checks per method & 0,000 & 1,515 & 1,000 & 13,000 & 2,476 \\ \hline
+Behaviors per method & 1,000 & 1,394 & 1,000 & 11,000 & 1,380 \\ \hline
+Preconditions per behavior & 0,000 & 1,217 & 1,000 & 5,000 & 1,299 \\ \hline
+Postconditions per behavior & 0,000 & 1,217 & 1,000 & 5,000 & 1,299 \\ \hline
+Null checks per method & 0,000 & 1,087 & 1,000 & 8,000 & 1,419 \\ \hline
+\end{tabular}
+
+===========INTERESTING METHODS===========
+======== 0 found ========
+
+

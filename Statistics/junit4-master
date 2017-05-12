@@ -58,3 +58,67 @@ Null checks per method & 0,000 & 1,367 & 1,000 & 23,000 & 1,663 \\ \hline
 ======== 0 found ========
 
 
+
+
+ ####### NEW RUN ####### 
+
+========= STATS GATHERED =========
+Methods processed: 3736
+Total behaviors: 4203
+Successful behaviors: 1477
+Failing behaviors: 2726
+	Symbol solver Failures: 1951
+		Method Failures: 1951
+		Other Failures: 0
+	Uncovered Statement Failures: 407
+	Unresolved Parameter Failures: 368
+Total postconditions: 856
+Total preconditions: 440
+	 Null checks: 210
+Total amount of Null checks: 3166
+Preconditions per method: 
+Mean: 0,316 Min: 0,000 Median: 0,000 Max: 12,000 Standard Deviation: 1,002 
+Postconditions per method: 
+Mean: 0,614 Min: 0,000 Median: 0,000 Max: 16,000 Standard Deviation: 0,917 
+Null checks per method 
+Mean: 0,151 Min: 0,000 Median: 0,000 Max: 9,000 Standard Deviation: 0,580 
+Behaviors per method: 
+Mean: 1,060 Min: 1,000 Median: 1,000 Max: 8,000 Standard Deviation: 0,337 
+Preconditions per behavior: 
+Mean: 0,149 Min: 0,000 Median: 0,000 Max: 4,000 Standard Deviation: 0,429 
+Postconditions per behavior: 
+Mean: 0,580 Min: 0,000 Median: 0,000 Max: 5,000 Standard Deviation: 0,711 
+Null checks per behavior: 
+Mean: 0,142 Min: 0,000 Median: 0,000 Max: 3,000 Standard Deviation: 0,437 
+==================================
+\begin{tabular}{| l | l | l | l | l | l |} 
+\hline 
+\multicolumn{6}{|c|}{junit4-master [SUCCESSFUL]} \\ 
+\hline 
+Statistic measured & Min & Mean & Median & Max & $\sigma$ \\ \hline 
+Preconditions per method & 0,000 & 0,316 & 0,000 & 12,000 & 1,002 \\ \hline
+Postconditions per method & 0,000 & 0,614 & 0,000 & 16,000 & 0,917 \\ \hline
+Null checks per method & 0,000 & 0,151 & 0,000 & 9,000 & 0,580 \\ \hline
+Behaviors per method & 1,000 & 1,060 & 1,000 & 8,000 & 0,337 \\ \hline
+Preconditions per behavior & 0,000 & 0,149 & 0,000 & 4,000 & 0,429 \\ \hline
+Postconditions per behavior & 0,000 & 0,580 & 0,000 & 5,000 & 0,711 \\ \hline
+Null checks per method & 0,000 & 0,142 & 0,000 & 3,000 & 0,437 \\ \hline
+\end{tabular}
+\begin{tabular}{| l | l | l | l | l | l |} 
+\hline 
+\multicolumn{6}{|c|}{junit4-master [FAILING]} \\ 
+\hline 
+Statistic measured & Min & Mean & Median & Max & $\sigma$ \\ \hline 
+Preconditions per method & 0,000 & 1,519 & 1,000 & 93,000 & 3,499 \\ \hline
+Postconditions per method & 0,000 & 0,770 & 0,000 & 24,000 & 1,474 \\ \hline
+Null checks per method & 0,000 & 1,216 & 1,000 & 61,000 & 2,072 \\ \hline
+Behaviors per method & 1,000 & 1,122 & 1,000 & 17,000 & 0,651 \\ \hline
+Preconditions per behavior & 0,000 & 0,686 & 0,000 & 6,000 & 0,876 \\ \hline
+Postconditions per behavior & 0,000 & 0,686 & 0,000 & 6,000 & 0,876 \\ \hline
+Null checks per method & 0,000 & 1,084 & 1,000 & 8,000 & 1,103 \\ \hline
+\end{tabular}
+
+===========INTERESTING METHODS===========
+======== 0 found ========
+
+
